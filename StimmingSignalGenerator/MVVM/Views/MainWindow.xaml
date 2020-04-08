@@ -1,9 +1,20 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
+        xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="StimmingSignalGenerator.MainWindow"
+        x:Class="StimmingSignalGenerator.MVVM.Views.MainWindow"
+        d:DataContext="vm:MainWindowViewModel"
         Title="StimmingSignalGenerator">
-    Welcome to Avalonia!
+
+  <StackPanel >
+    <v:SignalSourceControlView DataContext="{Binding SignalSourceControlViewModel}"/>
+    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+      <Button Content="Play" Command="{Binding PlayCommand}" />
+      <Button Content="Stop" Command="{Binding StopCommand}" />
+    </StackPanel>
+  </StackPanel>
+
 </Window>

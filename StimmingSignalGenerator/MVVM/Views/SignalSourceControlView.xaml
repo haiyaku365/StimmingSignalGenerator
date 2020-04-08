@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             
+             xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
+             xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
+             xmlns:c="clr-namespace:StimmingSignalGenerator.MVVM.Controls;assembly=StimmingSignalGenerator"
+
+             xmlns:helper="clr-namespace:StimmingSignalGenerator.MVVM.UiHelper;assembly=StimmingSignalGenerator"
+             xmlns:p="clr-namespace:NAudio.Wave.SampleProviders;assembly=NAudio"
+             
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="150"
+             d:DataContext="vm:SignalSourceControlViewModel"
+             
+             x:Class="StimmingSignalGenerator.MVVM.Views.SignalSourceControlView">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="30"></ColumnDefinition>
+      <ColumnDefinition Width="*"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition></RowDefinition>
+      <RowDefinition></RowDefinition>
+      <RowDefinition></RowDefinition>
+      <RowDefinition></RowDefinition>
+      <RowDefinition></RowDefinition>
+    </Grid.RowDefinitions>
+    <ComboBox Grid.Row="0" Grid.Column="1"
+              Items="{Binding Source={helper:EnumBindingSource {x:Type p:SignalGeneratorType}}}"
+              SelectedItem="{Binding SignalType}"/>
+
+    <TextBlock Grid.Row="1" Grid.Column="0">Freq</TextBlock>
+    <c:SignalSlider Grid.Row="1" Grid.Column="1"
+                        TickFrequency="10" SmallChange="10" LargeChange="50"
+                        Value="{Binding Frequency}" MinValue="100" MaxValue="10000"/>
+    <TextBlock Grid.Row="2" Grid.Column="0">Vol</TextBlock>
+    <c:SignalSlider Grid.Row="2" Grid.Column="1"
+                    TickFrequency="0.01" SmallChange="0.01" LargeChange="0.05"
+                    Value="{Binding Volume}" MinValue="0" MaxValue="1"/>
+  </Grid>
+</UserControl>

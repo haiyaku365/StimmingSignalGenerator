@@ -1,6 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using StimmingSignalGenerator.MVVM.ViewModels;
+using StimmingSignalGenerator.MVVM.Views;
 
 namespace StimmingSignalGenerator
 {
@@ -15,7 +17,10 @@ namespace StimmingSignalGenerator
       {
          if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
          {
-            desktop.MainWindow = new MainWindow();
+            desktop.MainWindow = new MainWindow()
+            {
+               DataContext = new MainWindowViewModel()
+            };
          }
 
          base.OnFrameworkInitializationCompleted();

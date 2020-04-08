@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -12,8 +12,26 @@
     </AvaloniaResource>
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Remove="MVVM\Views\SignalSlider.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="TODO.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TODO.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.7" />
     <PackageReference Include="Avalonia.Desktop" Version="0.9.7" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.7" />
     <PackageReference Include="NAudio" Version="1.10.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MVVM\UiHelper\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="MVVM\Views\SignalSourceControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
   </ItemGroup>
 </Project>
