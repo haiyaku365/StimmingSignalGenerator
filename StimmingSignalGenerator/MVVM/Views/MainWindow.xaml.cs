@@ -1,8 +1,8 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace StimmingSignalGenerator
+namespace StimmingSignalGenerator.MVVM.Views
 {
    public class MainWindow : Window
    {
@@ -10,7 +10,7 @@ namespace StimmingSignalGenerator
       {
          InitializeComponent();
 #if DEBUG
-            this.AttachDevTools();
+         this.AttachDevTools();
 #endif
       }
 
