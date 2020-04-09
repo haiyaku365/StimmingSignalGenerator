@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace StimmingSignalGenerator.MVVM.Models
+namespace StimmingSignalGenerator.SignalGenerator
 {
    public class SignalSourceControl
    {
