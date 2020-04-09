@@ -5,7 +5,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.Models
 {
-   class SignalSourceControlModel
+   class SignalSourceControl
    {
       //TODO Make config serializable
       public SignalGeneratorType SignalType { get; set; }
