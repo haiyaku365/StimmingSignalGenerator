@@ -11,10 +11,7 @@
 
   <StackPanel >
     <v:SignalSourceControlView DataContext="{Binding SignalSourceControlViewModel}"/>
-    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-      <Button Content="Play" Command="{Binding PlayCommand}" />
-      <Button Content="Stop" Command="{Binding StopCommand}" />
-    </StackPanel>
+    <v:AudioPlayerView DataContext="{Binding AudioPlayerViewModel}" />
   </StackPanel>
 
 </Window>

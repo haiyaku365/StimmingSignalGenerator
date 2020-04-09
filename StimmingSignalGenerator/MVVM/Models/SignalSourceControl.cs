@@ -5,11 +5,11 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.Models
 {
-   class SignalSourceControl
+   public class SignalSourceControl
    {
       //TODO Make config serializable
-      public SignalGeneratorType SignalType { get; set; }
-      public float Frequency { get; set; }
-      public float Volume { get; set; }
+      public SignalGeneratorType SignalType { get; set; } = SignalGeneratorType.Sin;
+      public double Frequency { get; set; } = 500f;
+      public double Volume { get; set; } = 0.5f;
    }
 }
