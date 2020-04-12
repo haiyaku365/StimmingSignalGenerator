@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace StimmingSignalGenerator.MVVM.Views
 {
-    public class SignalSourceControlView : UserControl
+    public class BasicSignalGeneratorView : UserControl
     {
-        public SignalSourceControlView()
+        public BasicSignalGeneratorView()
         {
             InitializeComponent();
         }

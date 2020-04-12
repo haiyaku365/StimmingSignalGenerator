@@ -13,7 +13,7 @@
              mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="150"
              d:DataContext="vm:SignalSourceControlViewModel"
              
-             x:Class="StimmingSignalGenerator.MVVM.Views.SignalSourceControlView">
+             x:Class="StimmingSignalGenerator.MVVM.Views.BasicSignalGeneratorView">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="30"></ColumnDefinition>
