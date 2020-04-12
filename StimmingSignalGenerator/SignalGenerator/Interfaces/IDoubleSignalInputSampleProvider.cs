@@ -7,7 +7,7 @@ namespace StimmingSignalGenerator.SignalGenerator.Interfaces
 {
    interface IDoubleSignalInputSampleProvider : ISampleProvider
    {
-      ISampleProvider InputSampleA { get; set; }
-      ISampleProvider InputSampleB { get; set; }
+      ISampleProvider SourceA { get; set; }
+      ISampleProvider SourceB { get; set; }
    }
 }

@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using NAudio.Utils;
+using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using StimmingSignalGenerator.SignalGenerator.Interfaces;
 using System;
@@ -9,43 +10,43 @@ namespace StimmingSignalGenerator.SignalGenerator
 {
    class FrequencyModulationProvider : IDoubleSignalInputSampleProvider
    {
-      public WaveFormat WaveFormat => InputSampleA.WaveFormat;
-
+      public WaveFormat WaveFormat => SourceA.WaveFormat;
       /// <summary>
       /// Carrier Signal [-1, 1]
       /// </summary>
-      public ISampleProvider InputSampleA { get; set; }
+      public ISampleProvider SourceA { get; set; }
       /// <summary>
       /// Information Signal [-1, 1]
       /// </summary>
-      public ISampleProvider InputSampleB { get; set; }
+      public ISampleProvider SourceB { get; set; }
       public float PitchOctaveUpDown { get; set; }
 
+      private float[] sourceBBuffer;
       /// <summary>
       /// Frequency Modulation
       /// </summary>
-      /// <param name="inputSampleA">Carrier Signal [-1, 1]</param>
-      /// <param name="inputSampleB">Information Signal [-1, 1]</param>
+      /// <param name="sourceA">Carrier Signal [-1, 1]</param>
+      /// <param name="sourceB">Information Signal [-1, 1]</param>
       public FrequencyModulationProvider(
-         ISampleProvider inputSampleA,
-         ISampleProvider inputSampleB,
+         ISampleProvider sourceA,
+         ISampleProvider sourceB,
          float pitchOctaveUpDown = 1
          )
       {
-         InputSampleA = inputSampleA;
-         InputSampleB = inputSampleB;
+         SourceA = sourceA;
+         SourceB = sourceB;
          PitchOctaveUpDown = pitchOctaveUpDown;
 
-         smbPitchShiftingSampleProvider = new SmbPitchShiftingSampleProvider(InputSampleA);
+         smbPitchShiftingSampleProvider = new SmbPitchShiftingSampleProvider(SourceA);
       }
       private readonly SmbPitchShiftingSampleProvider smbPitchShiftingSampleProvider;
 
       public int Read(float[] buffer, int offset, int count)
       {
-         float[] sampleBBuffer = new float[buffer.Length];
-         InputSampleB.Read(sampleBBuffer, offset, count);
+         sourceBBuffer = BufferHelpers.Ensure(sourceBBuffer, count);
+         SourceB.Read(sourceBBuffer, offset, count);
 
-         smbPitchShiftingSampleProvider.PitchFactor = MathF.Pow(PitchOctaveUpDown + 1, sampleBBuffer[offset]);
+         smbPitchShiftingSampleProvider.PitchFactor = MathF.Pow(PitchOctaveUpDown + 1, sourceBBuffer[offset]);
          return smbPitchShiftingSampleProvider.Read(buffer, offset, count);
       }
    }
