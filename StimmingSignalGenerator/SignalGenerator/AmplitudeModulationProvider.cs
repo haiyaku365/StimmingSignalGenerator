@@ -7,20 +7,25 @@ using System.Text;
 
 namespace StimmingSignalGenerator.SignalGenerator
 {
-   class AmplitudeModulationGenerator : IDoubleSignalInputSampleProvider
+   class AmplitudeModulationProvider : IDoubleSignalInputSampleProvider
    {
       public WaveFormat WaveFormat => InputSampleA.WaveFormat;
 
       /// <summary>
-      /// Carrier Signal
+      /// Carrier Signal [-1, 1]
       /// </summary>
       public ISampleProvider InputSampleA { get; set; }
       /// <summary>
-      /// Information Signal
+      /// Information Signal [-1, 1]
       /// </summary>
       public ISampleProvider InputSampleB { get; set; }
 
-      public AmplitudeModulationGenerator(
+      /// <summary>
+      /// Amplitude Modulation
+      /// </summary>
+      /// <param name="inputSampleA">Carrier Signal [-1, 1]</param>
+      /// <param name="inputSampleB">Information Signal [-1, 1]</param>
+      public AmplitudeModulationProvider(
          ISampleProvider inputSampleA,
          ISampleProvider inputSampleB
          )

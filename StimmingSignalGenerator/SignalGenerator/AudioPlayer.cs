@@ -31,7 +31,7 @@ namespace StimmingSignalGenerator.SignalGenerator
          if (player == null)
          {
             var waveOutEvent = new WaveOutEvent();
-            waveOutEvent.NumberOfBuffers = 2;
+            waveOutEvent.NumberOfBuffers = 4;
             waveOutEvent.DesiredLatency = 100;
             player = waveOutEvent;
             player.Init(new SampleToWaveProvider(SampleProvider));

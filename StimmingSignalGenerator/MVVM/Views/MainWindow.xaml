@@ -12,6 +12,8 @@
   <StackPanel >
     <v:BasicSignalGeneratorView DataContext="{Binding BasicSignalGeneratorViewModelA}"/>
     <v:BasicSignalGeneratorView DataContext="{Binding BasicSignalGeneratorViewModelB}"/>
+    <v:BasicSignalGeneratorView DataContext="{Binding BasicSignalGeneratorViewModelC}"/>
+    
     <v:AudioPlayerView DataContext="{Binding AudioPlayerViewModel}" />
   </StackPanel>
 
