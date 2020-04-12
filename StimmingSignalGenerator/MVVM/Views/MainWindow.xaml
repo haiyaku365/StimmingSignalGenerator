@@ -10,7 +10,8 @@
         Title="StimmingSignalGenerator">
 
   <StackPanel >
-    <v:SignalSourceControlView DataContext="{Binding SignalSourceControlViewModel}"/>
+    <v:BasicSignalGeneratorView DataContext="{Binding BasicSignalGeneratorViewModelA}"/>
+    <v:BasicSignalGeneratorView DataContext="{Binding BasicSignalGeneratorViewModelB}"/>
     <v:AudioPlayerView DataContext="{Binding AudioPlayerViewModel}" />
   </StackPanel>
 

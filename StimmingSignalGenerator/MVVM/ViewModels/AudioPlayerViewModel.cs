@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using NAudio.Wave;
+using ReactiveUI;
 using StimmingSignalGenerator.SignalGenerator;
 using System;
 using System.Collections.Generic;
@@ -11,34 +12,23 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    {
       public ReactiveCommand<Unit, Unit> PlayCommand { get; }
       public ReactiveCommand<Unit, Unit> StopCommand { get; }
-      public SignalSourceControlViewModel SignalSourceControlViewModel { get; }
 
       private readonly AudioPlayer audioPlayer;
 
-      public AudioPlayerViewModel(SignalSourceControlViewModel signalSourceControlViewModel)
+      public AudioPlayerViewModel(ISampleProvider sampleProvider)
       {
-         SignalSourceControlViewModel = signalSourceControlViewModel;
-
-         audioPlayer = new AudioPlayer(SignalSourceControlViewModel.ToModel());
+         audioPlayer = new AudioPlayer(sampleProvider);
          PlayCommand = ReactiveCommand.Create(() => Play());
          StopCommand = ReactiveCommand.Create(() => Stop());
       }
 
-      private IDisposable signalChangedSub;
       public void Play()
       {
-         signalChangedSub = SignalSourceControlViewModel
-           .WhenAnyValue(x => x.Frequency, x => x.Volume, x => x.SignalType)
-            .Subscribe(_ =>
-            {
-               audioPlayer.SignalSourceControl = SignalSourceControlViewModel.ToModel();
-            });
          audioPlayer.Play();
       }
 
       public void Stop()
       {
-         signalChangedSub.Dispose();
          audioPlayer.Stop();
       }
    }

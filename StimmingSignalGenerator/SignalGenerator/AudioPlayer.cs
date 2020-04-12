@@ -10,34 +10,19 @@ namespace StimmingSignalGenerator.SignalGenerator
    class AudioPlayer
    {
       private IWavePlayer player;
-      private readonly DynamicSignalGenerator signalGenerator;
-      public AudioPlayer(SignalSourceControl signalSourceControl)
+      public AudioPlayer(ISampleProvider sampleProvider)
       {
-         signalGenerator = new DynamicSignalGenerator(
-            new NAudio.Wave.SampleProviders.SignalGenerator()
-            {
-               Frequency = signalSourceControl.Frequency,
-               Gain = signalSourceControl.Volume,
-               Type = signalSourceControl.SignalType
-            }
-         );
+         SampleProvider = sampleProvider;
       }
 
-      private SignalSourceControl signalSourceControl;
-      public SignalSourceControl SignalSourceControl
+      private ISampleProvider sampleProvider;
+
+      public ISampleProvider SampleProvider
       {
-         get => signalSourceControl;
-         set
-         {
-            if (signalSourceControl == value) return;
-            signalSourceControl = value;
-            signalGenerator.SourceSignal =
-               new NAudio.Wave.SampleProviders.SignalGenerator()
-               {
-                  Frequency = SignalSourceControl.Frequency,
-                  Gain = SignalSourceControl.Volume,
-                  Type = SignalSourceControl.SignalType
-               };
+         get { return sampleProvider; }
+         set {
+            if (sampleProvider == value) return;
+            sampleProvider = value;
          }
       }
 
@@ -49,7 +34,7 @@ namespace StimmingSignalGenerator.SignalGenerator
             waveOutEvent.NumberOfBuffers = 2;
             waveOutEvent.DesiredLatency = 100;
             player = waveOutEvent;
-            player.Init(new SampleToWaveProvider(signalGenerator));
+            player.Init(new SampleToWaveProvider(SampleProvider));
          }
          player.Play();
       }

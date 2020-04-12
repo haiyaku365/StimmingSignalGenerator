@@ -1,41 +1,46 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using StimmingSignalGenerator.SignalGenerator.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace StimmingSignalGenerator.SignalGenerator.Effect
+namespace StimmingSignalGenerator.SignalGenerator
 {
-   class AmplitudeModulation : ISampleProvider
+   class AmplitudeModulationGenerator : IDoubleSignalInputSampleProvider
    {
-      public WaveFormat WaveFormat => CarrierProvider.WaveFormat;
-      public ISampleProvider InformationProvider { get; }
-      public ISampleProvider CarrierProvider { get; }
+      public WaveFormat WaveFormat => InputSampleA.WaveFormat;
 
-      public AmplitudeModulation(
-         ISampleProvider informationProvider,
-         ISampleProvider carrierProvider
+      /// <summary>
+      /// Carrier Signal
+      /// </summary>
+      public ISampleProvider InputSampleA { get; set; }
+      /// <summary>
+      /// Information Signal
+      /// </summary>
+      public ISampleProvider InputSampleB { get; set; }
+
+      public AmplitudeModulationGenerator(
+         ISampleProvider inputSampleA,
+         ISampleProvider inputSampleB
          )
       {
-         throw new NotImplementedException();
-         InformationProvider = informationProvider;
-         CarrierProvider = carrierProvider;
+         InputSampleA = inputSampleA;
+         InputSampleB = inputSampleB;
       }
 
       public int Read(float[] buffer, int offset, int count)
       {
-         float[] carrierBuffer = new float[buffer.Length];
-         int carrierRead = CarrierProvider.Read(carrierBuffer, offset, count);
+         int sampleARead = InputSampleA.Read(buffer, offset, count);
 
-         int informationRead = InformationProvider.Read(buffer, offset, count);
+         float[] sampleBBuffer = new float[buffer.Length];
+         InputSampleB.Read(sampleBBuffer, offset, count);
+
          for (int n = 0; n < count; n++)
          {
-            if (true)
-            {
-               buffer[offset + n] *= carrierBuffer[offset + n];
-            }
+            buffer[offset + n] *= (sampleBBuffer[offset + n] + 1) / 2;
          }
-         return informationRead;
+         return sampleARead;
       }
    }
 }

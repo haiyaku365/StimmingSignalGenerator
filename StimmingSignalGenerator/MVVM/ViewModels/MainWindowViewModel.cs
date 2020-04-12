@@ -1,4 +1,5 @@
 ﻿using ReactiveUI;
+using StimmingSignalGenerator.SignalGenerator;
 using System;
 using System.Collections.Generic;
 using System.Reactive;
@@ -9,12 +10,19 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    public class MainWindowViewModel : ViewModelBase
    {
-      public SignalSourceControlViewModel SignalSourceControlViewModel { get; }
+      public BasicSignalGeneratorViewModel BasicSignalGeneratorViewModelA { get; }
+      public BasicSignalGeneratorViewModel BasicSignalGeneratorViewModelB { get; }
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
       public MainWindowViewModel()
       {
-         SignalSourceControlViewModel = new SignalSourceControlViewModel();
-         AudioPlayerViewModel = new AudioPlayerViewModel(SignalSourceControlViewModel);
+         BasicSignalGeneratorViewModelA = new BasicSignalGeneratorViewModel();
+         BasicSignalGeneratorViewModelB = new BasicSignalGeneratorViewModel();
+
+         var finalGen = new AmplitudeModulationGenerator(
+            BasicSignalGeneratorViewModelA.BasicSignalGenerator, 
+            BasicSignalGeneratorViewModelB.BasicSignalGenerator );
+
+         AudioPlayerViewModel = new AudioPlayerViewModel(finalGen);
 
       }
    }
