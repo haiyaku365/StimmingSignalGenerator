@@ -5,7 +5,6 @@
              
              xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
              xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
-             xmlns:c="clr-namespace:StimmingSignalGenerator.MVVM.Controls;assembly=StimmingSignalGenerator"
 
              xmlns:helper="clr-namespace:StimmingSignalGenerator.MVVM.UiHelper;assembly=StimmingSignalGenerator"
              xmlns:p="clr-namespace:NAudio.Wave.SampleProviders;assembly=NAudio"
@@ -31,12 +30,10 @@
               SelectedItem="{Binding SignalType}"/>
 
     <TextBlock Grid.Row="1" Grid.Column="0">Freq</TextBlock>
-    <c:SignalSlider Grid.Row="1" Grid.Column="1"
-                        TickFrequency="0.01" SmallChange="10" LargeChange="50"
-                        Value="{Binding Frequency}" MinValue="100" MaxValue="10000"/>
+    <v:SignalSliderView Grid.Row="1" Grid.Column="1" 
+                    DataContext="{Binding FreqSignalSliderViewModel}"/>
     <TextBlock Grid.Row="2" Grid.Column="0">Vol</TextBlock>
-    <c:SignalSlider Grid.Row="2" Grid.Column="1"
-                    TickFrequency="0.01" SmallChange="0.01" LargeChange="0.05"
-                    Value="{Binding Volume}" MinValue="0" MaxValue="1"/>
+    <v:SignalSliderView Grid.Row="2" Grid.Column="1" 
+                    DataContext="{Binding VolSignalSliderViewModel}"/>
   </Grid>
 </UserControl>

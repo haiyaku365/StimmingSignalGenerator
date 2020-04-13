@@ -1,12 +1,15 @@
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Markup.Xaml;
+using System.Collections;
 
 namespace StimmingSignalGenerator.MVVM.Views
 {
-   public class BasicSignalGeneratorView : UserControl
+   public class SignalSliderView : UserControl
    {
-      public BasicSignalGeneratorView()
+      public SignalSliderView()
       {
          InitializeComponent();
       }

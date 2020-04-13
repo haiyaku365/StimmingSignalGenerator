@@ -4,8 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:StimmingSignalGenerator.MVVM.Controls;assembly=StimmingSignalGenerator"
              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="30"
-             Name="uc"
-             x:Class="StimmingSignalGenerator.MVVM.Controls.SignalSlider">
+             x:Class="StimmingSignalGenerator.MVVM.Views.SignalSliderView">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="40"></ColumnDefinition>
@@ -14,18 +13,19 @@
       <ColumnDefinition Width="*"></ColumnDefinition>
     </Grid.ColumnDefinitions>
     <NumericUpDown Grid.Column="0" ShowButtonSpinner="False"
-                   Value="{Binding #uc.MinValue,Mode=TwoWay}" />
+                   Value="{Binding MinValue,Mode=TwoWay}" />
     <NumericUpDown Grid.Column="1" ShowButtonSpinner="False"
-                   Value="{Binding #uc.Value,Mode=TwoWay}" />
+                   Value="{Binding Value,Mode=TwoWay}" />
     <NumericUpDown Grid.Column="2" ShowButtonSpinner="False"
-                   Value="{Binding #uc.MaxValue,Mode=TwoWay}" />
+                   Value="{Binding MaxValue,Mode=TwoWay}" />
     
     <Slider Grid.Column="3"
-            Minimum="{Binding #uc.MinValue, Mode=OneWay}" 
-            Maximum="{Binding #uc.MaxValue, Mode=OneWay}"
-            TickFrequency="{Binding #uc.TickFrequency}" 
-            SmallChange="{Binding #uc.SmallChange}" LargeChange="{Binding #uc.LargeChange}" 
+            Minimum="{Binding MinValue, Mode=OneWay}" 
+            Maximum="{Binding MaxValue, Mode=OneWay}"
+            TickFrequency="{Binding TickFrequency}" 
+            SmallChange="{Binding SmallChange}" 
+            LargeChange="{Binding LargeChange}" 
             IsSnapToTickEnabled="True"
-            Value="{Binding #uc.Value,Mode=TwoWay}" />
+            Value="{Binding Value,Mode=TwoWay}" />
   </Grid>
 </UserControl>
