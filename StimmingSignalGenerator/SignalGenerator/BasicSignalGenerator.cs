@@ -1,10 +1,15 @@
-﻿using System;
+﻿using NAudio.Wave;
+using StimmingSignalGenerator.SignalGenerator.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace NAudio.Wave.SampleProviders
+namespace StimmingSignalGenerator.SignalGenerator
 {
+   // https://raw.githubusercontent.com/naudio/NAudio/master/NAudio/Wave/SampleProviders/SignalGenerator.cs
    /// <summary>
    /// Signal Generator
-   /// Sin, Square, Triangle, SawTooth, White Noise, Pink Noise, Sweep.
+   /// Sin, SawTooth, Triangle, Square, White Noise, Pink Noise.
    /// </summary>
    /// <remarks>
    /// Posibility to change ISampleProvider
@@ -34,9 +39,6 @@ namespace NAudio.Wave.SampleProviders
       // Generator variable
       private int nSample;
 
-      // Sweep Generator variable
-      private double phi;
-
       /// <summary>
       /// Initializes a new instance for the Generator (Default :: 44.1Khz, 2 channels, Sinus, Frequency = 440, Gain = 1)
       /// </summary>
@@ -53,15 +55,14 @@ namespace NAudio.Wave.SampleProviders
       /// <param name="channel">Number of channels</param>
       public BasicSignalGenerator(int sampleRate, int channel)
       {
-         phi = 0;
          waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channel);
 
          // Default
-         Type = SignalGeneratorType.Sin;
+         Type = BasicSignalGeneratorType.Sin;
          Frequency = 440.0;
+         ZeroCrossingPosition = 0.5;
          Gain = 1;
          PhaseReverse = new bool[channel];
-         SweepLengthSecs = 2;
       }
 
       /// <summary>
@@ -71,24 +72,20 @@ namespace NAudio.Wave.SampleProviders
 
       /// <summary>
       /// Frequency for the Generator. (20.0 - 20000.0 Hz)
-      /// Sin, Square, Triangle, SawTooth, Sweep (Start Frequency).
+      /// Noise ignore this
       /// </summary>
       public double Frequency { get; set; }
+
+      /// <summary>
+      /// Position when signal cross zero default 0.5 (0.0 to 1.0)
+      /// Noise ignore this
+      /// </summary>
+      public double ZeroCrossingPosition { get; set; }
 
       /// <summary>
       /// Return Log of Frequency Start (Read only)
       /// </summary>
       public double FrequencyLog => Math.Log(Frequency);
-
-      /// <summary>
-      /// End Frequency for the Sweep Generator. (Start Frequency in Frequency)
-      /// </summary>
-      public double FrequencyEnd { get; set; }
-
-      /// <summary>
-      /// Return Log of Frequency End (Read only)
-      /// </summary>
-      public double FrequencyEndLog => Math.Log(FrequencyEnd);
 
       /// <summary>
       /// Gain for the Generator. (0.0 to 1.0)
@@ -103,12 +100,7 @@ namespace NAudio.Wave.SampleProviders
       /// <summary>
       /// Type of Generator.
       /// </summary>
-      public SignalGeneratorType Type { get; set; }
-
-      /// <summary>
-      /// Length Seconds for the Sweep Generator.
-      /// </summary>
-      public double SweepLengthSecs { get; set; }
+      public BasicSignalGeneratorType Type { get; set; }
 
       /// <summary>
       /// Reads from this provider.
@@ -127,30 +119,52 @@ namespace NAudio.Wave.SampleProviders
          {
             switch (Type)
             {
-               case SignalGeneratorType.Sin:
+               case BasicSignalGeneratorType.Sin:
 
                   // Sinus Generator
+                  /*
+                  https://www.desmos.com/calculator/0de76phnur
+                  f_{1}=1
+                  f_{2}=0.3
+                  p=\frac{1}{f_{1}}
+                  z=\frac{f_{2}}{f_{1}}
+                  y=\sin\left(f_{1}\cdot2\pi x\right)\left\{0\le x<p\right\}
+                  y_{1}=\sin\left(\frac{f_{1}}{f_{2}}\cdot\pi x\right)\left\{0\le x<z\right\}
+                  y_{2}=\sin\left(\frac{f_{1}}{\left(1-f_{2}\right)}\cdot\pi\left(x-p\right)\right)\left\{z\le x<p\right\}
+                  \left(0,0\right),\left(z,0\right),\left(p,0\right)
+                  */
+                  //TODO Optimize this
+                  double period = 1 / Frequency;
+                  double x = ((double)nSample / waveFormat.SampleRate) % period;
+                  double zeroCrossingPoint = ZeroCrossingPosition / Frequency;
+                  double frequencyFactor, shift;
+                  if (0 <= x && x < zeroCrossingPoint)
+                  {
+                     //before crossing zero
+                     frequencyFactor = 1 / ZeroCrossingPosition;
+                     shift = 0;
+                  }
+                  else //if (zeroCrossingPoint <= x && x < period)
+                  {
+                     //after crossing zero
+                     frequencyFactor = 1 / (1 - ZeroCrossingPosition);
+                     shift = -period;
+                  }
 
-                  multiple = TwoPi * Frequency / waveFormat.SampleRate;
-                  sampleValue = Gain * Math.Sin(nSample * multiple);
-
+                  sampleValue = Gain * Math.Sin(frequencyFactor * Frequency * Math.PI * (x + shift));
                   nSample++;
 
                   break;
 
-
-               case SignalGeneratorType.Square:
-
-                  // Square Generator
-
+               case BasicSignalGeneratorType.SawTooth:
                   multiple = 2 * Frequency / waveFormat.SampleRate;
                   sampleSaw = ((nSample * multiple) % 2) - 1;
-                  sampleValue = sampleSaw > 0 ? Gain : -Gain;
+                  sampleValue = Gain * sampleSaw;
 
                   nSample++;
                   break;
 
-               case SignalGeneratorType.Triangle:
+               case BasicSignalGeneratorType.Triangle:
 
                   // Triangle Generator
 
@@ -167,24 +181,18 @@ namespace NAudio.Wave.SampleProviders
                   nSample++;
                   break;
 
-               case SignalGeneratorType.SawTooth:
+               case BasicSignalGeneratorType.Square:
 
-                  // SawTooth Generator
+                  // Square Generator
 
                   multiple = 2 * Frequency / waveFormat.SampleRate;
                   sampleSaw = ((nSample * multiple) % 2) - 1;
-                  sampleValue = Gain * sampleSaw;
+                  sampleValue = sampleSaw > 0 ? Gain : -Gain;
 
                   nSample++;
                   break;
 
-               case SignalGeneratorType.White:
-
-                  // White Noise Generator
-                  sampleValue = (Gain * NextRandomTwo());
-                  break;
-
-               case SignalGeneratorType.Pink:
+               case BasicSignalGeneratorType.Pink:
 
                   // Pink Noise Generator
 
@@ -200,20 +208,10 @@ namespace NAudio.Wave.SampleProviders
                   sampleValue = (Gain * (pink / 5));
                   break;
 
-               case SignalGeneratorType.Sweep:
+               case BasicSignalGeneratorType.White:
 
-                  // Sweep Generator
-                  double f = Math.Exp(FrequencyLog + (nSample * (FrequencyEndLog - FrequencyLog)) / (SweepLengthSecs * waveFormat.SampleRate));
-
-                  multiple = TwoPi * f / waveFormat.SampleRate;
-                  phi += multiple;
-                  sampleValue = Gain * (Math.Sin(phi));
-                  nSample++;
-                  if (nSample > SweepLengthSecs * waveFormat.SampleRate)
-                  {
-                     nSample = 0;
-                     phi = 0;
-                  }
+                  // White Noise Generator
+                  sampleValue = (Gain * NextRandomTwo());
                   break;
 
                default:
@@ -242,13 +240,30 @@ namespace NAudio.Wave.SampleProviders
          return 2 * random.NextDouble() - 1;
       }
 
+
    }
 
    /// <summary>
-   /// Signal Generator type
+   /// Basic Signal Generator type
    /// </summary>
-   public enum SignalGeneratorType
+   public enum BasicSignalGeneratorType
    {
+      /// <summary>
+      /// Sine wave
+      /// </summary>
+      Sin,
+      /// <summary>
+      /// Sawtooth wave
+      /// </summary>
+      SawTooth,
+      /// <summary>
+      /// Triangle Wave
+      /// </summary>
+      Triangle,
+      /// <summary>
+      /// Square wave
+      /// </summary>
+      Square,
       /// <summary>
       /// Pink noise
       /// </summary>
@@ -256,27 +271,6 @@ namespace NAudio.Wave.SampleProviders
       /// <summary>
       /// White noise
       /// </summary>
-      White,
-      /// <summary>
-      /// Sweep
-      /// </summary>
-      Sweep,
-      /// <summary>
-      /// Sine wave
-      /// </summary>
-      Sin,
-      /// <summary>
-      /// Square wave
-      /// </summary>
-      Square,
-      /// <summary>
-      /// Triangle Wave
-      /// </summary>
-      Triangle,
-      /// <summary>
-      /// Sawtooth wave
-      /// </summary>
-      SawTooth,
+      White
    }
-
 }

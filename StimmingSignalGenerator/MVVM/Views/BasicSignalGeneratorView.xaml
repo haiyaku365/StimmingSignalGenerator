@@ -7,15 +7,15 @@
              xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
 
              xmlns:helper="clr-namespace:StimmingSignalGenerator.MVVM.UiHelper;assembly=StimmingSignalGenerator"
-             xmlns:p="clr-namespace:NAudio.Wave.SampleProviders;assembly=NAudio"
+             xmlns:p="clr-namespace:StimmingSignalGenerator.SignalGenerator;assembly=StimmingSignalGenerator"
              
-             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="150"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="150"
              d:DataContext="vm:SignalSourceControlViewModel"
              
              x:Class="StimmingSignalGenerator.MVVM.Views.BasicSignalGeneratorView">
-  <Grid>
+  <Grid Margin="5">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="30"></ColumnDefinition>
+      <ColumnDefinition Width="35"></ColumnDefinition>
       <ColumnDefinition Width="*"></ColumnDefinition>
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
@@ -23,17 +23,19 @@
       <RowDefinition></RowDefinition>
       <RowDefinition></RowDefinition>
       <RowDefinition></RowDefinition>
-      <RowDefinition></RowDefinition>
     </Grid.RowDefinitions>
     <ComboBox Grid.Row="0" Grid.Column="1"
-              Items="{Binding Source={helper:EnumBindingSource {x:Type p:SignalGeneratorType}}}"
+              Items="{Binding Source={helper:EnumBindingSource {x:Type p:BasicSignalGeneratorType}}}"
               SelectedItem="{Binding SignalType}"/>
 
-    <TextBlock Grid.Row="1" Grid.Column="0">Freq</TextBlock>
+    <TextBlock Grid.Row="1" Grid.Column="0" Text="Freq" ToolTip.Tip="Frequency" />
     <v:SignalSliderView Grid.Row="1" Grid.Column="1" 
                     DataContext="{Binding FreqSignalSliderViewModel}"/>
-    <TextBlock Grid.Row="2" Grid.Column="0">Vol</TextBlock>
+    <TextBlock Grid.Row="2" Grid.Column="0" Text="Vol" ToolTip.Tip="Volume" />
     <v:SignalSliderView Grid.Row="2" Grid.Column="1" 
                     DataContext="{Binding VolSignalSliderViewModel}"/>
+    <TextBlock Grid.Row="3" Grid.Column="0" Text="ZCP" ToolTip.Tip="ZeroCrossingPosition" />
+    <v:SignalSliderView Grid.Row="3" Grid.Column="1"
+                    DataContext="{Binding ZCPosSignalSliderViewModel}"/>
   </Grid>
 </UserControl>

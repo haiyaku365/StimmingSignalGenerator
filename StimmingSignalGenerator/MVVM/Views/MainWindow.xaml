@@ -9,7 +9,7 @@
         d:DataContext="vm:MainWindowViewModel"
         Title="StimmingSignalGenerator">
 
-  <StackPanel >
+  <StackPanel Margin="5">
     <v:BasicSignalGeneratorView DataContext="{Binding BasicSignalGeneratorViewModelA}"/>
     <v:BasicSignalGeneratorView DataContext="{Binding BasicSignalGeneratorViewModelB}"/>
     <v:BasicSignalGeneratorView DataContext="{Binding BasicSignalGeneratorViewModelC}"/>

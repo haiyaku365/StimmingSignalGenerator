@@ -16,7 +16,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private double largeChange;
 
       public static SignalSliderViewModel BasicSignalFreq =>
-         new SignalSliderViewModel(440, 0, 10000, 1, 10, 50);
+         new SignalSliderViewModel(440, 20, 10000, 1, 10, 50);
       public static SignalSliderViewModel AMSignalFreq =>
          new SignalSliderViewModel(1, 0, 5, 0.01, 0.01, 0.05);
       public static SignalSliderViewModel FMSignalFreq =>

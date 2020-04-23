@@ -14,10 +14,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public BasicSignalGenerator BasicSignalGenerator { get; set; }
       public SignalSliderViewModel FreqSignalSliderViewModel { get; set; }
       public SignalSliderViewModel VolSignalSliderViewModel { get; set; }
+      public SignalSliderViewModel ZCPosSignalSliderViewModel { get; set; }
 
       public ViewModelActivator Activator { get; }
 
-      private SignalGeneratorType signalType;
+      private BasicSignalGeneratorType signalType;
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       public BasicSignalGeneratorViewModel()
          : this(SignalSliderViewModel.BasicSignalFreq)
@@ -36,6 +37,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          FreqSignalSliderViewModel = freqSignalSliderViewModel;
          VolSignalSliderViewModel = volSignalSliderViewModel;
+         ZCPosSignalSliderViewModel = SignalSliderViewModel.Vol(0.5);
 
          FreqSignalSliderViewModel
             .ObservableForProperty(x => x.Value, skipInitial: false)
@@ -45,11 +47,15 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .ObservableForProperty(x => x.Value, skipInitial: false)
             .Subscribe(x => Volume = x.Value)
             .DisposeWith(Disposables);
+         ZCPosSignalSliderViewModel
+            .ObservableForProperty(x => x.Value, skipInitial: false)
+            .Subscribe(x => ZeroCrossingPosition = x.Value)
+            .DisposeWith(Disposables);
 
-         SignalType = SignalGeneratorType.Sin;
+         SignalType = BasicSignalGeneratorType.Sin;
       }
 
-      public SignalGeneratorType SignalType
+      public BasicSignalGeneratorType SignalType
       {
          get => signalType;
          set
@@ -83,6 +89,18 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
 
+      public double ZeroCrossingPosition
+      {
+         get => ZCPosSignalSliderViewModel.Value;
+         set
+         {
+            if (BasicSignalGenerator.ZeroCrossingPosition == value) return;
+            this.RaisePropertyChanging(nameof(ZeroCrossingPosition));
+            ZCPosSignalSliderViewModel.Value = value;
+            BasicSignalGenerator.ZeroCrossingPosition = value;
+            this.RaisePropertyChanged(nameof(ZeroCrossingPosition));
+         }
+      }
 
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)
