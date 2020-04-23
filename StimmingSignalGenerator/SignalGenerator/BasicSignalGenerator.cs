@@ -18,7 +18,7 @@ namespace NAudio.Wave.SampleProviders
    /// _waveOutGene.Init(wg);
    /// _waveOutGene.Play();
    /// </remarks>
-   public class SignalGenerator : ISampleProvider
+   public class BasicSignalGenerator : ISampleProvider
    {
       // Wave format
       private readonly WaveFormat waveFormat;
@@ -40,7 +40,7 @@ namespace NAudio.Wave.SampleProviders
       /// <summary>
       /// Initializes a new instance for the Generator (Default :: 44.1Khz, 2 channels, Sinus, Frequency = 440, Gain = 1)
       /// </summary>
-      public SignalGenerator()
+      public BasicSignalGenerator()
           : this(44100, 2)
       {
 
@@ -51,7 +51,7 @@ namespace NAudio.Wave.SampleProviders
       /// </summary>
       /// <param name="sampleRate">Desired sample rate</param>
       /// <param name="channel">Number of channels</param>
-      public SignalGenerator(int sampleRate, int channel)
+      public BasicSignalGenerator(int sampleRate, int channel)
       {
          phi = 0;
          waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channel);
