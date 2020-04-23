@@ -34,7 +34,7 @@ namespace StimmingSignalGenerator.SignalGenerator
       private readonly double[] pinkNoiseBuffer = new double[7];
 
       // Const Math
-      private const double TwoPi = 2 * Math.PI;
+      //private const double TwoPi = 2 * Math.PI;
 
       // Generator variable
       private int nSample;
@@ -110,9 +110,7 @@ namespace StimmingSignalGenerator.SignalGenerator
          int outIndex = offset;
 
          // Generator current value
-         double multiple;
          double sampleValue;
-         double sampleSaw;
 
          // Once per Read variable
          double period = 1 / Frequency;
@@ -194,9 +192,7 @@ namespace StimmingSignalGenerator.SignalGenerator
 
                   // Triangle Generator
 
-                  multiple = 2 * Frequency / waveFormat.SampleRate;
-                  sampleSaw = ((nSample * multiple) % 2);
-                  sampleValue = 2 * sampleSaw;
+                  sampleValue = 2 * SampleSaw(x, Frequency, frequencyFactor, shift, isBeforeCrossingZero);
                   if (sampleValue > 1)
                      sampleValue = 2 - sampleValue;
                   if (sampleValue < -1)
@@ -211,9 +207,9 @@ namespace StimmingSignalGenerator.SignalGenerator
 
                   // Square Generator
 
-                  multiple = 2 * Frequency / waveFormat.SampleRate;
-                  sampleSaw = ((nSample * multiple) % 2) - 1;
-                  sampleValue = sampleSaw > 0 ? Gain : -Gain;
+                  sampleValue = 
+                     SampleSaw(x, Frequency, frequencyFactor, shift, isBeforeCrossingZero) < 0 ? 
+                        Gain : -Gain;
 
                   nSample++;
                   break;
