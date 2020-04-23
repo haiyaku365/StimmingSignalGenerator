@@ -114,14 +114,59 @@ namespace StimmingSignalGenerator.SignalGenerator
          double sampleValue;
          double sampleSaw;
 
+         // Once per Read variable
+         double period = 1 / Frequency;
+         double zeroCrossingPoint = ZeroCrossingPosition / Frequency;
+         double beforeZCFrequencyFactor = 1 / ZeroCrossingPosition;
+         double beforeZCShift = 0;
+         double afterZCFrequencyFactor = 1 / (1 - ZeroCrossingPosition);
+         double afterZCShift = -period;
+
+         double x, frequencyFactor, shift;
+
+         static double SampleSaw(
+            double x, double frequency, double frequencyFactor,
+            double shift, bool isBeforeCrossingZero)
+         {
+            /*
+            https://www.desmos.com/calculator/kb4nj3hurl
+            f_{1}=1
+            f_{2}=0.7
+            p=\frac{1}{f_{1}}
+            z=\frac{f_{2}}{f_{1}}
+            y=\left(\operatorname{mod}\left(2f_{1}x,2\right)\right)-1\left\{0\le x<p\right\}
+            y_{1}=\left(\frac{f_{1}}{f_{2}}\operatorname{mod}\left(x,p\right)\right)-1\left\{0\le x<z\right\}
+            y_{2}=\left(\frac{f_{1}}{1-f_{2}}\left(\operatorname{mod}\left(x,p\right)-p\right)\right)+1\left\{z\le x<p\right\}
+            \left(0,0\right),\left(z,0\right),\left(p,0\right)
+            */
+            double lift = isBeforeCrossingZero ? -1 : 1;
+            return (frequencyFactor * frequency * (x + shift)) + lift;
+         }
+
          // Complete Buffer
          for (int sampleCount = 0; sampleCount < count / waveFormat.Channels; sampleCount++)
          {
+            //calculate common variable
+            x = ((double)nSample / waveFormat.SampleRate) % period;
+            bool isBeforeCrossingZero = 0 <= x && x < zeroCrossingPoint;
+            //bool isAfterCrossingZero = zeroCrossingPoint <= x && x < period;
+            if (isBeforeCrossingZero)
+            {
+               frequencyFactor = beforeZCFrequencyFactor;
+               shift = beforeZCShift;
+            }
+            else //if (isAfterCrossingZero)
+            {
+               frequencyFactor = afterZCFrequencyFactor;
+               shift = afterZCShift;
+            }
+
             switch (Type)
             {
                case BasicSignalGeneratorType.Sin:
 
                   // Sinus Generator
+
                   /*
                   https://www.desmos.com/calculator/0de76phnur
                   f_{1}=1
@@ -133,34 +178,15 @@ namespace StimmingSignalGenerator.SignalGenerator
                   y_{2}=\sin\left(\frac{f_{1}}{\left(1-f_{2}\right)}\cdot\pi\left(x-p\right)\right)\left\{z\le x<p\right\}
                   \left(0,0\right),\left(z,0\right),\left(p,0\right)
                   */
-                  //TODO Optimize this
-                  double period = 1 / Frequency;
-                  double x = ((double)nSample / waveFormat.SampleRate) % period;
-                  double zeroCrossingPoint = ZeroCrossingPosition / Frequency;
-                  double frequencyFactor, shift;
-                  if (0 <= x && x < zeroCrossingPoint)
-                  {
-                     //before crossing zero
-                     frequencyFactor = 1 / ZeroCrossingPosition;
-                     shift = 0;
-                  }
-                  else //if (zeroCrossingPoint <= x && x < period)
-                  {
-                     //after crossing zero
-                     frequencyFactor = 1 / (1 - ZeroCrossingPosition);
-                     shift = -period;
-                  }
-
                   sampleValue = Gain * Math.Sin(frequencyFactor * Frequency * Math.PI * (x + shift));
                   nSample++;
-
                   break;
 
                case BasicSignalGeneratorType.SawTooth:
-                  multiple = 2 * Frequency / waveFormat.SampleRate;
-                  sampleSaw = ((nSample * multiple) % 2) - 1;
-                  sampleValue = Gain * sampleSaw;
 
+                  // SawTooth Generator
+
+                  sampleValue = Gain * SampleSaw(x, Frequency, frequencyFactor, shift, isBeforeCrossingZero);
                   nSample++;
                   break;
 
