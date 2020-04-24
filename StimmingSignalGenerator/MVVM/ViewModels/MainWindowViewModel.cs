@@ -18,14 +18,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public MainWindowViewModel()
       {
          BasicSignalGeneratorViewModelA = 
-            new BasicSignalGeneratorViewModel();
+            new BasicSignalGeneratorViewModel()
+            { Name = "Main Signal" };
          BasicSignalGeneratorViewModelB = 
             new BasicSignalGeneratorViewModel(
-               SignalSliderViewModel.AMSignalFreq);
+               SignalSliderViewModel.AMSignalFreq)
+            { Name = "AM Signal"};
          BasicSignalGeneratorViewModelC = 
             new BasicSignalGeneratorViewModel(
                SignalSliderViewModel.FMSignalFreq,
-               SignalSliderViewModel.Vol(0.25));
+               SignalSliderViewModel.Vol(0.25))
+            { Name = "FM Signal" };
 
          var finalProvider =
             BasicSignalGeneratorViewModelA.BasicSignalGenerator

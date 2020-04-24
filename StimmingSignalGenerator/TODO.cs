@@ -5,6 +5,7 @@
 //-TODO Slider Property of BasicSignalGeneratorView(refactor to v & vm)
 //-TODO Custom basic signal gen
 //-TODO square wave with duty cycle parameter(ZeroCrossingPosition in BasicSignalGenerator)
+//-TODO collapsible signal gen view
 //TODO seperate R L Channel
 //TODO Mixing multi generator
 //TODO Output selector

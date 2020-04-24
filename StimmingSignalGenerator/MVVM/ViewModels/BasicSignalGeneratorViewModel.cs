@@ -11,6 +11,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    public class BasicSignalGeneratorViewModel : ViewModelBase, IDisposable
    {
+      public string Name { get; set; } = "SignalGenerator";
+
       public BasicSignalGenerator BasicSignalGenerator { get; set; }
       public SignalSliderViewModel FreqSignalSliderViewModel { get; set; }
       public SignalSliderViewModel VolSignalSliderViewModel { get; set; }

@@ -5,37 +5,64 @@
              
              xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
              xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
-
              xmlns:helper="clr-namespace:StimmingSignalGenerator.MVVM.UiHelper;assembly=StimmingSignalGenerator"
              xmlns:p="clr-namespace:StimmingSignalGenerator.SignalGenerator;assembly=StimmingSignalGenerator"
              
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="150"
+             mc:Ignorable="d" d:DesignWidth="400"
              d:DataContext="vm:SignalSourceControlViewModel"
+             x:Class="StimmingSignalGenerator.MVVM.Views.BasicSignalGeneratorView"
              
-             x:Class="StimmingSignalGenerator.MVVM.Views.BasicSignalGeneratorView">
-  <Grid Margin="5">
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="35"></ColumnDefinition>
-      <ColumnDefinition Width="*"></ColumnDefinition>
-    </Grid.ColumnDefinitions>
-    <Grid.RowDefinitions>
-      <RowDefinition></RowDefinition>
-      <RowDefinition></RowDefinition>
-      <RowDefinition></RowDefinition>
-      <RowDefinition></RowDefinition>
-    </Grid.RowDefinitions>
-    <ComboBox Grid.Row="0" Grid.Column="1"
-              Items="{Binding Source={helper:EnumBindingSource {x:Type p:BasicSignalGeneratorType}}}"
-              SelectedItem="{Binding SignalType}"/>
+             Margin="5">
+  <Expander>
+    <!-- Style -->
+    <Expander.Styles>
+      <Style Selector="Expander">
+        <Setter Property="IsExpanded" Value="True"/>
+      </Style>
+    </Expander.Styles>
+    
+      <!-- Header -->
+    <Expander.Header>
+      <StackPanel Orientation="Horizontal" Spacing="5">
+        <TextBlock Text="{Binding Name}" />
+        <TextBlock Text="{Binding SignalType}" />
+        <TextBlock Text="{Binding Frequency, StringFormat={}F:{0:N2}}" />
+        <TextBlock Text="{Binding Volume, StringFormat={}V:{0:P0}}" />
+        <TextBlock Text="{Binding ZeroCrossingPosition, StringFormat={}ZCP:{0:P0}}" />
+      </StackPanel>
+    </Expander.Header>
+    
+    <!-- Content -->
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="35" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition />
+        <RowDefinition />
+        <RowDefinition />
+        <RowDefinition />
+      </Grid.RowDefinitions>
+      <ComboBox Grid.Row="0" Grid.Column="1"
+                Items="{Binding Source={helper:EnumBindingSource {x:Type p:BasicSignalGeneratorType}}}"
+                SelectedItem="{Binding SignalType}"/>
 
-    <TextBlock Grid.Row="1" Grid.Column="0" Text="Freq" ToolTip.Tip="Frequency" />
-    <v:SignalSliderView Grid.Row="1" Grid.Column="1" 
-                    DataContext="{Binding FreqSignalSliderViewModel}"/>
-    <TextBlock Grid.Row="2" Grid.Column="0" Text="Vol" ToolTip.Tip="Volume" />
-    <v:SignalSliderView Grid.Row="2" Grid.Column="1" 
-                    DataContext="{Binding VolSignalSliderViewModel}"/>
-    <TextBlock Grid.Row="3" Grid.Column="0" Text="ZCP" ToolTip.Tip="ZeroCrossingPosition" />
-    <v:SignalSliderView Grid.Row="3" Grid.Column="1"
-                    DataContext="{Binding ZCPosSignalSliderViewModel}"/>
-  </Grid>
+      <TextBlock Grid.Row="1" Grid.Column="0"
+                 Text="Freq" ToolTip.Tip="Frequency" />
+      <v:SignalSliderView Grid.Row="1" Grid.Column="1"
+                      DataContext="{Binding FreqSignalSliderViewModel}"/>
+
+      <TextBlock Grid.Row="2" Grid.Column="0"
+                 Text="Vol" ToolTip.Tip="Volume" />
+      <v:SignalSliderView Grid.Row="2" Grid.Column="1"
+                      DataContext="{Binding VolSignalSliderViewModel}"/>
+
+      <TextBlock Grid.Row="3" Grid.Column="0"
+                 Text="ZCP" ToolTip.Tip="ZeroCrossingPosition" />
+      <v:SignalSliderView Grid.Row="3" Grid.Column="1"
+                      DataContext="{Binding ZCPosSignalSliderViewModel}"/>
+    </Grid>
+  </Expander>
+
 </UserControl>
