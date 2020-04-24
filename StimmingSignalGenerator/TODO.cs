@@ -7,7 +7,6 @@
 //-TODO square wave with duty cycle parameter(ZeroCrossingPosition in BasicSignalGenerator)
 //-TODO collapsible signal gen view
 //TODO seperate R L Channel
-//TODO PhaseReverse switch GUI
 //TODO Mixing multi generator
 //TODO Output selector
 //TODO signal phase shift

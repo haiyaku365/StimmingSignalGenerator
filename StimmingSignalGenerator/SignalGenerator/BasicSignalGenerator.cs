@@ -63,7 +63,6 @@ namespace StimmingSignalGenerator.SignalGenerator
          Frequency = 440.0;
          ZeroCrossingPosition = 0.5;
          Gain = 1;
-         PhaseReverse = new bool[channel];
          ChannelGain = Enumerable.Repeat(1.0, channel).ToArray();
       }
 
@@ -95,14 +94,12 @@ namespace StimmingSignalGenerator.SignalGenerator
       public double Gain { get; set; }
 
       /// <summary>
-      /// Gain for each channel. default are 1.0 for all channel (0.0 to 1.0)
+      /// Gain for each channel.
+      /// Negative gain will reverse phase.
+      /// default are 1.0 for all channel.
+      /// (-1.0 to 1.0)
       /// </summary>
       public double[] ChannelGain { get; }
-
-      /// <summary>
-      /// Channel PhaseReverse
-      /// </summary>
-      public bool[] PhaseReverse { get; }
 
       /// <summary>
       /// Type of Generator.
@@ -251,7 +248,7 @@ namespace StimmingSignalGenerator.SignalGenerator
             // Phase Reverse and Gain Per Channel
             for (int i = 0; i < waveFormat.Channels; i++)
             {
-               buffer[outIndex++] = (float)(sampleValue * ChannelGain[i] * (PhaseReverse[i] ? -1 : 1));
+               buffer[outIndex++] = (float)(sampleValue * ChannelGain[i]);
             }
          }
          return count;
