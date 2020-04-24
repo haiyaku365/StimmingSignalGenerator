@@ -2,13 +2,14 @@
 using StimmingSignalGenerator.SignalGenerator.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace StimmingSignalGenerator.SignalGenerator
 {
    // https://raw.githubusercontent.com/naudio/NAudio/master/NAudio/Wave/SampleProviders/SignalGenerator.cs
    /// <summary>
-   /// Signal Generator
+   /// Basic Signal Generator
    /// Sin, SawTooth, Triangle, Square, White Noise, Pink Noise.
    /// </summary>
    /// <remarks>
@@ -16,7 +17,7 @@ namespace StimmingSignalGenerator.SignalGenerator
    /// Example :
    /// ---------
    /// WaveOut _waveOutGene = new WaveOut();
-   /// WaveGenerator wg = new SignalGenerator();
+   /// WaveGenerator wg = new BasicSignalGenerator();
    /// wg.Type = ...
    /// wg.Frequency = ...
    /// wg ...
@@ -63,6 +64,7 @@ namespace StimmingSignalGenerator.SignalGenerator
          ZeroCrossingPosition = 0.5;
          Gain = 1;
          PhaseReverse = new bool[channel];
+         ChannelGain = Enumerable.Repeat(1.0, channel).ToArray();
       }
 
       /// <summary>
@@ -91,6 +93,11 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// Gain for the Generator. (0.0 to 1.0)
       /// </summary>
       public double Gain { get; set; }
+
+      /// <summary>
+      /// Gain for each channel. default are 1.0 for all channel (0.0 to 1.0)
+      /// </summary>
+      public double[] ChannelGain { get; }
 
       /// <summary>
       /// Channel PhaseReverse
@@ -207,8 +214,8 @@ namespace StimmingSignalGenerator.SignalGenerator
 
                   // Square Generator
 
-                  sampleValue = 
-                     SampleSaw(x, Frequency, frequencyFactor, shift, isBeforeCrossingZero) < 0 ? 
+                  sampleValue =
+                     SampleSaw(x, Frequency, frequencyFactor, shift, isBeforeCrossingZero) < 0 ?
                         Gain : -Gain;
 
                   nSample++;
@@ -241,13 +248,10 @@ namespace StimmingSignalGenerator.SignalGenerator
                   break;
             }
 
-            // Phase Reverse Per Channel
+            // Phase Reverse and Gain Per Channel
             for (int i = 0; i < waveFormat.Channels; i++)
             {
-               if (PhaseReverse[i])
-                  buffer[outIndex++] = (float)-sampleValue;
-               else
-                  buffer[outIndex++] = (float)sampleValue;
+               buffer[outIndex++] = (float)(sampleValue * ChannelGain[i] * (PhaseReverse[i] ? -1 : 1));
             }
          }
          return count;
