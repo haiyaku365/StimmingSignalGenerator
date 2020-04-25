@@ -35,7 +35,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          SignalSliderViewModel freqSignalSliderViewModel,
          SignalSliderViewModel volSignalSliderViewModel)
       {
-         BasicSignalGenerator = new BasicSignalGenerator();
+         BasicSignalGenerator = new BasicSignalGenerator(44100,1);
 
          FreqSignalSliderViewModel = freqSignalSliderViewModel;
          VolSignalSliderViewModel = volSignalSliderViewModel;

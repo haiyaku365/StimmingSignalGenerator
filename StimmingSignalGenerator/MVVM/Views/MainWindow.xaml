@@ -4,17 +4,28 @@
         xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="800"
         x:Class="StimmingSignalGenerator.MVVM.Views.MainWindow"
         d:DataContext="vm:MainWindowViewModel"
         Title="StimmingSignalGenerator">
-
   <StackPanel Margin="5">
-    <v:BasicSignalGeneratorView DataContext="{Binding BasicSignalGeneratorViewModelA}"/>
-    <v:BasicSignalGeneratorView DataContext="{Binding BasicSignalGeneratorViewModelB}"/>
-    <v:BasicSignalGeneratorView DataContext="{Binding BasicSignalGeneratorViewModelC}"/>
-    
-    <v:AudioPlayerView DataContext="{Binding AudioPlayerViewModel}" />
+    <TabControl>
+      <TabItem Header="Left" VerticalContentAlignment="Center">
+        <StackPanel Margin="5">
+          <v:BasicSignalGeneratorView DataContext="{Binding LeftSignalGeneratorVM}"/>
+          <v:BasicSignalGeneratorView DataContext="{Binding LeftAMSignalGeneratorVM}"/>
+          <v:BasicSignalGeneratorView DataContext="{Binding LeftFMSignalGeneratorVM}"/>
+        </StackPanel>
+      </TabItem>
+      <TabItem Header="Right" VerticalContentAlignment="Center">
+        <StackPanel Margin="5">
+          <v:BasicSignalGeneratorView DataContext="{Binding RightSignalGeneratorVM}"/>
+          <v:BasicSignalGeneratorView DataContext="{Binding RightAMSignalGeneratorVM}"/>
+          <v:BasicSignalGeneratorView DataContext="{Binding RightFMSignalGeneratorVM}"/>
+        </StackPanel>
+      </TabItem>
+    </TabControl>
+      <v:AudioPlayerView DataContext="{Binding AudioPlayerViewModel}" />
   </StackPanel>
 
 </Window>
