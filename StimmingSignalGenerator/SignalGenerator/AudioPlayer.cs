@@ -1,8 +1,10 @@
-﻿using NAudio.Wave;
+﻿using NAudio.CoreAudioApi;
+using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using StimmingSignalGenerator.SignalGenerator;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace StimmingSignalGenerator.SignalGenerator
@@ -13,14 +15,39 @@ namespace StimmingSignalGenerator.SignalGenerator
       public AudioPlayer(ISampleProvider sampleProvider)
       {
          SampleProvider = sampleProvider;
+
+         // https://github.com/naudio/NAudio/blob/master/Docs/EnumerateOutputDevices.md
+         // WaveOut not getting full device name
+         //var waveOutCapabilities = 
+         //   Enumerable.Range(0, WaveOut.DeviceCount)
+         //   .Select(n=> WaveOut.GetCapabilities(n))
+         //   .ToArray();
+
+         // DirectSoundOut not include unplug device and cannot set buffer
+         //var devices = DirectSoundOut.Devices;
+
+         // WASAPI Devices cannot set buffer
+         var enumerator = new MMDeviceEnumerator();
+         AudioDevices = 
+            enumerator
+            .EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active | DeviceState.Unplugged).ToArray();
+
+         // If not use ID to select AudioDevice from AudioDevices 
+         // it will be different object and fail combo box initialization
+         var defaultDevId = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia).ID;
+         AudioDevice = AudioDevices.SingleOrDefault(d => d.ID == defaultDevId);
+
+         enumerator.Dispose();
       }
+      public MMDevice[] AudioDevices { get; }
+      public MMDevice AudioDevice { get; set; }
 
       private ISampleProvider sampleProvider;
-
       public ISampleProvider SampleProvider
       {
          get { return sampleProvider; }
-         set {
+         set
+         {
             if (sampleProvider == value) return;
             sampleProvider = value;
          }
@@ -28,12 +55,18 @@ namespace StimmingSignalGenerator.SignalGenerator
 
       public void Play()
       {
+         if (AudioDevice?.State != DeviceState.Active) return;
          if (player == null)
          {
-            var waveOutEvent = new WaveOutEvent();
-            waveOutEvent.NumberOfBuffers = 4;
-            waveOutEvent.DesiredLatency = 100;
-            player = waveOutEvent;
+            //player = new WaveOutEvent
+            //{
+            //   NumberOfBuffers = 4,
+            //   DesiredLatency = 100
+            //};
+
+            //player = new DirectSoundOut(100) { };
+            player = new WasapiOut(AudioDevice, AudioClientShareMode.Exclusive, false, 50) { };
+
             player.Init(new SampleToWaveProvider(SampleProvider));
          }
          player.Play();

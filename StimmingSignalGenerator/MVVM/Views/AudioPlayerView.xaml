@@ -2,9 +2,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="80" d:DesignHeight="25"
+             
+             xmlns:h="clr-namespace:StimmingSignalGenerator.MVVM.UiHelper;assembly=StimmingSignalGenerator"
+             
+             mc:Ignorable="d"
              x:Class="StimmingSignalGenerator.MVVM.Views.AudioPlayerView">
   <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+    <ComboBox Items="{Binding AudioDevices}" SelectedItem="{Binding AudioDevice}">
+      <ComboBox.ItemTemplate>
+        <DataTemplate>
+          <StackPanel Orientation="Horizontal" Spacing="2">
+            <TextBlock Text="{Binding FriendlyName}" />
+            <TextBlock Text="{Binding State, StringFormat={}[{0}]}" />
+          </StackPanel>
+        </DataTemplate>
+      </ComboBox.ItemTemplate>
+    </ComboBox>
     <Button Content="Play" Command="{Binding PlayCommand}" />
     <Button Content="Stop" Command="{Binding StopCommand}" />
   </StackPanel>
