@@ -13,10 +13,16 @@
       <ColumnDefinition Width="*"></ColumnDefinition>
     </Grid.ColumnDefinitions>
     <NumericUpDown Grid.Column="0" ShowButtonSpinner="False"
+                   Increment="{Binding LargeChange}"
                    Value="{Binding MinValue,Mode=TwoWay}" />
-    <NumericUpDown Grid.Column="1" ShowButtonSpinner="False"
+    <NumericUpDown Grid.Column="1" ShowButtonSpinner="False" 
+                   Increment="{Binding LargeChange}" 
+                   Minimum="{Binding MinValue, Mode=OneWay}"
+                   Maximum="{Binding MaxValue, Mode=OneWay}"
+                   ClipToBounds="True"
                    Value="{Binding Value,Mode=TwoWay}" />
-    <NumericUpDown Grid.Column="2" ShowButtonSpinner="False"
+    <NumericUpDown Grid.Column="2" ShowButtonSpinner="False" 
+                   Increment="{Binding LargeChange}"
                    Value="{Binding MaxValue,Mode=TwoWay}" />
     
     <Slider Grid.Column="3"
@@ -25,7 +31,7 @@
             TickFrequency="{Binding TickFrequency}" 
             SmallChange="{Binding SmallChange}" 
             LargeChange="{Binding LargeChange}" 
-            IsSnapToTickEnabled="True"
+            IsSnapToTickEnabled="True" 
             Value="{Binding Value,Mode=TwoWay}" />
   </Grid>
 </UserControl>

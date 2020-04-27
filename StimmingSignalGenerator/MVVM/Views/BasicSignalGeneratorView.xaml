@@ -27,8 +27,8 @@
         <TextBlock Text="{Binding Name}" />
         <TextBlock Text="{Binding SignalType}" />
         <TextBlock Text="{Binding Frequency, StringFormat={}F:{0:N2}}" />
-        <TextBlock Text="{Binding Volume, StringFormat={}V:{0:P0}}" />
-        <TextBlock Text="{Binding ZeroCrossingPosition, StringFormat={}ZCP:{0:P0}}" />
+        <TextBlock Text="{Binding Volume, StringFormat={}V:{0:P1}}" />
+        <TextBlock Text="{Binding ZeroCrossingPosition, StringFormat={}ZCP:{0:P1}}" />
       </StackPanel>
     </Expander.Header>
     

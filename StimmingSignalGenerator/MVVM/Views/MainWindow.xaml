@@ -4,9 +4,10 @@
         xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800"
+        mc:Ignorable="d"
         x:Class="StimmingSignalGenerator.MVVM.Views.MainWindow"
         d:DataContext="vm:MainWindowViewModel"
+        Width="750" Height="800"
         Title="StimmingSignalGenerator">
   <StackPanel Margin="5">
     <TabControl>
