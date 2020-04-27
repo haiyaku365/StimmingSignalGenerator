@@ -13,14 +13,16 @@
       <TabItem Header="Left" VerticalContentAlignment="Center">
         <StackPanel Margin="5">
           <v:BasicSignalGeneratorView DataContext="{Binding LeftSignalGeneratorVM}"/>
-          <v:BasicSignalGeneratorView DataContext="{Binding LeftAMSignalGeneratorVM}"/>
+          <v:BasicSignalGeneratorView DataContext="{Binding LeftAM1SignalGeneratorVM}"/>
+          <v:BasicSignalGeneratorView DataContext="{Binding LeftAM2SignalGeneratorVM}"/>
           <v:BasicSignalGeneratorView DataContext="{Binding LeftFMSignalGeneratorVM}"/>
         </StackPanel>
       </TabItem>
       <TabItem Header="Right" VerticalContentAlignment="Center">
         <StackPanel Margin="5">
           <v:BasicSignalGeneratorView DataContext="{Binding RightSignalGeneratorVM}"/>
-          <v:BasicSignalGeneratorView DataContext="{Binding RightAMSignalGeneratorVM}"/>
+          <v:BasicSignalGeneratorView DataContext="{Binding RightAM1SignalGeneratorVM}"/>
+          <v:BasicSignalGeneratorView DataContext="{Binding RightAM2SignalGeneratorVM}"/>
           <v:BasicSignalGeneratorView DataContext="{Binding RightFMSignalGeneratorVM}"/>
         </StackPanel>
       </TabItem>

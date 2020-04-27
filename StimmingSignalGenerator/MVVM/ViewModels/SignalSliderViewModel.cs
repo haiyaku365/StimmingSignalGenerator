@@ -23,7 +23,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          new SignalSliderViewModel(1, 0, 5, 0.01, 0.01, 0.05);
       public static SignalSliderViewModel BasicVol => Vol();
       public static SignalSliderViewModel Vol(double initValue = 1) =>
-         new SignalSliderViewModel(initValue, 0, 1, 0.01, 0.01, 0.05);
+         new SignalSliderViewModel(initValue, 0, 1, 0.001, 0.001, 0.005);
 
 
       public SignalSliderViewModel() : this(440, 0, 10000, 1, 10, 50) { }

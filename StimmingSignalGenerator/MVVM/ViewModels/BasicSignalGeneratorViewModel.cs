@@ -34,12 +34,19 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public BasicSignalGeneratorViewModel(
          SignalSliderViewModel freqSignalSliderViewModel,
          SignalSliderViewModel volSignalSliderViewModel)
+         :this(freqSignalSliderViewModel, volSignalSliderViewModel, SignalSliderViewModel.Vol(0.5)){}
+
+      public BasicSignalGeneratorViewModel(
+         SignalSliderViewModel freqSignalSliderViewModel,
+         SignalSliderViewModel volSignalSliderViewModel,
+         SignalSliderViewModel zcPosSignalSliderViewModel
+         )
       {
          BasicSignalGenerator = new BasicSignalGenerator(44100,1);
 
          FreqSignalSliderViewModel = freqSignalSliderViewModel;
          VolSignalSliderViewModel = volSignalSliderViewModel;
-         ZCPosSignalSliderViewModel = SignalSliderViewModel.Vol(0.5);
+         ZCPosSignalSliderViewModel = zcPosSignalSliderViewModel;
 
          FreqSignalSliderViewModel
             .ObservableForProperty(x => x.Value, skipInitial: false)

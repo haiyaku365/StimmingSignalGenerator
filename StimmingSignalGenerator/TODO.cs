@@ -10,10 +10,12 @@
 //TODO Mixing multi generator
 //-TODO Output selector
 //TODO master vol
+//TODO sync R L channel toggle
 //TODO signal phase shift
 //TODO signal node
 //TODO Serialize setting
 //TODO preset
+//TODO UpdateSourceTrigger=LostFocus in SignalSlider (wait for avalonia implement https://github.com/AvaloniaUI/Avalonia/issues/3754)
 
 //TODO Wave form visualization
 //TODO Fix cracking noise when move slider (meybe Portamento will fixes this? check out https://github.com/naudio/sinegenerator-sample/blob/master/SineGenerator/SineWaveProvider.cs)
