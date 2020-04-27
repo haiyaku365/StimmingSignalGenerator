@@ -50,18 +50,18 @@
 
       <TextBlock Grid.Row="1" Grid.Column="0"
                  Text="Freq" ToolTip.Tip="Frequency" />
-      <v:SignalSliderView Grid.Row="1" Grid.Column="1"
-                      DataContext="{Binding FreqSignalSliderViewModel}"/>
+      <v:ControlSliderView Grid.Row="1" Grid.Column="1"
+                      DataContext="{Binding FreqControlSliderViewModel}"/>
 
       <TextBlock Grid.Row="2" Grid.Column="0"
                  Text="Vol" ToolTip.Tip="Volume" />
-      <v:SignalSliderView Grid.Row="2" Grid.Column="1"
-                      DataContext="{Binding VolSignalSliderViewModel}"/>
+      <v:ControlSliderView Grid.Row="2" Grid.Column="1"
+                      DataContext="{Binding VolControlSliderViewModel}"/>
 
       <TextBlock Grid.Row="3" Grid.Column="0"
                  Text="ZCP" ToolTip.Tip="ZeroCrossingPosition" />
-      <v:SignalSliderView Grid.Row="3" Grid.Column="1"
-                      DataContext="{Binding ZCPosSignalSliderViewModel}"/>
+      <v:ControlSliderView Grid.Row="3" Grid.Column="1"
+                      DataContext="{Binding ZCPosControlSliderViewModel}"/>
     </Grid>
   </Expander>
 

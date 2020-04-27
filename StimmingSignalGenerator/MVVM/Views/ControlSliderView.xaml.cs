@@ -7,9 +7,9 @@ using System.Collections;
 
 namespace StimmingSignalGenerator.MVVM.Views
 {
-   public class SignalSliderView : UserControl
+   public class ControlSliderView : UserControl
    {
-      public SignalSliderView()
+      public ControlSliderView()
       {
          InitializeComponent();
       }

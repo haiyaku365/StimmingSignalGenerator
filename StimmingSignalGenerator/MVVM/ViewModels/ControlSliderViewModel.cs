@@ -6,7 +6,7 @@ using ReactiveUI;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   public class SignalSliderViewModel : ViewModelBase
+   public class ControlSliderViewModel : ViewModelBase
    {
       private double _value;
       private double minValue;
@@ -15,19 +15,19 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private double smallChange;
       private double largeChange;
 
-      public static SignalSliderViewModel BasicSignalFreq =>
-         new SignalSliderViewModel(440, 20, 10000, 1, 10, 50);
-      public static SignalSliderViewModel AMSignalFreq =>
-         new SignalSliderViewModel(1, 0, 5, 0.01, 0.01, 0.05);
-      public static SignalSliderViewModel FMSignalFreq =>
-         new SignalSliderViewModel(1, 0, 5, 0.01, 0.01, 0.05);
-      public static SignalSliderViewModel BasicVol => Vol();
-      public static SignalSliderViewModel Vol(double initValue = 1) =>
-         new SignalSliderViewModel(initValue, 0, 1, 0.001, 0.001, 0.005);
+      public static ControlSliderViewModel BasicSignalFreq =>
+         new ControlSliderViewModel(440, 20, 10000, 1, 10, 50);
+      public static ControlSliderViewModel AMSignalFreq =>
+         new ControlSliderViewModel(1, 0, 5, 0.01, 0.01, 0.05);
+      public static ControlSliderViewModel FMSignalFreq =>
+         new ControlSliderViewModel(1, 0, 5, 0.01, 0.01, 0.05);
+      public static ControlSliderViewModel BasicVol => Vol();
+      public static ControlSliderViewModel Vol(double initValue = 1) =>
+         new ControlSliderViewModel(initValue, 0, 1, 0.001, 0.001, 0.005);
 
 
-      public SignalSliderViewModel() : this(440, 0, 10000, 1, 10, 50) { }
-      public SignalSliderViewModel(double value, double minValue, double maxValue, double tickFrequency, double smallChange, double largeChange)
+      public ControlSliderViewModel() : this(440, 0, 10000, 1, 10, 50) { }
+      public ControlSliderViewModel(double value, double minValue, double maxValue, double tickFrequency, double smallChange, double largeChange)
       {
          Value = value;
          MinValue = minValue;

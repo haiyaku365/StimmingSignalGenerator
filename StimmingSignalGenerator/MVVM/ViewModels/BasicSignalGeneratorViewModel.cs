@@ -14,49 +14,49 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public string Name { get; set; } = "SignalGenerator";
 
       public BasicSignalGenerator BasicSignalGenerator { get; set; }
-      public SignalSliderViewModel FreqSignalSliderViewModel { get; set; }
-      public SignalSliderViewModel VolSignalSliderViewModel { get; set; }
-      public SignalSliderViewModel ZCPosSignalSliderViewModel { get; set; }
+      public ControlSliderViewModel FreqControlSliderViewModel { get; set; }
+      public ControlSliderViewModel VolControlSliderViewModel { get; set; }
+      public ControlSliderViewModel ZCPosControlSliderViewModel { get; set; }
 
       public ViewModelActivator Activator { get; }
 
       private BasicSignalGeneratorType signalType;
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       public BasicSignalGeneratorViewModel()
-         : this(SignalSliderViewModel.BasicSignalFreq)
+         : this(ControlSliderViewModel.BasicSignalFreq)
       {
       }
       public BasicSignalGeneratorViewModel(
-         SignalSliderViewModel freqSignalSliderViewModel)
-         : this(freqSignalSliderViewModel, SignalSliderViewModel.BasicVol)
+         ControlSliderViewModel freqControlSliderViewModel)
+         : this(freqControlSliderViewModel, ControlSliderViewModel.BasicVol)
       {
       }
       public BasicSignalGeneratorViewModel(
-         SignalSliderViewModel freqSignalSliderViewModel,
-         SignalSliderViewModel volSignalSliderViewModel)
-         :this(freqSignalSliderViewModel, volSignalSliderViewModel, SignalSliderViewModel.Vol(0.5)){}
+         ControlSliderViewModel freqControlSliderViewModel,
+         ControlSliderViewModel volControlSliderViewModel)
+         :this(freqControlSliderViewModel, volControlSliderViewModel, ControlSliderViewModel.Vol(0.5)){}
 
       public BasicSignalGeneratorViewModel(
-         SignalSliderViewModel freqSignalSliderViewModel,
-         SignalSliderViewModel volSignalSliderViewModel,
-         SignalSliderViewModel zcPosSignalSliderViewModel
+         ControlSliderViewModel freqControlSliderViewModel,
+         ControlSliderViewModel volControlSliderViewModel,
+         ControlSliderViewModel zcPosControlSliderViewModel
          )
       {
          BasicSignalGenerator = new BasicSignalGenerator(44100,1);
 
-         FreqSignalSliderViewModel = freqSignalSliderViewModel;
-         VolSignalSliderViewModel = volSignalSliderViewModel;
-         ZCPosSignalSliderViewModel = zcPosSignalSliderViewModel;
+         FreqControlSliderViewModel = freqControlSliderViewModel;
+         VolControlSliderViewModel = volControlSliderViewModel;
+         ZCPosControlSliderViewModel = zcPosControlSliderViewModel;
 
-         FreqSignalSliderViewModel
+         FreqControlSliderViewModel
             .ObservableForProperty(x => x.Value, skipInitial: false)
             .Subscribe(x => Frequency = x.Value)
             .DisposeWith(Disposables);
-         VolSignalSliderViewModel
+         VolControlSliderViewModel
             .ObservableForProperty(x => x.Value, skipInitial: false)
             .Subscribe(x => Volume = x.Value)
             .DisposeWith(Disposables);
-         ZCPosSignalSliderViewModel
+         ZCPosControlSliderViewModel
             .ObservableForProperty(x => x.Value, skipInitial: false)
             .Subscribe(x => ZeroCrossingPosition = x.Value)
             .DisposeWith(Disposables);
@@ -75,24 +75,24 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       }
       public double Frequency
       {
-         get => FreqSignalSliderViewModel.Value;
+         get => FreqControlSliderViewModel.Value;
          set
          {
             if (BasicSignalGenerator.Frequency == value) return;
             this.RaisePropertyChanging(nameof(Frequency));
-            FreqSignalSliderViewModel.Value = value;
+            FreqControlSliderViewModel.Value = value;
             BasicSignalGenerator.Frequency = value;
             this.RaisePropertyChanged(nameof(Frequency));
          }
       }
       public double Volume
       {
-         get => VolSignalSliderViewModel.Value;
+         get => VolControlSliderViewModel.Value;
          set
          {
             if (BasicSignalGenerator.Gain == value) return;
             this.RaisePropertyChanging(nameof(Volume));
-            VolSignalSliderViewModel.Value = value;
+            VolControlSliderViewModel.Value = value;
             BasicSignalGenerator.Gain = value;
             this.RaisePropertyChanged(nameof(Volume));
          }
@@ -100,12 +100,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public double ZeroCrossingPosition
       {
-         get => ZCPosSignalSliderViewModel.Value;
+         get => ZCPosControlSliderViewModel.Value;
          set
          {
             if (BasicSignalGenerator.ZeroCrossingPosition == value) return;
             this.RaisePropertyChanging(nameof(ZeroCrossingPosition));
-            ZCPosSignalSliderViewModel.Value = value;
+            ZCPosControlSliderViewModel.Value = value;
             BasicSignalGenerator.ZeroCrossingPosition = value;
             this.RaisePropertyChanged(nameof(ZeroCrossingPosition));
          }

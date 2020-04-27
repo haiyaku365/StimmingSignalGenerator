@@ -32,16 +32,16 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             new BasicSignalGeneratorViewModel()
             { Name = $"{namePrefix} Main Signal" },
             new BasicSignalGeneratorViewModel(
-                  SignalSliderViewModel.AMSignalFreq)
+                  ControlSliderViewModel.AMSignalFreq)
             { Name = $"{namePrefix} AM1 Signal" },
             new BasicSignalGeneratorViewModel(
-                  new SignalSliderViewModel(330, 0, 500, 0.1, 0.1, 1),
-                  SignalSliderViewModel.Vol(0),
-                  SignalSliderViewModel.Vol(0.15))
+                  new ControlSliderViewModel(330, 0, 500, 0.1, 0.1, 1),
+                  ControlSliderViewModel.Vol(0),
+                  ControlSliderViewModel.Vol(0.15))
             { Name = $"{namePrefix} AM2 Signal" },
             new BasicSignalGeneratorViewModel(
-                  SignalSliderViewModel.FMSignalFreq,
-                  SignalSliderViewModel.Vol(0.25))
+                  ControlSliderViewModel.FMSignalFreq,
+                  ControlSliderViewModel.Vol(0.25))
             { Name = $"{namePrefix} FM Signal" }
             );
 

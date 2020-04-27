@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:StimmingSignalGenerator.MVVM.Controls;assembly=StimmingSignalGenerator"
              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="30"
-             x:Class="StimmingSignalGenerator.MVVM.Views.SignalSliderView">
+             x:Class="StimmingSignalGenerator.MVVM.Views.ControlSliderView">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="40"></ColumnDefinition>
