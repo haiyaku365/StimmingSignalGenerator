@@ -17,5 +17,10 @@ namespace StimmingSignalGenerator.SignalGenerator
          ISampleProvider FmSampleProvider,
          float pitchOctaveUpDown = 1)
          => new FrequencyModulationProvider(SourceSampleProvider, FmSampleProvider, pitchOctaveUpDown);
+
+      public static ISampleProvider Gain(
+         this ISampleProvider SourceSampleProvider,
+         Func<float, float> gainFuntion)
+         => new GainControlSampleProvider(SourceSampleProvider, gainFuntion);
    }
 }

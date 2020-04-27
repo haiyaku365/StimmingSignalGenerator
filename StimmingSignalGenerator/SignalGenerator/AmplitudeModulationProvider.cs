@@ -38,6 +38,14 @@ namespace StimmingSignalGenerator.SignalGenerator
 
       public int Read(float[] buffer, int offset, int count)
       {
+         /*
+         https://www.desmos.com/calculator/gtghlhuqut
+         f_{1}=1
+         g_{0}=0.5
+         y_{0}=g_{0}\sin\left(f_{1}\cdot2\pi x\right)
+         y_{1}=\frac{\left(y_{0}+1\right)}{2}
+         y=\sin\left(20\cdot2\pi x\right)\cdot y_{1}\left\{-1<y<1\right\}
+          */
          int sampleARead = SourceA.Read(buffer, offset, count);
          sourceBBuffer = BufferHelpers.Ensure(sourceBBuffer, count);
          SourceB.Read(sourceBBuffer, offset, count);

@@ -20,7 +20,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public BasicSignalGeneratorViewModel RightAM2SignalGeneratorVM { get; }
       public BasicSignalGeneratorViewModel RightFMSignalGeneratorVM { get; }
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
-
+     
       public MainWindowViewModel()
       {
          static (
@@ -35,7 +35,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                   SignalSliderViewModel.AMSignalFreq)
             { Name = $"{namePrefix} AM1 Signal" },
             new BasicSignalGeneratorViewModel(
-                  new SignalSliderViewModel(330,0,500,0.1,0.1,1), 
+                  new SignalSliderViewModel(330, 0, 500, 0.1, 0.1, 1),
                   SignalSliderViewModel.Vol(0),
                   SignalSliderViewModel.Vol(0.15))
             { Name = $"{namePrefix} AM2 Signal" },
@@ -51,29 +51,39 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          (RightSignalGeneratorVM, RightAM1SignalGeneratorVM, RightAM2SignalGeneratorVM, RightFMSignalGeneratorVM) =
             CreateSignalGeneratorVM("Right");
 
+         /*
+         AM Signal with gain bump
+         https://www.desmos.com/calculator/ya9ayr9ylc
+         f_{1}=1
+         g_{0}=0.25
+         y_{0}=g_{0}\sin\left(f_{1}\cdot2\pi x\right)
+         y_{1}=y_{0}+1-g_{0}
+         y_{2}=\frac{\left(y_{1}+1\right)}{2}
+         y=\sin\left(20\cdot2\pi x\right)\cdot y_{2}\left\{-1<y<1\right\}
+         */
+         var leftSignal =
+               LeftSignalGeneratorVM.BasicSignalGenerator
+               .AddAM(LeftAM1SignalGeneratorVM.BasicSignalGenerator.Gain(g => g + 1 - (float)LeftAM1SignalGeneratorVM.Volume))
+               .AddAM(LeftAM2SignalGeneratorVM.BasicSignalGenerator.Gain(g => g + 1 - (float)LeftAM2SignalGeneratorVM.Volume))
+               .AddFM(LeftFMSignalGeneratorVM.BasicSignalGenerator);
 
-      var leftSignelProvider =
-            LeftSignalGeneratorVM.BasicSignalGenerator
-            .AddAM(LeftAM1SignalGeneratorVM.BasicSignalGenerator)
-            .AddAM(LeftAM2SignalGeneratorVM.BasicSignalGenerator)
-            .AddFM(LeftFMSignalGeneratorVM.BasicSignalGenerator);
-
-         var rightSignelProvider =
+         var rightSignal =
             RightSignalGeneratorVM.BasicSignalGenerator
-            .AddAM(RightAM1SignalGeneratorVM.BasicSignalGenerator)
-            .AddAM(RightAM2SignalGeneratorVM.BasicSignalGenerator)
+            .AddAM(RightAM1SignalGeneratorVM.BasicSignalGenerator.Gain(g => g + 1 - (float)RightAM1SignalGeneratorVM.Volume))
+            .AddAM(RightAM2SignalGeneratorVM.BasicSignalGenerator.Gain(g => g + 1 - (float)RightAM2SignalGeneratorVM.Volume))
             .AddFM(RightFMSignalGeneratorVM.BasicSignalGenerator);
 
          //combine ch
-         var finalProvider = new MultiplexingSampleProvider(
+         var multiplexedSignal = new MultiplexingSampleProvider(
             new[] {
-               leftSignelProvider , //left ch
-               rightSignelProvider },//right ch
+               leftSignal , //left ch
+               rightSignal },//right ch
             2
             );
-         AudioPlayerViewModel = new AudioPlayerViewModel(finalProvider);
+
+         AudioPlayerViewModel = new AudioPlayerViewModel(multiplexedSignal);
       }
 
-      
+
    }
 }
