@@ -34,12 +34,6 @@ namespace StimmingSignalGenerator.SignalGenerator
 
       private readonly double[] pinkNoiseBuffer = new double[7];
 
-      // Const Math
-      //private const double TwoPi = 2 * Math.PI;
-
-      // Generator variable
-      private int nSample;
-
       /// <summary>
       /// Initializes a new instance for the Generator (Default :: 44.1Khz, 2 channels, Sinus, Frequency = 440, Gain = 1)
       /// </summary>
@@ -75,8 +69,22 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// Frequency for the Generator. (20.0 - 20000.0 Hz)
       /// Noise ignore this
       /// </summary>
-      public double Frequency { get; set; }
+      public double Frequency
+      {
+         get => targetPhaseStep;
+         set
+         {
+            targetPhaseStep = value;
+            seekFrequency = true;
+         }
+      }
 
+      private bool seekFrequency;
+      private double targetPhaseStep;
+      private double currentPhaseStep;
+      private double phaseStepDelta;
+      private double phase;
+      private double Period => WaveFormat.SampleRate;
       /// <summary>
       /// Position when signal cross zero default 0.5 (0.0 to 1.0)
       /// Noise ignore this
@@ -91,7 +99,20 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// <summary>
       /// Gain for the Generator. (0.0 to 1.0)
       /// </summary>
-      public double Gain { get; set; }
+      public double Gain
+      {
+         get => targetGain;
+         set
+         {
+            targetGain = value;
+            seekGain = true;
+         }
+      }
+
+      private bool seekGain;
+      private double targetGain;
+      private double currentGain;
+      private double gainStepDelta;
 
       /// <summary>
       /// Gain for each channel.
@@ -112,44 +133,38 @@ namespace StimmingSignalGenerator.SignalGenerator
       public int Read(float[] buffer, int offset, int count)
       {
          int outIndex = offset;
+         int countPerChannel = count / waveFormat.Channels;
 
          // Generator current value
          double sampleValue;
 
          // Once per Read variable
-         double period = 1 / Frequency;
-         double zeroCrossingPoint = ZeroCrossingPosition / Frequency;
+         double zeroCrossingPoint = ZeroCrossingPosition * Period;
          double beforeZCFrequencyFactor = 1 / ZeroCrossingPosition;
          double beforeZCShift = 0;
          double afterZCFrequencyFactor = 1 / (1 - ZeroCrossingPosition);
-         double afterZCShift = -period;
-
+         double afterZCShift = -Period;
          double x, frequencyFactor, shift;
 
-         static double SampleSaw(
-            double x, double frequency, double frequencyFactor,
-            double shift, bool isBeforeCrossingZero)
+         // Calc gainStepDelta
+         if (seekGain) // process Gain change only once per call to Read
          {
-            /*
-            https://www.desmos.com/calculator/kb4nj3hurl
-            f_{1}=1
-            f_{2}=0.7
-            p=\frac{1}{f_{1}}
-            z=\frac{f_{2}}{f_{1}}
-            y=\left(\operatorname{mod}\left(2f_{1}x,2\right)\right)-1\left\{0\le x<p\right\}
-            y_{1}=\left(\frac{f_{1}}{f_{2}}\operatorname{mod}\left(x,p\right)\right)-1\left\{0\le x<z\right\}
-            y_{2}=\left(\frac{f_{1}}{1-f_{2}}\left(\operatorname{mod}\left(x,p\right)-p\right)\right)+1\left\{z\le x<p\right\}
-            \left(0,0\right),\left(z,0\right),\left(p,0\right)
-            */
-            double lift = isBeforeCrossingZero ? -1 : 1;
-            return (frequencyFactor * frequency * (x + shift)) + lift;
+            gainStepDelta = (targetGain - currentGain) / countPerChannel;
+            seekGain = false;
+         }
+         // Calc frequencyStepDelta
+         if (seekFrequency) // process frequency change only once per call to Read
+         {
+            phaseStepDelta = (targetPhaseStep - currentPhaseStep) / countPerChannel;
+            seekFrequency = false;
          }
 
          // Complete Buffer
-         for (int sampleCount = 0; sampleCount < count / waveFormat.Channels; sampleCount++)
+         for (int sampleCount = 0; sampleCount < countPerChannel; sampleCount++)
          {
             //calculate common variable
-            x = ((double)nSample / waveFormat.SampleRate) % period;
+            x = phase % Period;
+
             bool isBeforeCrossingZero = 0 <= x && x < zeroCrossingPoint;
             //bool isAfterCrossingZero = zeroCrossingPoint <= x && x < period;
             if (isBeforeCrossingZero)
@@ -168,43 +183,31 @@ namespace StimmingSignalGenerator.SignalGenerator
                case BasicSignalGeneratorType.Sin:
 
                   // Sinus Generator
-
-                  /*
-                  https://www.desmos.com/calculator/0de76phnur
-                  f_{1}=1
-                  f_{2}=0.3
-                  p=\frac{1}{f_{1}}
-                  z=\frac{f_{2}}{f_{1}}
-                  y=\sin\left(f_{1}\cdot2\pi x\right)\left\{0\le x<p\right\}
-                  y_{1}=\sin\left(\frac{f_{1}}{f_{2}}\cdot\pi x\right)\left\{0\le x<z\right\}
-                  y_{2}=\sin\left(\frac{f_{1}}{\left(1-f_{2}\right)}\cdot\pi\left(x-p\right)\right)\left\{z\le x<p\right\}
-                  \left(0,0\right),\left(z,0\right),\left(p,0\right)
-                  */
-                  sampleValue = Gain * Math.Sin(frequencyFactor * Frequency * Math.PI * (x + shift));
-                  nSample++;
+                  sampleValue = currentGain * SampleSin(x, frequencyFactor, shift);
+                  CalculateNextPhase();
                   break;
 
                case BasicSignalGeneratorType.SawTooth:
 
                   // SawTooth Generator
 
-                  sampleValue = Gain * SampleSaw(x, Frequency, frequencyFactor, shift, isBeforeCrossingZero);
-                  nSample++;
+                  sampleValue = currentGain * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
+                  CalculateNextPhase();
                   break;
 
                case BasicSignalGeneratorType.Triangle:
 
                   // Triangle Generator
 
-                  sampleValue = 2 * SampleSaw(x, Frequency, frequencyFactor, shift, isBeforeCrossingZero);
+                  sampleValue = 2 * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
                   if (sampleValue > 1)
                      sampleValue = 2 - sampleValue;
                   if (sampleValue < -1)
                      sampleValue = -2 - sampleValue;
 
-                  sampleValue *= Gain;
+                  sampleValue *= currentGain;
 
-                  nSample++;
+                  CalculateNextPhase();
                   break;
 
                case BasicSignalGeneratorType.Square:
@@ -212,10 +215,10 @@ namespace StimmingSignalGenerator.SignalGenerator
                   // Square Generator
 
                   sampleValue =
-                     SampleSaw(x, Frequency, frequencyFactor, shift, isBeforeCrossingZero) < 0 ?
-                        Gain : -Gain;
+                     SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero) < 0 ?
+                        currentGain : -currentGain;
 
-                  nSample++;
+                  CalculateNextPhase();
                   break;
 
                case BasicSignalGeneratorType.Pink:
@@ -231,20 +234,20 @@ namespace StimmingSignalGenerator.SignalGenerator
                   pinkNoiseBuffer[5] = -0.7616 * pinkNoiseBuffer[5] - white * 0.0168980;
                   double pink = pinkNoiseBuffer[0] + pinkNoiseBuffer[1] + pinkNoiseBuffer[2] + pinkNoiseBuffer[3] + pinkNoiseBuffer[4] + pinkNoiseBuffer[5] + pinkNoiseBuffer[6] + white * 0.5362;
                   pinkNoiseBuffer[6] = white * 0.115926;
-                  sampleValue = (Gain * (pink / 5));
+                  sampleValue = (currentGain * (pink / 5));
                   break;
 
                case BasicSignalGeneratorType.White:
 
                   // White Noise Generator
-                  sampleValue = (Gain * NextRandomTwo());
+                  sampleValue = (currentGain * NextRandomTwo());
                   break;
 
                default:
                   sampleValue = 0.0;
                   break;
             }
-
+            CalculateNextGain();
             // Phase Reverse and Gain Per Channel
             for (int i = 0; i < waveFormat.Channels; i++)
             {
@@ -252,6 +255,64 @@ namespace StimmingSignalGenerator.SignalGenerator
             }
          }
          return count;
+      }
+
+      private void CalculateNextGain()
+      {
+         //calculate currentGain
+         currentGain += gainStepDelta;
+         //correct if value exceed target
+         if (gainStepDelta > 0 && currentGain > targetGain ||
+             gainStepDelta < 0 && currentGain < targetGain)
+            currentGain = targetGain;
+      }
+
+      private void CalculateNextPhase()
+      {
+         phase += currentPhaseStep;
+         if (phase > Period) phase -= Period;
+         if (currentPhaseStep != targetPhaseStep)
+         {
+            //calculate currentPhaseStep
+            currentPhaseStep += phaseStepDelta;
+            //correct if value exceed target
+            if (phaseStepDelta > 0 && currentPhaseStep > targetPhaseStep ||
+                phaseStepDelta < 0 && currentPhaseStep < targetPhaseStep)
+               currentPhaseStep = targetPhaseStep;
+         }
+      }
+
+      private double SampleSin(double x, double frequencyFactor, double shift)
+      {
+         /*
+         https://www.desmos.com/calculator/0de76phnur
+         f_{1}=1
+         f_{2}=0.3
+         p=\frac{1}{f_{1}}
+         z=\frac{f_{2}}{f_{1}}
+         y=\sin\left(f_{1}\cdot2\pi x\right)\left\{0\le x<p\right\}
+         y_{1}=\sin\left(\frac{f_{1}}{f_{2}}\cdot\pi x\right)\left\{0\le x<z\right\}
+         y_{2}=\sin\left(\frac{f_{1}}{\left(1-f_{2}\right)}\cdot\pi\left(x-p\right)\right)\left\{z\le x<p\right\}
+         \left(0,0\right),\left(z,0\right),\left(p,0\right)
+         */
+         return Math.Sin(frequencyFactor * Math.PI / WaveFormat.SampleRate * (x + shift));
+      }
+
+      private double SampleSaw(double x, double frequencyFactor, double shift, bool isBeforeCrossingZero)
+      {
+         /*
+         https://www.desmos.com/calculator/kb4nj3hurl
+         f_{1}=1
+         f_{2}=0.7
+         p=\frac{1}{f_{1}}
+         z=\frac{f_{2}}{f_{1}}
+         y=\left(\operatorname{mod}\left(2f_{1}x,2\right)\right)-1\left\{0\le x<p\right\}
+         y_{1}=\left(\frac{f_{1}}{f_{2}}\operatorname{mod}\left(x,p\right)\right)-1\left\{0\le x<z\right\}
+         y_{2}=\left(\frac{f_{1}}{1-f_{2}}\left(\operatorname{mod}\left(x,p\right)-p\right)\right)+1\left\{z\le x<p\right\}
+         \left(0,0\right),\left(z,0\right),\left(p,0\right)
+         */
+         double lift = isBeforeCrossingZero ? -1 : 1;
+         return (frequencyFactor / WaveFormat.SampleRate * (x + shift)) + lift;
       }
 
       /// <summary>

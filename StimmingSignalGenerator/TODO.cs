@@ -18,6 +18,6 @@
 //TODO UpdateSourceTrigger=LostFocus in ControlSlider (wait for avalonia implement https://github.com/AvaloniaUI/Avalonia/issues/3754)
 
 //TODO Wave form visualization
-//TODO Fix cracking noise when move slider (meybe Portamento will fixes this? check out https://github.com/naudio/sinegenerator-sample/blob/master/SineGenerator/SineWaveProvider.cs)
+//-TODO Fix cracking noise when move slider (meybe Portamento will fixes this? check out https://github.com/naudio/sinegenerator-sample/blob/master/SineGenerator/SineWaveProvider.cs)
 //-TODO Rename SignalSlider -> ControlSlider
 //TODO SignalSlider -> Using signal to move ControlSlider
