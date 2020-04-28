@@ -132,6 +132,14 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// </summary>
       public int Read(float[] buffer, int offset, int count)
       {
+         //skip all this if gain is 0
+         if (Gain == 0 || ChannelGain.All(g => g == 0))
+         {
+            for (int i = 0; i < count; i++)
+               buffer[i] = 0;
+            return count;
+         }
+
          int outIndex = offset;
          int countPerChannel = count / waveFormat.Channels;
 
