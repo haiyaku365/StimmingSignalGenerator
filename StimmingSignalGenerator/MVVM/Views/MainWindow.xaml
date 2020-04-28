@@ -1,13 +1,16 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
-        xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        
+        xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
+        xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
+        xmlns:oxy="clr-namespace:OxyPlot.Avalonia;assembly=OxyPlot.Avalonia"
+        
         mc:Ignorable="d"
         x:Class="StimmingSignalGenerator.MVVM.Views.MainWindow"
         d:DataContext="vm:MainWindowViewModel"
-        Width="750" Height="800"
+        Width="750" Height="1000"
         Title="StimmingSignalGenerator">
   <StackPanel Margin="5">
     <TabControl>
@@ -17,6 +20,7 @@
           <v:BasicSignalGeneratorView DataContext="{Binding LeftAM1SignalGeneratorVM}"/>
           <v:BasicSignalGeneratorView DataContext="{Binding LeftAM2SignalGeneratorVM}"/>
           <v:BasicSignalGeneratorView DataContext="{Binding LeftFMSignalGeneratorVM}"/>
+          <v:PlotSampleView DataContext="{Binding LeftSignalPlotVM}" />
         </StackPanel>
       </TabItem>
       <TabItem Header="Right" VerticalContentAlignment="Center">
@@ -25,10 +29,12 @@
           <v:BasicSignalGeneratorView DataContext="{Binding RightAM1SignalGeneratorVM}"/>
           <v:BasicSignalGeneratorView DataContext="{Binding RightAM2SignalGeneratorVM}"/>
           <v:BasicSignalGeneratorView DataContext="{Binding RightFMSignalGeneratorVM}"/>
+          <v:PlotSampleView DataContext="{Binding RightSignalPlotVM}" />
         </StackPanel>
       </TabItem>
     </TabControl>
-      <v:AudioPlayerView DataContext="{Binding AudioPlayerViewModel}" />
+    <v:AudioPlayerView DataContext="{Binding AudioPlayerViewModel}" />
+
   </StackPanel>
 
 </Window>
