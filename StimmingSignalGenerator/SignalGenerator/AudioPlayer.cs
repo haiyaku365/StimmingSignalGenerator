@@ -9,7 +9,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.SignalGenerator
 {
-   class AudioPlayer
+   class AudioPlayer : IDisposable
    {
       private IWavePlayer player;
       public AudioPlayer(ISampleProvider sampleProvider)
@@ -28,7 +28,7 @@ namespace StimmingSignalGenerator.SignalGenerator
 
          // WASAPI Devices cannot set buffer
          var enumerator = new MMDeviceEnumerator();
-         AudioDevices = 
+         AudioDevices =
             enumerator
             .EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active | DeviceState.Unplugged).ToArray();
 
@@ -83,6 +83,37 @@ namespace StimmingSignalGenerator.SignalGenerator
             return;
          player.Dispose();
          player = null;
+      }
+
+      private bool disposedValue;
+      protected virtual void Dispose(bool disposing)
+      {
+         if (!disposedValue)
+         {
+            if (disposing)
+            {
+               // dispose managed state (managed objects)
+               Stop();
+            }
+
+            // free unmanaged resources (unmanaged objects) and override finalizer
+            // set large fields to null
+            disposedValue = true;
+         }
+      }
+
+      // // override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+      // ~AudioPlayer()
+      // {
+      //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+      //     Dispose(disposing: false);
+      // }
+
+      public void Dispose()
+      {
+         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+         Dispose(disposing: true);
+         GC.SuppressFinalize(this);
       }
    }
 }
