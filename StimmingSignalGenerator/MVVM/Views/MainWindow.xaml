@@ -10,31 +10,29 @@
         mc:Ignorable="d"
         x:Class="StimmingSignalGenerator.MVVM.Views.MainWindow"
         d:DataContext="vm:MainWindowViewModel"
-        Width="750" Height="1000"
+        Width="750"
         Title="StimmingSignalGenerator">
-  <StackPanel Margin="5">
-    <TabControl>
+  <DockPanel Margin="10">
+    <v:AudioPlayerView DockPanel.Dock="Top" DataContext="{Binding AudioPlayerViewModel}"
+                       VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
+    <TabControl DockPanel.Dock="Bottom" >
       <TabItem Header="Left" VerticalContentAlignment="Center">
-        <StackPanel Margin="5">
-          <v:BasicSignalGeneratorView DataContext="{Binding LeftSignalGeneratorVM}"/>
-          <v:BasicSignalGeneratorView DataContext="{Binding LeftAM1SignalGeneratorVM}"/>
-          <v:BasicSignalGeneratorView DataContext="{Binding LeftAM2SignalGeneratorVM}"/>
-          <v:BasicSignalGeneratorView DataContext="{Binding LeftFMSignalGeneratorVM}"/>
-          <v:PlotSampleView DataContext="{Binding LeftSignalPlotVM}" />
-        </StackPanel>
+        <DockPanel Margin="5" >
+          <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding LeftSignalPlotVM}" />
+          <v:MultiSignalGeneratorView DockPanel.Dock="Bottom" DataContext="{Binding LeftSignalGeneratorsVM}"/>
+        </DockPanel>
       </TabItem>
       <TabItem Header="Right" VerticalContentAlignment="Center">
-        <StackPanel Margin="5">
-          <v:BasicSignalGeneratorView DataContext="{Binding RightSignalGeneratorVM}"/>
-          <v:BasicSignalGeneratorView DataContext="{Binding RightAM1SignalGeneratorVM}"/>
-          <v:BasicSignalGeneratorView DataContext="{Binding RightAM2SignalGeneratorVM}"/>
-          <v:BasicSignalGeneratorView DataContext="{Binding RightFMSignalGeneratorVM}"/>
-          <v:PlotSampleView DataContext="{Binding RightSignalPlotVM}" />
-        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="5">
+            <v:PlotSampleView DataContext="{Binding RightSignalPlotVM}" />
+            <v:BasicSignalGeneratorView DataContext="{Binding RightSignalGeneratorVM}"/>
+            <v:BasicSignalGeneratorView DataContext="{Binding RightAM1SignalGeneratorVM}"/>
+            <v:BasicSignalGeneratorView DataContext="{Binding RightAM2SignalGeneratorVM}"/>
+            <v:BasicSignalGeneratorView DataContext="{Binding RightFMSignalGeneratorVM}"/>
+          </StackPanel>
+        </ScrollViewer>
       </TabItem>
     </TabControl>
-    <v:AudioPlayerView DataContext="{Binding AudioPlayerViewModel}" />
-
-  </StackPanel>
-
+  </DockPanel>
 </Window>

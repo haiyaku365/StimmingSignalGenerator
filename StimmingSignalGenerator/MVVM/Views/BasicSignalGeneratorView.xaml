@@ -20,8 +20,8 @@
         <Setter Property="IsExpanded" Value="True"/>
       </Style>
     </Expander.Styles>
-    
-      <!-- Header -->
+
+    <!-- Header -->
     <Expander.Header>
       <StackPanel Orientation="Horizontal" Spacing="5">
         <TextBlock Text="{Binding Name}" />
@@ -31,7 +31,7 @@
         <TextBlock Text="{Binding ZeroCrossingPosition, StringFormat={}ZCP:{0:P1}}" />
       </StackPanel>
     </Expander.Header>
-    
+
     <!-- Content -->
     <Grid>
       <Grid.ColumnDefinitions>
@@ -51,17 +51,17 @@
       <TextBlock Grid.Row="1" Grid.Column="0"
                  Text="Freq" ToolTip.Tip="Frequency" />
       <v:ControlSliderView Grid.Row="1" Grid.Column="1"
-                      DataContext="{Binding FreqControlSliderViewModel}"/>
+                           DataContext="{Binding FreqControlSliderViewModel}"/>
 
       <TextBlock Grid.Row="2" Grid.Column="0"
                  Text="Vol" ToolTip.Tip="Volume" />
       <v:ControlSliderView Grid.Row="2" Grid.Column="1"
-                      DataContext="{Binding VolControlSliderViewModel}"/>
+                           DataContext="{Binding VolControlSliderViewModel}"/>
 
       <TextBlock Grid.Row="3" Grid.Column="0"
                  Text="ZCP" ToolTip.Tip="ZeroCrossingPosition" />
       <v:ControlSliderView Grid.Row="3" Grid.Column="1"
-                      DataContext="{Binding ZCPosControlSliderViewModel}"/>
+                           DataContext="{Binding ZCPosControlSliderViewModel}"/>
     </Grid>
   </Expander>
 

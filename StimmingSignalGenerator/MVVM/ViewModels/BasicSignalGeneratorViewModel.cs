@@ -11,17 +11,16 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    public class BasicSignalGeneratorViewModel : ViewModelBase, IDisposable
    {
-      public string Name { get; set; } = "SignalGenerator";
-
-      public BasicSignalGenerator BasicSignalGenerator { get; set; }
-      public ControlSliderViewModel FreqControlSliderViewModel { get; set; }
-      public ControlSliderViewModel VolControlSliderViewModel { get; set; }
-      public ControlSliderViewModel ZCPosControlSliderViewModel { get; set; }
+      public int Id { get; internal set; }
+      private string name = "SignalGenerator";
+      public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
+      public BasicSignalGenerator BasicSignalGenerator { get; }
+      public ControlSliderViewModel FreqControlSliderViewModel { get; }
+      public ControlSliderViewModel VolControlSliderViewModel { get; }
+      public ControlSliderViewModel ZCPosControlSliderViewModel { get; }
 
       public ViewModelActivator Activator { get; }
 
-      private BasicSignalGeneratorType signalType;
-      private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       public BasicSignalGeneratorViewModel()
          : this(ControlSliderViewModel.BasicSignalFreq)
       {
@@ -34,7 +33,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public BasicSignalGeneratorViewModel(
          ControlSliderViewModel freqControlSliderViewModel,
          ControlSliderViewModel volControlSliderViewModel)
-         :this(freqControlSliderViewModel, volControlSliderViewModel, ControlSliderViewModel.Vol(0.5)){}
+         : this(freqControlSliderViewModel, volControlSliderViewModel, ControlSliderViewModel.Vol(0.5)) { }
 
       public BasicSignalGeneratorViewModel(
          ControlSliderViewModel freqControlSliderViewModel,
@@ -42,7 +41,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          ControlSliderViewModel zcPosControlSliderViewModel
          )
       {
-         BasicSignalGenerator = new BasicSignalGenerator(44100,1);
+         BasicSignalGenerator = new BasicSignalGenerator(44100, 1);
 
          FreqControlSliderViewModel = freqControlSliderViewModel;
          VolControlSliderViewModel = volControlSliderViewModel;
@@ -64,6 +63,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          SignalType = BasicSignalGeneratorType.Sin;
       }
 
+      private BasicSignalGeneratorType signalType;
       public BasicSignalGeneratorType SignalType
       {
          get => signalType;
@@ -111,6 +111,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
 
+      private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)
       {

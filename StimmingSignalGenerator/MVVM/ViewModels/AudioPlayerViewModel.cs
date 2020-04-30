@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
@@ -32,8 +33,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public AudioPlayerViewModel(ISampleProvider sampleProvider)
       {
          audioPlayer = new AudioPlayer(sampleProvider);
-         PlayCommand = ReactiveCommand.Create(() => Play());
-         StopCommand = ReactiveCommand.Create(() => Stop());
+         PlayCommand = ReactiveCommand.Create(() => Play()).DisposeWith(Disposables);
+         StopCommand = ReactiveCommand.Create(() => Stop()).DisposeWith(Disposables);
       }
 
       public void Play()
@@ -46,6 +47,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          audioPlayer.Stop();
       }
 
+      private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)
       {

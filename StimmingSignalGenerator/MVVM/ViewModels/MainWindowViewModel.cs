@@ -1,4 +1,5 @@
-﻿using NAudio.Wave.SampleProviders;
+﻿using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using ReactiveUI;
 using StimmingSignalGenerator.SignalGenerator;
 using System;
@@ -12,10 +13,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    public class MainWindowViewModel : ViewModelBase, IDisposable
    {
-      public BasicSignalGeneratorViewModel LeftSignalGeneratorVM { get; }
-      public BasicSignalGeneratorViewModel LeftAM1SignalGeneratorVM { get; }
-      public BasicSignalGeneratorViewModel LeftAM2SignalGeneratorVM { get; }
-      public BasicSignalGeneratorViewModel LeftFMSignalGeneratorVM { get; }
+      public MultiSignalGeneratorViewModel LeftSignalGeneratorsVM { get; }
       public BasicSignalGeneratorViewModel RightSignalGeneratorVM { get; }
       public BasicSignalGeneratorViewModel RightAM1SignalGeneratorVM { get; }
       public BasicSignalGeneratorViewModel RightAM2SignalGeneratorVM { get; }
@@ -46,11 +44,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             { Name = $"{namePrefix} FM Signal" }.DisposeWith(Disposables)
             );
 
-         (LeftSignalGeneratorVM, LeftAM1SignalGeneratorVM, LeftAM2SignalGeneratorVM, LeftFMSignalGeneratorVM) =
-            CreateSignalGeneratorVM("Left");
+         LeftSignalGeneratorsVM = new MultiSignalGeneratorViewModel("Left1");
+         LeftSignalGeneratorsVM.AddVM("Left2");
+         LeftSignalGeneratorsVM.AddVM("Left3");
 
          (RightSignalGeneratorVM, RightAM1SignalGeneratorVM, RightAM2SignalGeneratorVM, RightFMSignalGeneratorVM) =
-            CreateSignalGeneratorVM("Right");
+                     CreateSignalGeneratorVM("Right");
+         RightSignalGeneratorVM.Volume = 0;
 
          /*
          AM Signal with gain bump
@@ -62,11 +62,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          y_{2}=\frac{\left(y_{1}+1\right)}{2}
          y=\sin\left(20\cdot2\pi x\right)\cdot y_{2}\left\{-1<y<1\right\}
          */
-         var leftSignal =
-               LeftSignalGeneratorVM.BasicSignalGenerator
-               .AddAM(LeftAM1SignalGeneratorVM.BasicSignalGenerator.Gain(g => g + 1 - (float)LeftAM1SignalGeneratorVM.Volume))
-               .AddAM(LeftAM2SignalGeneratorVM.BasicSignalGenerator.Gain(g => g + 1 - (float)LeftAM2SignalGeneratorVM.Volume))
-               .AddFM(LeftFMSignalGeneratorVM.BasicSignalGenerator);
+         ISampleProvider leftSignal = LeftSignalGeneratorsVM.SampleSignal;
 
          var rightSignal =
             RightSignalGeneratorVM.BasicSignalGenerator

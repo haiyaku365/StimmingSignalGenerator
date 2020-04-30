@@ -7,7 +7,7 @@
 //-TODO square wave with duty cycle parameter(ZeroCrossingPosition in BasicSignalGenerator)
 //-TODO collapsible signal gen view
 //-TODO seperate R L Channel
-//TODO Mixing multi generator
+//-TODO Mixing multi generator
 //-TODO Output selector
 //TODO master vol
 //TODO sync R L channel toggle

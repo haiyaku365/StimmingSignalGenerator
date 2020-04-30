@@ -38,11 +38,13 @@ namespace StimmingSignalGenerator.SignalGenerator
            new LinearAxis
            {
               Position = AxisPosition.Left,
-              Minimum = -1,
-              Maximum = 1,
-              AbsoluteMinimum = -1,
-              AbsoluteMaximum = 1,
-              IsZoomEnabled = false
+              Minimum = -1.2,
+              Maximum = 1.2,
+              AbsoluteMinimum = -1.2,
+              AbsoluteMaximum = 1.2,
+              IsZoomEnabled = false,
+              ExtraGridlines = new[] { -1d, 1d },
+              ExtraGridlineColor = OxyColor.FromAColor(0xa0, OxyColors.Red)
            });
          PlotModel.Axes.Add(
            new LinearAxis

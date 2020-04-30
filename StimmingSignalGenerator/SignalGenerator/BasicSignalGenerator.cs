@@ -132,14 +132,6 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// </summary>
       public int Read(float[] buffer, int offset, int count)
       {
-         //skip all this if gain is 0
-         if (Gain == 0 || ChannelGain.All(g => g == 0))
-         {
-            for (int i = 0; i < count; i++)
-               buffer[i] = 0;
-            return count;
-         }
-
          int outIndex = offset;
          int countPerChannel = count / waveFormat.Channels;
 
@@ -165,6 +157,19 @@ namespace StimmingSignalGenerator.SignalGenerator
          {
             phaseStepDelta = (targetPhaseStep - currentPhaseStep) / countPerChannel;
             seekFrequency = false;
+         }
+
+         //skip calc if gain is 0
+         if (Gain == 0 || ChannelGain.All(g => g == 0))
+         {
+            for (int i = 0; i < count; i++)
+               buffer[i] = 0;
+
+            //prevent out of phase when mixing multi signal
+            for (int i = 0; i < countPerChannel; i++)
+               CalculateNextPhase();
+
+            return count;
          }
 
          // Complete Buffer
