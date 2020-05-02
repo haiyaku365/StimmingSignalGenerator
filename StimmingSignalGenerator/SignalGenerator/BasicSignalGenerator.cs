@@ -115,6 +115,15 @@ namespace StimmingSignalGenerator.SignalGenerator
       private double gainStepDelta;
 
       /// <summary>
+      /// Gain before seek to target gain.
+      /// </summary>
+      public double CurrentGain { get => currentGain; }
+      /// <summary>
+      /// Gain step delta of latest read.
+      /// </summary>
+      public double GainStepDelta { get => gainStepDelta; }
+
+      /// <summary>
       /// Gain for each channel.
       /// Negative gain will reverse phase.
       /// default are 1.0 for all channel.
