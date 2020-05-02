@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using NAudio.Utils;
+using NAudio.Wave;
 using StimmingSignalGenerator.SignalGenerator.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -26,8 +27,6 @@ namespace StimmingSignalGenerator.SignalGenerator
    /// </remarks>
    public class BasicSignalGenerator : ISampleProvider
    {
-      // Wave format
-      private readonly WaveFormat waveFormat;
 
       // Random Number for the White Noise & Pink Noise Generator
       private readonly Random random = new Random();
@@ -38,7 +37,7 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// Initializes a new instance for the Generator (Default :: 44.1Khz, 2 channels, Sinus, Frequency = 440, Gain = 1)
       /// </summary>
       public BasicSignalGenerator()
-          : this(44100, 2)
+          : this(44100, 1)
       {
 
       }
@@ -50,20 +49,23 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// <param name="channel">Number of channels</param>
       public BasicSignalGenerator(int sampleRate, int channel)
       {
-         waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channel);
+         WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channel);
 
          // Default
          Type = BasicSignalGeneratorType.Sin;
          Frequency = 440.0;
          ZeroCrossingPosition = 0.5;
          Gain = 1;
-         ChannelGain = Enumerable.Repeat(1.0, channel).ToArray();
+         ChannelGain = new double[channel];
+         Array.Fill(ChannelGain, 1);
+
+         AMSignals = new List<BasicSignalGenerator>();
       }
 
       /// <summary>
       /// The waveformat of this WaveProvider (same as the source)
       /// </summary>
-      public WaveFormat WaveFormat => waveFormat;
+      public WaveFormat WaveFormat { get; }
 
       /// <summary>
       /// Frequency for the Generator. (20.0 - 20000.0 Hz)
@@ -132,6 +134,13 @@ namespace StimmingSignalGenerator.SignalGenerator
       public double[] ChannelGain { get; }
 
       /// <summary>
+      /// 1 Channel Signal for amplitude modulation.
+      /// </summary>
+      public List<BasicSignalGenerator> AMSignals { get; set; }
+      float[] amBuffer;
+      float[] aggregateAMBuffer;
+
+      /// <summary>
       /// Type of Generator.
       /// </summary>
       public BasicSignalGeneratorType Type { get; set; }
@@ -142,7 +151,7 @@ namespace StimmingSignalGenerator.SignalGenerator
       public int Read(float[] buffer, int offset, int count)
       {
          int outIndex = offset;
-         int countPerChannel = count / waveFormat.Channels;
+         int countPerChannel = count / WaveFormat.Channels;
 
          // Generator current value
          double sampleValue;
@@ -166,6 +175,29 @@ namespace StimmingSignalGenerator.SignalGenerator
          {
             phaseStepDelta = (targetPhaseStep - currentPhaseStep) / countPerChannel;
             seekFrequency = false;
+         }
+
+         aggregateAMBuffer = BufferHelpers.Ensure(aggregateAMBuffer, count);
+         Array.Fill(aggregateAMBuffer, 1);
+         // read AM signal
+         foreach (var signal in AMSignals)
+         {
+            amBuffer = BufferHelpers.Ensure(amBuffer, count);
+            signal.Read(amBuffer, offset, count);
+            /*
+            AM Signal with gain bump
+            https://www.desmos.com/calculator/ya9ayr9ylc
+            f_{1}=1
+            g_{0}=0.25
+            y_{0}=g_{0}\sin\left(f_{1}\cdot2\pi x\right)
+            y_{1}=y_{0}+1-g_{0}
+            y_{2}=\frac{\left(y_{1}+1\right)}{2}
+            y=\sin\left(20\cdot2\pi x\right)\cdot y_{2}\left\{-1<y<1\right\}
+            */
+            for (int i = 0; i < amBuffer.Length; i++)
+            {
+               aggregateAMBuffer[i] *= (amBuffer[i] + 2 - (float)signal.Gain) / 2;
+            }
          }
 
          //skip calc if gain is 0
@@ -270,10 +302,10 @@ namespace StimmingSignalGenerator.SignalGenerator
                   break;
             }
             CalculateNextGain();
-            // Phase Reverse and Gain Per Channel
-            for (int i = 0; i < waveFormat.Channels; i++)
+            // Phase Reverse, Gain Per Channel and AM signal
+            for (int i = 0; i < WaveFormat.Channels; i++)
             {
-               buffer[outIndex++] = (float)(sampleValue * ChannelGain[i]);
+               buffer[outIndex++] = (float)(sampleValue * ChannelGain[i]) * aggregateAMBuffer[sampleCount];
             }
          }
          return count;

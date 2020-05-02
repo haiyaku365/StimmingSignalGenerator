@@ -10,7 +10,7 @@
 //-TODO Mixing multi generator
 //-TODO Output selector
 //TODO master vol
-//TODO sync R L channel toggle
+//TODO sync R L channel toggle(or maybe disable R channel and use only L channel multiplexing to R,L)
 //TODO signal phase shift
 //TODO signal node
 //TODO Serialize setting

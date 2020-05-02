@@ -1,8 +1,12 @@
-﻿using NAudio.Wave.SampleProviders;
+﻿using DynamicData;
+using NAudio.Wave.SampleProviders;
 using ReactiveUI;
 using StimmingSignalGenerator.SignalGenerator;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
@@ -19,7 +23,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ControlSliderViewModel VolControlSliderViewModel { get; }
       public ControlSliderViewModel ZCPosControlSliderViewModel { get; }
 
-      public ViewModelActivator Activator { get; }
+
+      private readonly ReadOnlyObservableCollection<BasicSignalGeneratorViewModel> amSignalVMs;
+      public ReadOnlyObservableCollection<BasicSignalGeneratorViewModel> AMSignalVMs => amSignalVMs;
+      private SourceCache<BasicSignalGeneratorViewModel, int> AMSignalVMsSourceCache { get; }
+      public ReactiveCommand<Unit, Unit> AddAMCommand { get; }
+      public ReactiveCommand<BasicSignalGeneratorViewModel, Unit> RemoveAMCommand { get; }
 
       public BasicSignalGeneratorViewModel()
          : this(ControlSliderViewModel.BasicSignalFreq)
@@ -41,7 +50,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          ControlSliderViewModel zcPosControlSliderViewModel
          )
       {
-         BasicSignalGenerator = new BasicSignalGenerator(44100, 1);
+         BasicSignalGenerator = new BasicSignalGenerator();
 
          FreqControlSliderViewModel = freqControlSliderViewModel;
          VolControlSliderViewModel = volControlSliderViewModel;
@@ -61,6 +70,27 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
 
          SignalType = BasicSignalGeneratorType.Sin;
+
+         AMSignalVMsSourceCache = 
+            new SourceCache<BasicSignalGeneratorViewModel, int>(x => x.Id)
+            .DisposeWith(Disposables);
+         AMSignalVMsSourceCache.Connect()
+            .OnItemAdded(vm => BasicSignalGenerator.AMSignals.Add(vm.BasicSignalGenerator))
+            .OnItemRemoved(vm =>
+            {
+               BasicSignalGenerator.AMSignals.Remove(vm.BasicSignalGenerator);
+               vm.Dispose();
+            })
+            .ObserveOn(RxApp.MainThreadScheduler) // Make sure this is only right before the Bind()
+            .Bind(out amSignalVMs)
+            .Subscribe()
+            .DisposeWith(Disposables);
+         AddAMCommand = ReactiveCommand.Create(
+            () => AddAMVM())
+            .DisposeWith(Disposables);
+         RemoveAMCommand = ReactiveCommand.Create<BasicSignalGeneratorViewModel>(
+            vm => RemoveAMVM(vm))
+            .DisposeWith(Disposables);
       }
 
       private BasicSignalGeneratorType signalType;
@@ -111,6 +141,27 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
 
+      public void AddAMVM() => AddAMVM($"AMSignal{GetNextId() + 1}");
+      public void AddAMVM(string name)
+      {
+         AMSignalVMsSourceCache.AddOrUpdate(CreateAMVM(name));
+      }
+
+      public void RemoveAMVM(BasicSignalGeneratorViewModel vm)
+      {
+         AMSignalVMsSourceCache.Remove(vm);
+      }
+
+      private BasicSignalGeneratorViewModel CreateAMVM(string name, double volume = 0) =>
+         new BasicSignalGeneratorViewModel(
+            ControlSliderViewModel.AMSignalFreq) 
+            { Name = name, Id = GetNextId(), Volume = 0 }
+         .DisposeWith(Disposables);
+
+      private int GetNextId() =>
+         AMSignalVMsSourceCache.Count == 0 ?
+            0 : AMSignalVMsSourceCache.Keys.Max() + 1;
+
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)
@@ -119,17 +170,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             if (disposing)
             {
-               // TODO: dispose managed state (managed objects)
+               // dispose managed state (managed objects)
                Disposables?.Dispose();
             }
 
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
+            // free unmanaged resources (unmanaged objects) and override finalizer
+            // set large fields to null
             disposedValue = true;
          }
       }
 
-      // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+      // // override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
       // ~BasicSignalGeneratorViewModel()
       // {
       //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method

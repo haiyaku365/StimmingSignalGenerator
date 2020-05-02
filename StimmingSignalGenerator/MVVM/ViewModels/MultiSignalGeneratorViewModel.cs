@@ -30,7 +30,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private readonly MultiSignalGenerator mixingSampleProvider;
       public MultiSignalGeneratorViewModel(string firstSignalName = "Signal1")
       {
-         BasicSignalGeneratorVMsSourceCache = new SourceCache<BasicSignalGeneratorViewModel, int>(x => x.Id);
+         BasicSignalGeneratorVMsSourceCache = 
+            new SourceCache<BasicSignalGeneratorViewModel, int>(x => x.Id)
+            .DisposeWith(Disposables);
          var initVM = CreateVM(firstSignalName, 1);
          mixingSampleProvider = new MultiSignalGenerator(initVM.BasicSignalGenerator.WaveFormat);
 

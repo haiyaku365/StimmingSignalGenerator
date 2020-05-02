@@ -18,9 +18,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public static ControlSliderViewModel BasicSignalFreq =>
          new ControlSliderViewModel(440, 20, 10000, 1, 10, 50);
       public static ControlSliderViewModel AMSignalFreq =>
-         new ControlSliderViewModel(1, 0, 5, 0.01, 0.01, 0.05);
+         new ControlSliderViewModel(1, 0, 6, 0.01, 0.01, 0.05);
       public static ControlSliderViewModel FMSignalFreq =>
-         new ControlSliderViewModel(1, 0, 5, 0.01, 0.01, 0.05);
+         new ControlSliderViewModel(1, 0, 6, 0.01, 0.01, 0.05);
       public static ControlSliderViewModel BasicVol => Vol();
       public static ControlSliderViewModel Vol(double initValue = 1) =>
          new ControlSliderViewModel(initValue, 0, 1, 0.001, 0.001, 0.005);
