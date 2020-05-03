@@ -70,35 +70,66 @@
                            DataContext="{Binding ZCPosControlSliderViewModel}"/>
       <Border Grid.Row="4" Grid.Column="1"
               BorderBrush="#3399ff" BorderThickness="1" CornerRadius="2" Margin="2" Padding="2">
-        <Expander Header="AM Signal" >
-          <ScrollViewer VerticalScrollBarVisibility="Auto" >
-            <DockPanel>
-              <ItemsControl DockPanel.Dock="Top" Margin="2"
-                            Items="{Binding AMSignalVMs }">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <Grid>
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="30"/>
-                      </Grid.ColumnDefinitions>
-                      <v:BasicSignalGeneratorView Grid.Column="0" DataContext="{Binding}"/>
-                      <Button Grid.Column="1"  Width="30" Height="30"
-                              VerticalAlignment="Center" HorizontalAlignment="Right"
-                              Background="#ff4d4d" Content="X"
-                              Command="{Binding $parent[UserControl].DataContext.RemoveAMCommand}"
-                              CommandParameter="{Binding}"/>
-                    </Grid>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-              <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom"
-                      Width="{Binding $parent.Width,Mode=OneWay}" Height="30"
-                      Background="#4dff4d" Content="+AM"
-                      Command="{Binding AddAMCommand}"/>
-            </DockPanel>
-          </ScrollViewer>
-        </Expander>
+        <DockPanel>
+          <Expander DockPanel.Dock="Top" Header="AM Signal" >
+            <ScrollViewer VerticalScrollBarVisibility="Auto" >
+              <DockPanel>
+                <ItemsControl DockPanel.Dock="Top" Margin="2"
+                              Items="{Binding AMSignalVMs }">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition />
+                          <ColumnDefinition Width="30"/>
+                        </Grid.ColumnDefinitions>
+                        <v:BasicSignalGeneratorView Grid.Column="0" DataContext="{Binding}"/>
+                        <Button Grid.Column="1"  Width="30" Height="30"
+                                VerticalAlignment="Center" HorizontalAlignment="Right"
+                                Background="#ff4d4d" Content="X"
+                                Command="{Binding $parent[UserControl].DataContext.RemoveAMCommand}"
+                                CommandParameter="{Binding}"/>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom"
+                        Width="{Binding $parent.Width,Mode=OneWay}" Height="30"
+                        Background="#4dff4d" Content="+AM"
+                        Command="{Binding AddAMCommand}"/>
+              </DockPanel>
+            </ScrollViewer>
+          </Expander>
+          <Expander DockPanel.Dock="Top" Header="FM Signal" >
+            <ScrollViewer VerticalScrollBarVisibility="Auto" >
+              <DockPanel>
+                <ItemsControl DockPanel.Dock="Top" Margin="2"
+                              Items="{Binding FMSignalVMs }">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition />
+                          <ColumnDefinition Width="30"/>
+                        </Grid.ColumnDefinitions>
+                        <v:BasicSignalGeneratorView Grid.Column="0" DataContext="{Binding}"/>
+                        <Button Grid.Column="1"  Width="30" Height="30"
+                                VerticalAlignment="Center" HorizontalAlignment="Right"
+                                Background="#ff4d4d" Content="X"
+                                Command="{Binding $parent[UserControl].DataContext.RemoveFMCommand}"
+                                CommandParameter="{Binding}"/>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom"
+                        Width="{Binding $parent.Width,Mode=OneWay}" Height="30"
+                        Background="#4dff4d" Content="+FM"
+                        Command="{Binding AddFMCommand}"/>
+              </DockPanel>
+            </ScrollViewer>
+          </Expander>
+        </DockPanel>
       </Border>
     </Grid>
   </Expander>

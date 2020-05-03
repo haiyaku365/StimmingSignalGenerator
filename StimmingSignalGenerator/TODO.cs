@@ -23,3 +23,7 @@
 //-TODO Fix cracking noise when move slider (meybe Portamento will fixes this? check out https://github.com/naudio/sinegenerator-sample/blob/master/SineGenerator/SineWaveProvider.cs)
 //-TODO Rename SignalSlider -> ControlSlider
 //TODO SignalSlider -> Using signal to move ControlSlider
+
+//TODO Compact ui
+//TODO side by side L,R
+//TODO rename BasicSignalGenerator and namespace SignalGenerator

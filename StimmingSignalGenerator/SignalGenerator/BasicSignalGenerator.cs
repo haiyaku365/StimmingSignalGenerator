@@ -60,6 +60,7 @@ namespace StimmingSignalGenerator.SignalGenerator
          Array.Fill(ChannelGain, 1);
 
          AMSignals = new List<BasicSignalGenerator>();
+         FMSignals = new List<BasicSignalGenerator>();
       }
 
       /// <summary>
@@ -99,6 +100,13 @@ namespace StimmingSignalGenerator.SignalGenerator
       public double FrequencyLog => Math.Log(Frequency);
 
       /// <summary>
+      /// 1 Channel Signal for frequency modulation. Gain of signal indicate how much frequency change.
+      /// </summary>
+      List<BasicSignalGenerator> FMSignals;
+      float[] fmBuffer;
+      float[] aggregateFMBuffer;
+
+      /// <summary>
       /// Gain for the Generator. (0.0 to 1.0)
       /// </summary>
       public double Gain
@@ -136,7 +144,7 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// <summary>
       /// 1 Channel Signal for amplitude modulation.
       /// </summary>
-      public List<BasicSignalGenerator> AMSignals { get; set; }
+      List<BasicSignalGenerator> AMSignals;
       float[] amBuffer;
       float[] aggregateAMBuffer;
 
@@ -144,6 +152,35 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// Type of Generator.
       /// </summary>
       public BasicSignalGeneratorType Type { get; set; }
+
+      public void AddAMSignal(BasicSignalGenerator signal)
+      {
+         lock (AMSignals)
+         {
+            AMSignals.Add(signal);
+         }
+      }
+      public void RemoveAMSignal(BasicSignalGenerator signal)
+      {
+         lock (AMSignals)
+         {
+            AMSignals.Remove(signal);
+         }
+      }
+      public void AddFMSignal(BasicSignalGenerator signal)
+      {
+         lock (FMSignals)
+         {
+            FMSignals.Add(signal);
+         }
+      }
+      public void RemoveFMSignal(BasicSignalGenerator signal)
+      {
+         lock (FMSignals)
+         {
+            FMSignals.Remove(signal);
+         }
+      }
 
       /// <summary>
       /// Reads from this provider.
@@ -180,23 +217,43 @@ namespace StimmingSignalGenerator.SignalGenerator
          aggregateAMBuffer = BufferHelpers.Ensure(aggregateAMBuffer, count);
          Array.Fill(aggregateAMBuffer, 1);
          // read AM signal
-         foreach (var signal in AMSignals)
+         lock (AMSignals)
          {
-            amBuffer = BufferHelpers.Ensure(amBuffer, count);
-            signal.Read(amBuffer, offset, count);
-            /*
-            AM Signal with gain bump
-            https://www.desmos.com/calculator/ya9ayr9ylc
-            f_{1}=1
-            g_{0}=0.25
-            y_{0}=g_{0}\sin\left(f_{1}\cdot2\pi x\right)
-            y_{1}=y_{0}+1-g_{0}
-            y_{2}=\frac{\left(y_{1}+1\right)}{2}
-            y=\sin\left(20\cdot2\pi x\right)\cdot y_{2}\left\{-1<y<1\right\}
-            */
-            for (int i = 0; i < amBuffer.Length; i++)
+            foreach (var signal in AMSignals)
             {
-               aggregateAMBuffer[i] *= (amBuffer[i] + 2 - (float)signal.Gain) / 2;
+               amBuffer = BufferHelpers.Ensure(amBuffer, count);
+               signal.Read(amBuffer, offset, count);
+               /*
+               AM Signal with gain bump
+               https://www.desmos.com/calculator/ya9ayr9ylc
+               f_{1}=1
+               g_{0}=0.25
+               y_{0}=g_{0}\sin\left(f_{1}\cdot2\pi x\right)
+               y_{1}=y_{0}+1-g_{0}
+               y_{2}=\frac{\left(y_{1}+1\right)}{2}
+               y=\sin\left(20\cdot2\pi x\right)\cdot y_{2}\left\{-1<y<1\right\}
+               */
+               for (int i = 0; i < amBuffer.Length; i++)
+               {
+                  aggregateAMBuffer[i] *= (amBuffer[i] + 2 - (float)signal.Gain) / 2;
+               }
+            }
+         }
+
+
+         aggregateFMBuffer = BufferHelpers.Ensure(aggregateFMBuffer, count);
+         Array.Fill(aggregateFMBuffer, 0);
+         // read FM signal
+         lock (FMSignals)
+         {
+            foreach (var signal in FMSignals)
+            {
+               fmBuffer = BufferHelpers.Ensure(fmBuffer, count);
+               signal.Read(fmBuffer, offset, count);
+               for (int i = 0; i < fmBuffer.Length; i++)
+               {
+                  aggregateFMBuffer[i] += fmBuffer[i];
+               }
             }
          }
 
@@ -208,7 +265,7 @@ namespace StimmingSignalGenerator.SignalGenerator
 
             //prevent out of phase when mixing multi signal
             for (int i = 0; i < countPerChannel; i++)
-               CalculateNextPhase();
+               CalculateNextPhase(0);
 
             return count;
          }
@@ -238,7 +295,7 @@ namespace StimmingSignalGenerator.SignalGenerator
 
                   // Sinus Generator
                   sampleValue = currentGain * SampleSin(x, frequencyFactor, shift);
-                  CalculateNextPhase();
+                  CalculateNextPhase(sampleCount);
                   break;
 
                case BasicSignalGeneratorType.SawTooth:
@@ -246,7 +303,7 @@ namespace StimmingSignalGenerator.SignalGenerator
                   // SawTooth Generator
 
                   sampleValue = currentGain * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
-                  CalculateNextPhase();
+                  CalculateNextPhase(sampleCount);
                   break;
 
                case BasicSignalGeneratorType.Triangle:
@@ -261,7 +318,7 @@ namespace StimmingSignalGenerator.SignalGenerator
 
                   sampleValue *= currentGain;
 
-                  CalculateNextPhase();
+                  CalculateNextPhase(sampleCount);
                   break;
 
                case BasicSignalGeneratorType.Square:
@@ -272,7 +329,7 @@ namespace StimmingSignalGenerator.SignalGenerator
                      SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero) < 0 ?
                         currentGain : -currentGain;
 
-                  CalculateNextPhase();
+                  CalculateNextPhase(sampleCount);
                   break;
 
                case BasicSignalGeneratorType.Pink:
@@ -321,9 +378,10 @@ namespace StimmingSignalGenerator.SignalGenerator
             currentGain = targetGain;
       }
 
-      private void CalculateNextPhase()
+      private void CalculateNextPhase(int sampleCount)
       {
-         phase += currentPhaseStep;
+         // move to next phase and apply FM
+         phase += currentPhaseStep + aggregateFMBuffer[sampleCount];
          if (phase > Period) phase -= Period;
          if (currentPhaseStep != targetPhaseStep)
          {

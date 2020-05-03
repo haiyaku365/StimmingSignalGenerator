@@ -30,6 +30,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReactiveCommand<Unit, Unit> AddAMCommand { get; }
       public ReactiveCommand<BasicSignalGeneratorViewModel, Unit> RemoveAMCommand { get; }
 
+
+      private readonly ReadOnlyObservableCollection<BasicSignalGeneratorViewModel> fmSignalVMs;
+      public ReadOnlyObservableCollection<BasicSignalGeneratorViewModel> FMSignalVMs => fmSignalVMs;
+      private SourceCache<BasicSignalGeneratorViewModel, int> FMSignalVMsSourceCache { get; }
+      public ReactiveCommand<Unit, Unit> AddFMCommand { get; }
+      public ReactiveCommand<BasicSignalGeneratorViewModel, Unit> RemoveFMCommand { get; }
+
       public BasicSignalGeneratorViewModel()
          : this(ControlSliderViewModel.BasicSignalFreq)
       {
@@ -75,10 +82,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             new SourceCache<BasicSignalGeneratorViewModel, int>(x => x.Id)
             .DisposeWith(Disposables);
          AMSignalVMsSourceCache.Connect()
-            .OnItemAdded(vm => BasicSignalGenerator.AMSignals.Add(vm.BasicSignalGenerator))
+            .OnItemAdded(vm => BasicSignalGenerator.AddAMSignal(vm.BasicSignalGenerator))
             .OnItemRemoved(vm =>
             {
-               BasicSignalGenerator.AMSignals.Remove(vm.BasicSignalGenerator);
+               BasicSignalGenerator.RemoveAMSignal(vm.BasicSignalGenerator);
                vm.Dispose();
             })
             .ObserveOn(RxApp.MainThreadScheduler) // Make sure this is only right before the Bind()
@@ -86,10 +93,32 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe()
             .DisposeWith(Disposables);
          AddAMCommand = ReactiveCommand.Create(
-            () => AddAMVM())
+            () => AMSignalVMsSourceCache.AddOrUpdate(CreateAMVM($"AMSignal{GetNextId(AMSignalVMsSourceCache) + 1}")))
             .DisposeWith(Disposables);
          RemoveAMCommand = ReactiveCommand.Create<BasicSignalGeneratorViewModel>(
-            vm => RemoveAMVM(vm))
+            vm => AMSignalVMsSourceCache.Remove(vm))
+            .DisposeWith(Disposables);
+
+
+         FMSignalVMsSourceCache =
+            new SourceCache<BasicSignalGeneratorViewModel, int>(x => x.Id)
+            .DisposeWith(Disposables);
+         FMSignalVMsSourceCache.Connect()
+            .OnItemAdded(vm => BasicSignalGenerator.AddFMSignal(vm.BasicSignalGenerator))
+            .OnItemRemoved(vm =>
+            {
+               BasicSignalGenerator.RemoveFMSignal(vm.BasicSignalGenerator);
+               vm.Dispose();
+            })
+            .ObserveOn(RxApp.MainThreadScheduler) 
+            .Bind(out fmSignalVMs)
+            .Subscribe()
+            .DisposeWith(Disposables);
+         AddFMCommand = ReactiveCommand.Create(
+            () => FMSignalVMsSourceCache.AddOrUpdate(CreateFMVM($"FMSignal{GetNextId(FMSignalVMsSourceCache) + 1}")))
+            .DisposeWith(Disposables);
+         RemoveFMCommand = ReactiveCommand.Create<BasicSignalGeneratorViewModel>(
+            vm => FMSignalVMsSourceCache.Remove(vm))
             .DisposeWith(Disposables);
       }
 
@@ -141,26 +170,22 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
 
-      public void AddAMVM() => AddAMVM($"AMSignal{GetNextId() + 1}");
-      public void AddAMVM(string name)
-      {
-         AMSignalVMsSourceCache.AddOrUpdate(CreateAMVM(name));
-      }
-
-      public void RemoveAMVM(BasicSignalGeneratorViewModel vm)
-      {
-         AMSignalVMsSourceCache.Remove(vm);
-      }
-
       private BasicSignalGeneratorViewModel CreateAMVM(string name, double volume = 0) =>
          new BasicSignalGeneratorViewModel(
             ControlSliderViewModel.AMSignalFreq) 
-            { Name = name, Id = GetNextId(), Volume = 0 }
+            { Name = name, Id = GetNextId(AMSignalVMsSourceCache), Volume = 0 }
          .DisposeWith(Disposables);
 
-      private int GetNextId() =>
-         AMSignalVMsSourceCache.Count == 0 ?
-            0 : AMSignalVMsSourceCache.Keys.Max() + 1;
+      private BasicSignalGeneratorViewModel CreateFMVM(string name, double volume = 0) =>
+         new BasicSignalGeneratorViewModel(
+            ControlSliderViewModel.FMSignalFreq,
+            new ControlSliderViewModel(0,0,100,1,1,5))
+         { Name = name, Id = GetNextId(FMSignalVMsSourceCache), Volume = 0 }
+         .DisposeWith(Disposables);
+
+      private int GetNextId(SourceCache<BasicSignalGeneratorViewModel,int> SourceCache) =>
+         SourceCache.Count == 0 ?
+            0 : SourceCache.Keys.Max() + 1;
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       private bool disposedValue;
