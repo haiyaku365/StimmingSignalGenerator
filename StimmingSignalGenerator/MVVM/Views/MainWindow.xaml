@@ -23,15 +23,10 @@
         </DockPanel>
       </TabItem>
       <TabItem Header="Right" VerticalContentAlignment="Center">
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-          <StackPanel Margin="5">
-            <v:PlotSampleView DataContext="{Binding RightSignalPlotVM}" />
-            <v:BasicSignalGeneratorView DataContext="{Binding RightSignalGeneratorVM}"/>
-            <v:BasicSignalGeneratorView DataContext="{Binding RightAM1SignalGeneratorVM}"/>
-            <v:BasicSignalGeneratorView DataContext="{Binding RightAM2SignalGeneratorVM}"/>
-            <v:BasicSignalGeneratorView DataContext="{Binding RightFMSignalGeneratorVM}"/>
-          </StackPanel>
-        </ScrollViewer>
+        <DockPanel Margin="5" >
+          <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding RightSignalPlotVM}" />
+          <v:MultiSignalGeneratorView DockPanel.Dock="Bottom" DataContext="{Binding RightSignalGeneratorsVM}"/>
+        </DockPanel>
       </TabItem>
     </TabControl>
   </DockPanel>

@@ -14,61 +14,18 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    public class MainWindowViewModel : ViewModelBase, IDisposable
    {
       public MultiSignalGeneratorViewModel LeftSignalGeneratorsVM { get; }
-      public BasicSignalGeneratorViewModel RightSignalGeneratorVM { get; }
-      public BasicSignalGeneratorViewModel RightAM1SignalGeneratorVM { get; }
-      public BasicSignalGeneratorViewModel RightAM2SignalGeneratorVM { get; }
-      public BasicSignalGeneratorViewModel RightFMSignalGeneratorVM { get; }
+      public MultiSignalGeneratorViewModel RightSignalGeneratorsVM { get; }
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
       public PlotSampleViewModel LeftSignalPlotVM { get; }
       public PlotSampleViewModel RightSignalPlotVM { get; }
       public MainWindowViewModel()
       {
-         (BasicSignalGeneratorViewModel Main,
-          BasicSignalGeneratorViewModel AM1,
-          BasicSignalGeneratorViewModel AM2,
-          BasicSignalGeneratorViewModel FM)
-         CreateSignalGeneratorVM(string namePrefix) => (
-            new BasicSignalGeneratorViewModel()
-            { Name = $"{namePrefix} Main Signal" }.DisposeWith(Disposables),
-            new BasicSignalGeneratorViewModel(
-                  ControlSliderViewModel.AMSignalFreq)
-            { Name = $"{namePrefix} AM1 Signal" }.DisposeWith(Disposables),
-            new BasicSignalGeneratorViewModel(
-                  new ControlSliderViewModel(335, 0, 500, 0.1, 0.1, 1),
-                  ControlSliderViewModel.Vol(1),
-                  ControlSliderViewModel.Vol(0.1))
-            { Name = $"{namePrefix} AM2 Signal" }.DisposeWith(Disposables),
-            new BasicSignalGeneratorViewModel(
-                  ControlSliderViewModel.FMSignalFreq,
-                  ControlSliderViewModel.Vol(0))
-            { Name = $"{namePrefix} FM Signal" }.DisposeWith(Disposables)
-            );
+         LeftSignalGeneratorsVM = new MultiSignalGeneratorViewModel();
+         RightSignalGeneratorsVM = new MultiSignalGeneratorViewModel();
+         RightSignalGeneratorsVM.Volume = 0;
 
-         LeftSignalGeneratorsVM = new MultiSignalGeneratorViewModel("Left1");
-         LeftSignalGeneratorsVM.AddVM("Left2");
-         LeftSignalGeneratorsVM.AddVM("Left3");
-
-         (RightSignalGeneratorVM, RightAM1SignalGeneratorVM, RightAM2SignalGeneratorVM, RightFMSignalGeneratorVM) =
-                     CreateSignalGeneratorVM("Right");
-         RightSignalGeneratorVM.Volume = 0;
-
-         /*
-         AM Signal with gain bump
-         https://www.desmos.com/calculator/ya9ayr9ylc
-         f_{1}=1
-         g_{0}=0.25
-         y_{0}=g_{0}\sin\left(f_{1}\cdot2\pi x\right)
-         y_{1}=y_{0}+1-g_{0}
-         y_{2}=\frac{\left(y_{1}+1\right)}{2}
-         y=\sin\left(20\cdot2\pi x\right)\cdot y_{2}\left\{-1<y<1\right\}
-         */
          ISampleProvider leftSignal = LeftSignalGeneratorsVM.SampleSignal;
-
-         var rightSignal =
-            RightSignalGeneratorVM.BasicSignalGenerator
-            .AddAM(RightAM1SignalGeneratorVM.BasicSignalGenerator.Gain(g => g + 1 - (float)RightAM1SignalGeneratorVM.Volume))
-            .AddAM(RightAM2SignalGeneratorVM.BasicSignalGenerator.Gain(g => g + 1 - (float)RightAM2SignalGeneratorVM.Volume))
-            .AddFM(RightFMSignalGeneratorVM.BasicSignalGenerator);
+         ISampleProvider rightSignal = RightSignalGeneratorsVM.SampleSignal;
 
          leftSignal = new PlotSampleProvider(leftSignal);
          LeftSignalPlotVM = new PlotSampleViewModel(leftSignal as PlotSampleProvider).DisposeWith(Disposables);
