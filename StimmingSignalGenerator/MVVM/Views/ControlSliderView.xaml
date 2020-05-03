@@ -6,6 +6,11 @@
              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="30"
              x:Class="StimmingSignalGenerator.MVVM.Views.ControlSliderView">
   <Grid>
+    <Grid.Styles>
+      <Style Selector="NumericUpDown">
+        <Setter Property="Background" Value="Transparent"/>
+      </Style>
+    </Grid.Styles>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="40"></ColumnDefinition>
       <ColumnDefinition Width="50"></ColumnDefinition>

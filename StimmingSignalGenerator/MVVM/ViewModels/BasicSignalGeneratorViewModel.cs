@@ -1,4 +1,5 @@
-﻿using DynamicData;
+﻿using Avalonia.Media;
+using DynamicData;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
 using StimmingSignalGenerator.SignalGenerator;
@@ -37,6 +38,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReactiveCommand<Unit, Unit> AddFMCommand { get; }
       public ReactiveCommand<BasicSignalGeneratorViewModel, Unit> RemoveFMCommand { get; }
 
+      public Brush BGColor { get; }
       public BasicSignalGeneratorViewModel()
          : this(ControlSliderViewModel.BasicSignalFreq)
       {
@@ -57,6 +59,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          ControlSliderViewModel zcPosControlSliderViewModel
          )
       {
+         BGColor = GetRandomBrush();
          BasicSignalGenerator = new BasicSignalGenerator();
 
          FreqControlSliderViewModel = freqControlSliderViewModel;
@@ -78,7 +81,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          SignalType = BasicSignalGeneratorType.Sin;
 
-         AMSignalVMsSourceCache = 
+         AMSignalVMsSourceCache =
             new SourceCache<BasicSignalGeneratorViewModel, int>(x => x.Id)
             .DisposeWith(Disposables);
          AMSignalVMsSourceCache.Connect()
@@ -110,7 +113,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                BasicSignalGenerator.RemoveFMSignal(vm.BasicSignalGenerator);
                vm.Dispose();
             })
-            .ObserveOn(RxApp.MainThreadScheduler) 
+            .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out fmSignalVMs)
             .Subscribe()
             .DisposeWith(Disposables);
@@ -170,20 +173,27 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
 
+      private static readonly Random rand = new Random();
+      private Brush GetRandomBrush()
+      {
+         var (r, g, b) = Helper.ColorHelper.HsvToRgb(rand.Next(0, 360), 1, 1);
+         return new SolidColorBrush(Color.FromArgb(80, r, g, b));
+      }
+
       private BasicSignalGeneratorViewModel CreateAMVM(string name, double volume = 0) =>
          new BasicSignalGeneratorViewModel(
-            ControlSliderViewModel.AMSignalFreq) 
-            { Name = name, Id = GetNextId(AMSignalVMsSourceCache), Volume = 0 }
+            ControlSliderViewModel.AMSignalFreq)
+         { Name = name, Id = GetNextId(AMSignalVMsSourceCache), Volume = 0 }
          .DisposeWith(Disposables);
 
       private BasicSignalGeneratorViewModel CreateFMVM(string name, double volume = 0) =>
          new BasicSignalGeneratorViewModel(
             ControlSliderViewModel.FMSignalFreq,
-            new ControlSliderViewModel(0,0,100,1,1,5))
+            new ControlSliderViewModel(0, 0, 100, 1, 1, 5))
          { Name = name, Id = GetNextId(FMSignalVMsSourceCache), Volume = 0 }
          .DisposeWith(Disposables);
 
-      private int GetNextId(SourceCache<BasicSignalGeneratorViewModel,int> SourceCache) =>
+      private int GetNextId(SourceCache<BasicSignalGeneratorViewModel, int> SourceCache) =>
          SourceCache.Count == 0 ?
             0 : SourceCache.Keys.Max() + 1;
 

@@ -99,9 +99,6 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// </summary>
       public double FrequencyLog => Math.Log(Frequency);
 
-      /// <summary>
-      /// 1 Channel Signal for frequency modulation. Gain of signal indicate how much frequency change.
-      /// </summary>
       List<BasicSignalGenerator> FMSignals;
       float[] fmBuffer;
       float[] aggregateFMBuffer;
@@ -141,9 +138,6 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// </summary>
       public double[] ChannelGain { get; }
 
-      /// <summary>
-      /// 1 Channel Signal for amplitude modulation.
-      /// </summary>
       List<BasicSignalGenerator> AMSignals;
       float[] amBuffer;
       float[] aggregateAMBuffer;
@@ -153,6 +147,10 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// </summary>
       public BasicSignalGeneratorType Type { get; set; }
 
+      /// <summary>
+      /// 1 Channel Signal for amplitude modulation.
+      /// </summary>
+      /// <param name="signal">1 Channel Signal</param>
       public void AddAMSignal(BasicSignalGenerator signal)
       {
          lock (AMSignals)
@@ -167,6 +165,11 @@ namespace StimmingSignalGenerator.SignalGenerator
             AMSignals.Remove(signal);
          }
       }
+
+      /// <summary>
+      /// Add 1 Channel Signal for frequency modulation. Gain of signal indicate how much frequency change.
+      /// </summary>
+      /// <param name="signal">1 Channel Signal</param>
       public void AddFMSignal(BasicSignalGenerator signal)
       {
          lock (FMSignals)
