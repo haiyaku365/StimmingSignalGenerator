@@ -5,6 +5,12 @@ VisualStudioVersion = 16.0.30001.183
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StimmingSignalGenerator", "StimmingSignalGenerator\StimmingSignalGenerator.csproj", "{A481B29D-12AA-4EE5-89C7-C259FB808D3C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{605873EF-3522-46ED-8FB5-2841BF723E61}"
+	ProjectSection(SolutionItems) = preProject
+		docs\c18d087f.PNG = docs\c18d087f.PNG
+		docs\README.md = docs\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
