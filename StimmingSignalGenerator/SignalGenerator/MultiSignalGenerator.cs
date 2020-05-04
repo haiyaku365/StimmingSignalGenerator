@@ -33,14 +33,20 @@ namespace StimmingSignalGenerator.SignalGenerator
 
       public void AddMixerInput(BasicSignalGenerator basicSignalGenerator)
       {
-         sources.Add(basicSignalGenerator);
-         mixingSampleProvider.AddMixerInput(basicSignalGenerator);
+         lock (sources)
+         {
+            sources.Add(basicSignalGenerator);
+            mixingSampleProvider.AddMixerInput(basicSignalGenerator);
+         }
       }
 
       public void RemoveMixerInput(BasicSignalGenerator basicSignalGenerator)
       {
-         sources.Remove(basicSignalGenerator);
-         mixingSampleProvider.RemoveMixerInput(basicSignalGenerator);
+         lock (sources)
+         {
+            sources.Remove(basicSignalGenerator);
+            mixingSampleProvider.RemoveMixerInput(basicSignalGenerator);
+         }
       }
 
       public int Read(float[] buffer, int offset, int count)
@@ -48,19 +54,23 @@ namespace StimmingSignalGenerator.SignalGenerator
          int read;
          int outIndex = offset;
          float sumCurrentGain, sumGainStepDelta;
-         var enableSource = sources.Where(s => s.Gain != 0).ToList();
 
-         if (enableSource.Any(s => s.Gain != s.CurrentGain))
+         lock (sources)
          {
-            sumCurrentGain = (float)enableSource.Sum(s => s.CurrentGain);
-            read = mixingSampleProvider.Read(buffer, offset, count);
-            sumGainStepDelta = (float)enableSource.Sum(s => s.GainStepDelta);
-         }
-         else
-         {
-            sumCurrentGain = (float)enableSource.Sum(s => s.Gain);
-            read = mixingSampleProvider.Read(buffer, offset, count);
-            sumGainStepDelta = 0;
+            var enableSource = sources.Where(s => s.Gain != 0).ToList();
+
+            if (enableSource.Any(s => s.Gain != s.CurrentGain))
+            {
+               sumCurrentGain = (float)enableSource.Sum(s => s.CurrentGain);
+               read = mixingSampleProvider.Read(buffer, offset, count);
+               sumGainStepDelta = (float)enableSource.Sum(s => s.GainStepDelta);
+            }
+            else
+            {
+               sumCurrentGain = (float)enableSource.Sum(s => s.Gain);
+               read = mixingSampleProvider.Read(buffer, offset, count);
+               sumGainStepDelta = 0;
+            }
          }
 
          int countPerChannel = count / WaveFormat.Channels;
