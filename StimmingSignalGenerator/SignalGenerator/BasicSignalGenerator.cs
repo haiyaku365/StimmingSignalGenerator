@@ -268,7 +268,7 @@ namespace StimmingSignalGenerator.SignalGenerator
 
             //prevent out of phase when mixing multi signal
             for (int i = 0; i < countPerChannel; i++)
-               CalculateNextPhase(0);
+               CalculateNextPhase(aggregateAMBuffer[i]);
 
             return count;
          }
@@ -298,7 +298,7 @@ namespace StimmingSignalGenerator.SignalGenerator
 
                   // Sinus Generator
                   sampleValue = currentGain * SampleSin(x, frequencyFactor, shift);
-                  CalculateNextPhase(sampleCount);
+                  CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
                case BasicSignalGeneratorType.SawTooth:
@@ -306,7 +306,7 @@ namespace StimmingSignalGenerator.SignalGenerator
                   // SawTooth Generator
 
                   sampleValue = currentGain * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
-                  CalculateNextPhase(sampleCount);
+                  CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
                case BasicSignalGeneratorType.Triangle:
@@ -321,7 +321,7 @@ namespace StimmingSignalGenerator.SignalGenerator
 
                   sampleValue *= currentGain;
 
-                  CalculateNextPhase(sampleCount);
+                  CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
                case BasicSignalGeneratorType.Square:
@@ -332,7 +332,7 @@ namespace StimmingSignalGenerator.SignalGenerator
                      SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero) < 0 ?
                         currentGain : -currentGain;
 
-                  CalculateNextPhase(sampleCount);
+                  CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
                case BasicSignalGeneratorType.Pink:
@@ -381,10 +381,10 @@ namespace StimmingSignalGenerator.SignalGenerator
             currentGain = targetGain;
       }
 
-      private void CalculateNextPhase(int sampleCount)
+      private void CalculateNextPhase(float fmValue)
       {
          // move to next phase and apply FM
-         phase += currentPhaseStep + aggregateFMBuffer[sampleCount];
+         phase += currentPhaseStep + fmValue;
          if (phase > Period) phase -= Period;
          if (currentPhaseStep != targetPhaseStep)
          {
