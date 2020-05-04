@@ -6,7 +6,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
 
-namespace StimmingSignalGenerator.SignalGenerator
+namespace StimmingSignalGenerator.Generators
 {
    public static class SampleProviderExt
    {

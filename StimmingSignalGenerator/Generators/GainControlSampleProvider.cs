@@ -1,10 +1,10 @@
 ﻿using NAudio.Wave;
-using StimmingSignalGenerator.SignalGenerator.Interfaces;
+using StimmingSignalGenerator.Generators.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace StimmingSignalGenerator.SignalGenerator
+namespace StimmingSignalGenerator.Generators
 {
    class GainControlSampleProvider : ISingleSignalInputSampleProvider
    {

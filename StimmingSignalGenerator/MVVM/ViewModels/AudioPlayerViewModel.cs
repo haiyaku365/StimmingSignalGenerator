@@ -1,7 +1,7 @@
 ﻿using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using ReactiveUI;
-using StimmingSignalGenerator.SignalGenerator;
+using StimmingSignalGenerator.Generators;
 using System;
 using System.Collections.Generic;
 using System.Linq;

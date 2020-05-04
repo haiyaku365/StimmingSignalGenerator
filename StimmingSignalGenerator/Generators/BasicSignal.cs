@@ -1,16 +1,16 @@
 ﻿using NAudio.Utils;
 using NAudio.Wave;
-using StimmingSignalGenerator.SignalGenerator.Interfaces;
+using StimmingSignalGenerator.Generators.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace StimmingSignalGenerator.SignalGenerator
+namespace StimmingSignalGenerator.Generators
 {
    // https://raw.githubusercontent.com/naudio/NAudio/master/NAudio/Wave/SampleProviders/SignalGenerator.cs
    /// <summary>
-   /// Basic Signal Generator
+   /// Basic Signal
    /// Sin, SawTooth, Triangle, Square, White Noise, Pink Noise.
    /// </summary>
    /// <remarks>
@@ -18,14 +18,14 @@ namespace StimmingSignalGenerator.SignalGenerator
    /// Example :
    /// ---------
    /// WaveOut _waveOutGene = new WaveOut();
-   /// WaveGenerator wg = new BasicSignalGenerator();
+   /// WaveGenerator wg = new BasicSignal();
    /// wg.Type = ...
    /// wg.Frequency = ...
    /// wg ...
    /// _waveOutGene.Init(wg);
    /// _waveOutGene.Play();
    /// </remarks>
-   public class BasicSignalGenerator : ISampleProvider
+   public class BasicSignal : ISampleProvider
    {
 
       // Random Number for the White Noise & Pink Noise Generator
@@ -36,7 +36,7 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// <summary>
       /// Initializes a new instance for the Generator (Default :: 44.1Khz, 2 channels, Sinus, Frequency = 440, Gain = 1)
       /// </summary>
-      public BasicSignalGenerator()
+      public BasicSignal()
           : this(44100, 1)
       {
 
@@ -47,20 +47,20 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// </summary>
       /// <param name="sampleRate">Desired sample rate</param>
       /// <param name="channel">Number of channels</param>
-      public BasicSignalGenerator(int sampleRate, int channel)
+      public BasicSignal(int sampleRate, int channel)
       {
          WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channel);
 
          // Default
-         Type = BasicSignalGeneratorType.Sin;
+         Type = BasicSignalType.Sin;
          Frequency = 440.0;
          ZeroCrossingPosition = 0.5;
          Gain = 1;
          ChannelGain = new double[channel];
          Array.Fill(ChannelGain, 1);
 
-         AMSignals = new List<BasicSignalGenerator>();
-         FMSignals = new List<BasicSignalGenerator>();
+         AMSignals = new List<BasicSignal>();
+         FMSignals = new List<BasicSignal>();
       }
 
       /// <summary>
@@ -99,7 +99,7 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// </summary>
       public double FrequencyLog => Math.Log(Frequency);
 
-      List<BasicSignalGenerator> FMSignals;
+      List<BasicSignal> FMSignals;
       float[] fmBuffer;
       float[] aggregateFMBuffer;
 
@@ -138,27 +138,27 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// </summary>
       public double[] ChannelGain { get; }
 
-      List<BasicSignalGenerator> AMSignals;
+      List<BasicSignal> AMSignals;
       float[] amBuffer;
       float[] aggregateAMBuffer;
 
       /// <summary>
       /// Type of Generator.
       /// </summary>
-      public BasicSignalGeneratorType Type { get; set; }
+      public BasicSignalType Type { get; set; }
 
       /// <summary>
       /// 1 Channel Signal for amplitude modulation.
       /// </summary>
       /// <param name="signal">1 Channel Signal</param>
-      public void AddAMSignal(BasicSignalGenerator signal)
+      public void AddAMSignal(BasicSignal signal)
       {
          lock (AMSignals)
          {
             AMSignals.Add(signal);
          }
       }
-      public void RemoveAMSignal(BasicSignalGenerator signal)
+      public void RemoveAMSignal(BasicSignal signal)
       {
          lock (AMSignals)
          {
@@ -170,14 +170,14 @@ namespace StimmingSignalGenerator.SignalGenerator
       /// Add 1 Channel Signal for frequency modulation. Gain of signal indicate how much frequency change.
       /// </summary>
       /// <param name="signal">1 Channel Signal</param>
-      public void AddFMSignal(BasicSignalGenerator signal)
+      public void AddFMSignal(BasicSignal signal)
       {
          lock (FMSignals)
          {
             FMSignals.Add(signal);
          }
       }
-      public void RemoveFMSignal(BasicSignalGenerator signal)
+      public void RemoveFMSignal(BasicSignal signal)
       {
          lock (FMSignals)
          {
@@ -294,14 +294,14 @@ namespace StimmingSignalGenerator.SignalGenerator
 
             switch (Type)
             {
-               case BasicSignalGeneratorType.Sin:
+               case BasicSignalType.Sin:
 
                   // Sinus Generator
                   sampleValue = currentGain * SampleSin(x, frequencyFactor, shift);
                   CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
-               case BasicSignalGeneratorType.SawTooth:
+               case BasicSignalType.SawTooth:
 
                   // SawTooth Generator
 
@@ -309,7 +309,7 @@ namespace StimmingSignalGenerator.SignalGenerator
                   CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
-               case BasicSignalGeneratorType.Triangle:
+               case BasicSignalType.Triangle:
 
                   // Triangle Generator
 
@@ -324,7 +324,7 @@ namespace StimmingSignalGenerator.SignalGenerator
                   CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
-               case BasicSignalGeneratorType.Square:
+               case BasicSignalType.Square:
 
                   // Square Generator
 
@@ -335,7 +335,7 @@ namespace StimmingSignalGenerator.SignalGenerator
                   CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
-               case BasicSignalGeneratorType.Pink:
+               case BasicSignalType.Pink:
 
                   // Pink Noise Generator
 
@@ -351,7 +351,7 @@ namespace StimmingSignalGenerator.SignalGenerator
                   sampleValue = (currentGain * (pink / 5));
                   break;
 
-               case BasicSignalGeneratorType.White:
+               case BasicSignalType.White:
 
                   // White Noise Generator
                   sampleValue = (currentGain * NextRandomTwo());
@@ -443,9 +443,9 @@ namespace StimmingSignalGenerator.SignalGenerator
    }
 
    /// <summary>
-   /// Basic Signal Generator type
+   /// Basic Signal type
    /// </summary>
-   public enum BasicSignalGeneratorType
+   public enum BasicSignalType
    {
       /// <summary>
       /// Sine wave

@@ -6,11 +6,11 @@
              xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
              xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
              xmlns:helper="clr-namespace:StimmingSignalGenerator.MVVM.UiHelper;assembly=StimmingSignalGenerator"
-             xmlns:p="clr-namespace:StimmingSignalGenerator.SignalGenerator;assembly=StimmingSignalGenerator"
+             xmlns:p="clr-namespace:StimmingSignalGenerator.Generators;assembly=StimmingSignalGenerator"
              
              mc:Ignorable="d" d:DesignWidth="400"
              d:DataContext="vm:SignalSourceControlViewModel"
-             x:Class="StimmingSignalGenerator.MVVM.Views.BasicSignalGeneratorView"
+             x:Class="StimmingSignalGenerator.MVVM.Views.BasicSignalView"
              
              Margin="5">
   <Expander>
@@ -51,7 +51,7 @@
         <RowDefinition />
       </Grid.RowDefinitions>
       <ComboBox Grid.Row="0" Grid.Column="1"
-                Items="{Binding Source={helper:EnumBindingSource {x:Type p:BasicSignalGeneratorType}}}"
+                Items="{Binding Source={helper:EnumBindingSource {x:Type p:BasicSignalType}}}"
                 SelectedItem="{Binding SignalType}"/>
 
       <TextBlock Grid.Row="1" Grid.Column="0"
@@ -82,7 +82,7 @@
                         <ColumnDefinition />
                         <ColumnDefinition Width="30"/>
                       </Grid.ColumnDefinitions>
-                      <v:BasicSignalGeneratorView Grid.Column="0" DataContext="{Binding}"/>
+                      <v:BasicSignalView Grid.Column="0" DataContext="{Binding}"/>
                       <Button Grid.Column="1"  Width="30" Height="30"
                               VerticalAlignment="Top" HorizontalAlignment="Right"
                               Background="#ff4d4d" Content="X"
@@ -112,7 +112,7 @@
                         <ColumnDefinition />
                         <ColumnDefinition Width="30"/>
                       </Grid.ColumnDefinitions>
-                      <v:BasicSignalGeneratorView Grid.Column="0" DataContext="{Binding}"/>
+                      <v:BasicSignalView Grid.Column="0" DataContext="{Binding}"/>
                       <Button Grid.Column="1"  Width="30" Height="30"
                               VerticalAlignment="Top" HorizontalAlignment="Right"
                               Background="#ff4d4d" Content="X"

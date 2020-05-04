@@ -2,7 +2,7 @@
 using DynamicData;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
-using StimmingSignalGenerator.SignalGenerator;
+using StimmingSignalGenerator.Generators;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,53 +14,53 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   public class BasicSignalGeneratorViewModel : ViewModelBase, IDisposable
+   public class BasicSignalViewModel : ViewModelBase, IDisposable
    {
       public int Id { get; internal set; }
       private string name = "SignalGenerator";
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
-      public BasicSignalGenerator BasicSignalGenerator { get; }
+      public BasicSignal BasicSignal { get; }
       public ControlSliderViewModel FreqControlSliderViewModel { get; }
       public ControlSliderViewModel VolControlSliderViewModel { get; }
       public ControlSliderViewModel ZCPosControlSliderViewModel { get; }
 
 
-      private readonly ReadOnlyObservableCollection<BasicSignalGeneratorViewModel> amSignalVMs;
-      public ReadOnlyObservableCollection<BasicSignalGeneratorViewModel> AMSignalVMs => amSignalVMs;
-      private SourceCache<BasicSignalGeneratorViewModel, int> AMSignalVMsSourceCache { get; }
+      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> amSignalVMs;
+      public ReadOnlyObservableCollection<BasicSignalViewModel> AMSignalVMs => amSignalVMs;
+      private SourceCache<BasicSignalViewModel, int> AMSignalVMsSourceCache { get; }
       public ReactiveCommand<Unit, Unit> AddAMCommand { get; }
-      public ReactiveCommand<BasicSignalGeneratorViewModel, Unit> RemoveAMCommand { get; }
+      public ReactiveCommand<BasicSignalViewModel, Unit> RemoveAMCommand { get; }
 
 
-      private readonly ReadOnlyObservableCollection<BasicSignalGeneratorViewModel> fmSignalVMs;
-      public ReadOnlyObservableCollection<BasicSignalGeneratorViewModel> FMSignalVMs => fmSignalVMs;
-      private SourceCache<BasicSignalGeneratorViewModel, int> FMSignalVMsSourceCache { get; }
+      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> fmSignalVMs;
+      public ReadOnlyObservableCollection<BasicSignalViewModel> FMSignalVMs => fmSignalVMs;
+      private SourceCache<BasicSignalViewModel, int> FMSignalVMsSourceCache { get; }
       public ReactiveCommand<Unit, Unit> AddFMCommand { get; }
-      public ReactiveCommand<BasicSignalGeneratorViewModel, Unit> RemoveFMCommand { get; }
+      public ReactiveCommand<BasicSignalViewModel, Unit> RemoveFMCommand { get; }
 
       public Brush BGColor { get; }
-      public BasicSignalGeneratorViewModel()
+      public BasicSignalViewModel()
          : this(ControlSliderViewModel.BasicSignalFreq)
       {
       }
-      public BasicSignalGeneratorViewModel(
+      public BasicSignalViewModel(
          ControlSliderViewModel freqControlSliderViewModel)
          : this(freqControlSliderViewModel, ControlSliderViewModel.BasicVol)
       {
       }
-      public BasicSignalGeneratorViewModel(
+      public BasicSignalViewModel(
          ControlSliderViewModel freqControlSliderViewModel,
          ControlSliderViewModel volControlSliderViewModel)
          : this(freqControlSliderViewModel, volControlSliderViewModel, ControlSliderViewModel.Vol(0.5)) { }
 
-      public BasicSignalGeneratorViewModel(
+      public BasicSignalViewModel(
          ControlSliderViewModel freqControlSliderViewModel,
          ControlSliderViewModel volControlSliderViewModel,
          ControlSliderViewModel zcPosControlSliderViewModel
          )
       {
          BGColor = GetRandomBrush();
-         BasicSignalGenerator = new BasicSignalGenerator();
+         BasicSignal = new BasicSignal();
 
          FreqControlSliderViewModel = freqControlSliderViewModel;
          VolControlSliderViewModel = volControlSliderViewModel;
@@ -79,16 +79,16 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe(x => ZeroCrossingPosition = x.Value)
             .DisposeWith(Disposables);
 
-         SignalType = BasicSignalGeneratorType.Sin;
+         SignalType = BasicSignalType.Sin;
 
          AMSignalVMsSourceCache =
-            new SourceCache<BasicSignalGeneratorViewModel, int>(x => x.Id)
+            new SourceCache<BasicSignalViewModel, int>(x => x.Id)
             .DisposeWith(Disposables);
          AMSignalVMsSourceCache.Connect()
-            .OnItemAdded(vm => BasicSignalGenerator.AddAMSignal(vm.BasicSignalGenerator))
+            .OnItemAdded(vm => BasicSignal.AddAMSignal(vm.BasicSignal))
             .OnItemRemoved(vm =>
             {
-               BasicSignalGenerator.RemoveAMSignal(vm.BasicSignalGenerator);
+               BasicSignal.RemoveAMSignal(vm.BasicSignal);
                vm.Dispose();
             })
             .ObserveOn(RxApp.MainThreadScheduler) // Make sure this is only right before the Bind()
@@ -98,19 +98,19 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          AddAMCommand = ReactiveCommand.Create(
             () => AMSignalVMsSourceCache.AddOrUpdate(CreateAMVM($"AMSignal{GetNextId(AMSignalVMsSourceCache) + 1}")))
             .DisposeWith(Disposables);
-         RemoveAMCommand = ReactiveCommand.Create<BasicSignalGeneratorViewModel>(
+         RemoveAMCommand = ReactiveCommand.Create<BasicSignalViewModel>(
             vm => AMSignalVMsSourceCache.Remove(vm))
             .DisposeWith(Disposables);
 
 
          FMSignalVMsSourceCache =
-            new SourceCache<BasicSignalGeneratorViewModel, int>(x => x.Id)
+            new SourceCache<BasicSignalViewModel, int>(x => x.Id)
             .DisposeWith(Disposables);
          FMSignalVMsSourceCache.Connect()
-            .OnItemAdded(vm => BasicSignalGenerator.AddFMSignal(vm.BasicSignalGenerator))
+            .OnItemAdded(vm => BasicSignal.AddFMSignal(vm.BasicSignal))
             .OnItemRemoved(vm =>
             {
-               BasicSignalGenerator.RemoveFMSignal(vm.BasicSignalGenerator);
+               BasicSignal.RemoveFMSignal(vm.BasicSignal);
                vm.Dispose();
             })
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -120,19 +120,19 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          AddFMCommand = ReactiveCommand.Create(
             () => FMSignalVMsSourceCache.AddOrUpdate(CreateFMVM($"FMSignal{GetNextId(FMSignalVMsSourceCache) + 1}")))
             .DisposeWith(Disposables);
-         RemoveFMCommand = ReactiveCommand.Create<BasicSignalGeneratorViewModel>(
+         RemoveFMCommand = ReactiveCommand.Create<BasicSignalViewModel>(
             vm => FMSignalVMsSourceCache.Remove(vm))
             .DisposeWith(Disposables);
       }
 
-      private BasicSignalGeneratorType signalType;
-      public BasicSignalGeneratorType SignalType
+      private BasicSignalType signalType;
+      public BasicSignalType SignalType
       {
          get => signalType;
          set
          {
             this.RaiseAndSetIfChanged(ref signalType, value);
-            BasicSignalGenerator.Type = signalType;
+            BasicSignal.Type = signalType;
          }
       }
       public double Frequency
@@ -140,10 +140,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          get => FreqControlSliderViewModel.Value;
          set
          {
-            if (BasicSignalGenerator.Frequency == value) return;
+            if (BasicSignal.Frequency == value) return;
             this.RaisePropertyChanging(nameof(Frequency));
             FreqControlSliderViewModel.Value = value;
-            BasicSignalGenerator.Frequency = value;
+            BasicSignal.Frequency = value;
             this.RaisePropertyChanged(nameof(Frequency));
          }
       }
@@ -152,10 +152,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          get => VolControlSliderViewModel.Value;
          set
          {
-            if (BasicSignalGenerator.Gain == value) return;
+            if (BasicSignal.Gain == value) return;
             this.RaisePropertyChanging(nameof(Volume));
             VolControlSliderViewModel.Value = value;
-            BasicSignalGenerator.Gain = value;
+            BasicSignal.Gain = value;
             this.RaisePropertyChanged(nameof(Volume));
          }
       }
@@ -165,10 +165,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          get => ZCPosControlSliderViewModel.Value;
          set
          {
-            if (BasicSignalGenerator.ZeroCrossingPosition == value) return;
+            if (BasicSignal.ZeroCrossingPosition == value) return;
             this.RaisePropertyChanging(nameof(ZeroCrossingPosition));
             ZCPosControlSliderViewModel.Value = value;
-            BasicSignalGenerator.ZeroCrossingPosition = value;
+            BasicSignal.ZeroCrossingPosition = value;
             this.RaisePropertyChanged(nameof(ZeroCrossingPosition));
          }
       }
@@ -180,20 +180,20 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return new SolidColorBrush(Color.FromArgb(60, r, g, b));
       }
 
-      private BasicSignalGeneratorViewModel CreateAMVM(string name, double volume = 0) =>
-         new BasicSignalGeneratorViewModel(
+      private BasicSignalViewModel CreateAMVM(string name, double volume = 0) =>
+         new BasicSignalViewModel(
             ControlSliderViewModel.AMSignalFreq)
          { Name = name, Id = GetNextId(AMSignalVMsSourceCache), Volume = 0 }
          .DisposeWith(Disposables);
 
-      private BasicSignalGeneratorViewModel CreateFMVM(string name, double volume = 0) =>
-         new BasicSignalGeneratorViewModel(
+      private BasicSignalViewModel CreateFMVM(string name, double volume = 0) =>
+         new BasicSignalViewModel(
             ControlSliderViewModel.FMSignalFreq,
             new ControlSliderViewModel(0, 0, 100, 1, 1, 5))
          { Name = name, Id = GetNextId(FMSignalVMsSourceCache), Volume = 0 }
          .DisposeWith(Disposables);
 
-      private int GetNextId(SourceCache<BasicSignalGeneratorViewModel, int> SourceCache) =>
+      private int GetNextId(SourceCache<BasicSignalViewModel, int> SourceCache) =>
          SourceCache.Count == 0 ?
             0 : SourceCache.Keys.Max() + 1;
 
@@ -216,7 +216,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       }
 
       // // override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-      // ~BasicSignalGeneratorViewModel()
+      // ~BasicSignalViewModel()
       // {
       //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
       //     Dispose(disposing: false);

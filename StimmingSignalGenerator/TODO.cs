@@ -2,9 +2,9 @@
 //-TODO basic control
 //-TODO amplitude control
 //-TODO frequency control
-//-TODO Slider Property of BasicSignalGeneratorView(refactor to v & vm)
+//-TODO Slider Property of BasicSignalView(refactor to v & vm)
 //-TODO Custom basic signal gen
-//-TODO square wave with duty cycle parameter(ZeroCrossingPosition in BasicSignalGenerator)
+//-TODO square wave with duty cycle parameter(ZeroCrossingPosition in BasicSignal)
 //-TODO collapsible signal gen view
 //-TODO seperate R L Channel
 //-TODO Mixing multi generator
@@ -19,11 +19,11 @@
 
 //-TODO Waveform visualization (OxyPlot)
 //TODO Exp with faster way to plot or optimize oxyplot
-//TODO Waveform in BasicSignalGeneratorView
+//TODO Waveform in BasicSignalView
 //-TODO Fix cracking noise when move slider (meybe Portamento will fixes this? check out https://github.com/naudio/sinegenerator-sample/blob/master/SineGenerator/SineWaveProvider.cs)
 //-TODO Rename SignalSlider -> ControlSlider
 //xTODO SignalSlider -> Using signal to move ControlSlider
 
 //TODO Compact ui
 //TODO side by side L,R
-//TODO rename BasicSignalGenerator and namespace SignalGenerator
+//-TODO rename BasicSignal and namespace SignalGenerator

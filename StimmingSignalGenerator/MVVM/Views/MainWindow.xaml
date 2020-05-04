@@ -19,13 +19,13 @@
       <TabItem Header="Left" VerticalContentAlignment="Center">
         <DockPanel Margin="5" >
           <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding LeftSignalPlotVM}" />
-          <v:MultiSignalGeneratorView DockPanel.Dock="Bottom" DataContext="{Binding LeftSignalGeneratorsVM}"/>
+          <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding LeftSignalGeneratorsVM}"/>
         </DockPanel>
       </TabItem>
       <TabItem Header="Right" VerticalContentAlignment="Center">
         <DockPanel Margin="5" >
           <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding RightSignalPlotVM}" />
-          <v:MultiSignalGeneratorView DockPanel.Dock="Bottom" DataContext="{Binding RightSignalGeneratorsVM}"/>
+          <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding RightSignalGeneratorsVM}"/>
         </DockPanel>
       </TabItem>
     </TabControl>

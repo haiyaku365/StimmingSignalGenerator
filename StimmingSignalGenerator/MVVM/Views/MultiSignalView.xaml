@@ -6,7 +6,7 @@
              
              xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
              
-             x:Class="StimmingSignalGenerator.MVVM.Views.MultiSignalGeneratorView">
+             x:Class="StimmingSignalGenerator.MVVM.Views.MultiSignalView">
   <Expander>
     <!-- Style -->
     <Expander.Styles>
@@ -41,7 +41,7 @@
       <ScrollViewer Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" >
         <DockPanel>
           <ItemsControl DockPanel.Dock="Top" Margin="2"
-                        Items="{Binding BasicSignalGeneratorVMs }">
+                        Items="{Binding BasicSignalVMs }">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
                 <Border BorderBrush="#3399ff" Background="{Binding BGColor}"
@@ -51,7 +51,7 @@
                       <ColumnDefinition />
                       <ColumnDefinition Width="30"/>
                     </Grid.ColumnDefinitions>
-                    <v:BasicSignalGeneratorView Grid.Column="0" DataContext="{Binding}"/>
+                    <v:BasicSignalView Grid.Column="0" DataContext="{Binding}"/>
                     <Button Grid.Column="1"  Width="30" Height="30"
                             VerticalAlignment="Top" HorizontalAlignment="Right"
                             Background="#ff4d4d" Content="X"

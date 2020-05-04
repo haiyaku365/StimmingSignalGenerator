@@ -1,7 +1,7 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
-using StimmingSignalGenerator.SignalGenerator;
+using StimmingSignalGenerator.Generators;
 using System;
 using System.Collections.Generic;
 using System.Reactive;
@@ -13,15 +13,15 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    public class MainWindowViewModel : ViewModelBase, IDisposable
    {
-      public MultiSignalGeneratorViewModel LeftSignalGeneratorsVM { get; }
-      public MultiSignalGeneratorViewModel RightSignalGeneratorsVM { get; }
+      public MultiSignalViewModel LeftSignalGeneratorsVM { get; }
+      public MultiSignalViewModel RightSignalGeneratorsVM { get; }
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
       public PlotSampleViewModel LeftSignalPlotVM { get; }
       public PlotSampleViewModel RightSignalPlotVM { get; }
       public MainWindowViewModel()
       {
-         LeftSignalGeneratorsVM = new MultiSignalGeneratorViewModel();
-         RightSignalGeneratorsVM = new MultiSignalGeneratorViewModel();
+         LeftSignalGeneratorsVM = new MultiSignalViewModel();
+         RightSignalGeneratorsVM = new MultiSignalViewModel();
          RightSignalGeneratorsVM.Volume = 0;
 
          ISampleProvider leftSignal = LeftSignalGeneratorsVM.SampleSignal;

@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace StimmingSignalGenerator.SignalGenerator
+namespace StimmingSignalGenerator.Generators
 {
    /// <summary>
-   /// Generate signal from multiple BasicSignalGenerator
+   /// Generate signal from multiple BasicSignal
    /// </summary>
-   class MultiSignalGenerator : ISampleProvider
+   class MultiSignal : ISampleProvider
    {
       public WaveFormat WaveFormat { get; }
 
@@ -21,31 +21,31 @@ namespace StimmingSignalGenerator.SignalGenerator
       public double Gain { get; set; }
 
       private readonly MixingSampleProvider mixingSampleProvider;
-      private readonly List<BasicSignalGenerator> sources;
+      private readonly List<BasicSignal> sources;
 
-      public MultiSignalGenerator(WaveFormat waveFormat)
+      public MultiSignal(WaveFormat waveFormat)
       {
          WaveFormat = waveFormat;
 
          mixingSampleProvider = new MixingSampleProvider(waveFormat);
-         sources = new List<BasicSignalGenerator>();
+         sources = new List<BasicSignal>();
       }
 
-      public void AddMixerInput(BasicSignalGenerator basicSignalGenerator)
+      public void AddSignal(BasicSignal basicSignal)
       {
          lock (sources)
          {
-            sources.Add(basicSignalGenerator);
-            mixingSampleProvider.AddMixerInput(basicSignalGenerator);
+            sources.Add(basicSignal);
+            mixingSampleProvider.AddMixerInput(basicSignal);
          }
       }
 
-      public void RemoveMixerInput(BasicSignalGenerator basicSignalGenerator)
+      public void RemoveSignal(BasicSignal basicSignal)
       {
          lock (sources)
          {
-            sources.Remove(basicSignalGenerator);
-            mixingSampleProvider.RemoveMixerInput(basicSignalGenerator);
+            sources.Remove(basicSignal);
+            mixingSampleProvider.RemoveMixerInput(basicSignal);
          }
       }
 

@@ -2,7 +2,7 @@
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
-using StimmingSignalGenerator.SignalGenerator;
+using StimmingSignalGenerator.Generators;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,46 +14,46 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   public class MultiSignalGeneratorViewModel : ViewModelBase, IDisposable
+   public class MultiSignalViewModel : ViewModelBase, IDisposable
    {
-      private string name = "MultiSignalGenerator";
+      private string name = "MultiSignal";
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
       public ControlSliderViewModel VolControlSliderViewModel { get; }
       public ReactiveCommand<Unit, Unit> AddCommand { get; }
-      public ReactiveCommand<BasicSignalGeneratorViewModel, Unit> RemoveCommand { get; }
+      public ReactiveCommand<BasicSignalViewModel, Unit> RemoveCommand { get; }
 
-      private readonly ReadOnlyObservableCollection<BasicSignalGeneratorViewModel> basicSignalGeneratorVMs;
-      public ReadOnlyObservableCollection<BasicSignalGeneratorViewModel> BasicSignalGeneratorVMs => basicSignalGeneratorVMs;
-      private SourceCache<BasicSignalGeneratorViewModel, int> BasicSignalGeneratorVMsSourceCache { get; }
-      public ISampleProvider SampleSignal => mixingSampleProvider;
+      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> basicSignalVMs;
+      public ReadOnlyObservableCollection<BasicSignalViewModel> BasicSignalVMs => basicSignalVMs;
+      private SourceCache<BasicSignalViewModel, int> BasicSignalVMsSourceCache { get; }
+      public ISampleProvider SampleSignal => multiSignal;
 
-      private readonly MultiSignalGenerator mixingSampleProvider;
-      public MultiSignalGeneratorViewModel(string firstSignalName = "Signal1")
+      private readonly MultiSignal multiSignal;
+      public MultiSignalViewModel(string firstSignalName = "Signal1")
       {
-         BasicSignalGeneratorVMsSourceCache = 
-            new SourceCache<BasicSignalGeneratorViewModel, int>(x => x.Id)
+         BasicSignalVMsSourceCache = 
+            new SourceCache<BasicSignalViewModel, int>(x => x.Id)
             .DisposeWith(Disposables);
          var initVM = CreateVM(firstSignalName, 1);
-         mixingSampleProvider = new MultiSignalGenerator(initVM.BasicSignalGenerator.WaveFormat);
+         multiSignal = new MultiSignal(initVM.BasicSignal.WaveFormat);
 
-         BasicSignalGeneratorVMsSourceCache.Connect()
-            .OnItemAdded(vm => mixingSampleProvider.AddMixerInput(vm.BasicSignalGenerator))
+         BasicSignalVMsSourceCache.Connect()
+            .OnItemAdded(vm => multiSignal.AddSignal(vm.BasicSignal))
             .OnItemRemoved(vm =>
             {
-               mixingSampleProvider.RemoveMixerInput(vm.BasicSignalGenerator);
+               multiSignal.RemoveSignal(vm.BasicSignal);
                vm.Dispose();
             })
             .ObserveOn(RxApp.MainThreadScheduler) // Make sure this is only right before the Bind()
-            .Bind(out basicSignalGeneratorVMs)
+            .Bind(out basicSignalVMs)
             .Subscribe()
             .DisposeWith(Disposables);
 
-         BasicSignalGeneratorVMsSourceCache.AddOrUpdate(initVM);
+         BasicSignalVMsSourceCache.AddOrUpdate(initVM);
 
          AddCommand = ReactiveCommand.Create(
             () => AddVM())
             .DisposeWith(Disposables);
-         RemoveCommand = ReactiveCommand.Create<BasicSignalGeneratorViewModel>(
+         RemoveCommand = ReactiveCommand.Create<BasicSignalViewModel>(
             vm => RemoveVM(vm))
             .DisposeWith(Disposables);
 
@@ -69,10 +69,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          get => VolControlSliderViewModel.Value;
          set
          {
-            if (mixingSampleProvider.Gain == value) return;
+            if (multiSignal.Gain == value) return;
             this.RaisePropertyChanging(nameof(Volume));
             VolControlSliderViewModel.Value = value;
-            mixingSampleProvider.Gain = value;
+            multiSignal.Gain = value;
             this.RaisePropertyChanged(nameof(Volume));
          }
       }
@@ -80,20 +80,20 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public void AddVM() => AddVM($"Signal{GetNextId() + 1}");
       public void AddVM(string name)
       {
-         BasicSignalGeneratorVMsSourceCache.AddOrUpdate(CreateVM(name));
+         BasicSignalVMsSourceCache.AddOrUpdate(CreateVM(name));
       }
 
-      public void RemoveVM(BasicSignalGeneratorViewModel vm)
+      public void RemoveVM(BasicSignalViewModel vm)
       {
-         BasicSignalGeneratorVMsSourceCache.Remove(vm);
+         BasicSignalVMsSourceCache.Remove(vm);
       }
-      private BasicSignalGeneratorViewModel CreateVM(string name, double volume = 0) =>
-         new BasicSignalGeneratorViewModel { Name = name, Id = GetNextId(), Volume = volume }
+      private BasicSignalViewModel CreateVM(string name, double volume = 0) =>
+         new BasicSignalViewModel { Name = name, Id = GetNextId(), Volume = volume }
          .DisposeWith(Disposables);
 
       private int GetNextId() => 
-         BasicSignalGeneratorVMsSourceCache.Count == 0 ? 
-            0 : BasicSignalGeneratorVMsSourceCache.Keys.Max() + 1;
+         BasicSignalVMsSourceCache.Count == 0 ? 
+            0 : BasicSignalVMsSourceCache.Keys.Max() + 1;
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       private bool disposedValue;

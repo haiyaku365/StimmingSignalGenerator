@@ -2,14 +2,14 @@
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
-using StimmingSignalGenerator.SignalGenerator.Interfaces;
+using StimmingSignalGenerator.Generators.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace StimmingSignalGenerator.SignalGenerator
+namespace StimmingSignalGenerator.Generators
 {
    public class PlotSampleProvider : ISingleSignalInputSampleProvider
    {

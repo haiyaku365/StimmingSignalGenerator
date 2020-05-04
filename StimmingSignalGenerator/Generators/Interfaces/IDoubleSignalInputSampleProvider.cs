@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace StimmingSignalGenerator.SignalGenerator.Interfaces
+namespace StimmingSignalGenerator.Generators.Interfaces
 {
    interface IDoubleSignalInputSampleProvider : ISampleProvider
    {
