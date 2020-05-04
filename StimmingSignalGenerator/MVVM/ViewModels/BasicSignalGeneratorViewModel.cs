@@ -177,7 +177,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private Brush GetRandomBrush()
       {
          var (r, g, b) = Helper.ColorHelper.HsvToRgb(rand.Next(0, 360), 1, 1);
-         return new SolidColorBrush(Color.FromArgb(80, r, g, b));
+         return new SolidColorBrush(Color.FromArgb(60, r, g, b));
       }
 
       private BasicSignalGeneratorViewModel CreateAMVM(string name, double volume = 0) =>
