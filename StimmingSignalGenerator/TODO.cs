@@ -1,29 +1,15 @@
 
-//-TODO basic control
-//-TODO amplitude control
-//-TODO frequency control
-//-TODO Slider Property of BasicSignalView(refactor to v & vm)
-//-TODO Custom basic signal gen
-//-TODO square wave with duty cycle parameter(ZeroCrossingPosition in BasicSignal)
-//-TODO collapsible signal gen view
-//-TODO seperate R L Channel
-//-TODO Mixing multi generator
-//-TODO Output selector
 //TODO master vol
-//-TODO sync R L channel toggle(or maybe disable R channel and use only L channel multiplexing to R,L)
 //TODO signal phase shift
-//-TODO signal node
 //TODO Serialize setting
+//TODO Command to copy BasicSignal to clipboard as json
+//TODO Add BasicSignal from clipboard
 //TODO preset
 //TODO UpdateSourceTrigger=LostFocus in ControlSlider (wait for avalonia implement https://github.com/AvaloniaUI/Avalonia/issues/3754)
 
 //-TODO Waveform visualization (OxyPlot)
 //TODO Exp with faster way to plot or optimize oxyplot
 //TODO Waveform in BasicSignalView
-//-TODO Fix cracking noise when move slider (meybe Portamento will fixes this? check out https://github.com/naudio/sinegenerator-sample/blob/master/SineGenerator/SineWaveProvider.cs)
-//-TODO Rename SignalSlider -> ControlSlider
-//xTODO SignalSlider -> Using signal to move ControlSlider
+
 
 //TODO Compact ui
-//-TODO side by side L,R
-//-TODO rename BasicSignal and namespace SignalGenerator

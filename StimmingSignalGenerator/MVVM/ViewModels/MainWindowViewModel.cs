@@ -12,7 +12,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   public class MainWindowViewModel : ViewModelBase, IDisposable
+   class MainWindowViewModel : ViewModelBase, IDisposable
    {
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
       public List<MultiSignalViewModel> MultiSignalVMs { get; }
@@ -68,7 +68,26 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
       }
 
+      void Save()
+      {
+         IEnumerable<Generators.POCOs.MultiSignal> pocos;
+         switch (GeneratorMode)
+         {
+            case GeneratorModeType.Mono:
+               pocos = MultiSignalVMs.Take(1).Select(vm => vm.ToPOCO());
+               break;
+            case GeneratorModeType.Stereo:
+               pocos = MultiSignalVMs.Skip(1).Select(vm => vm.ToPOCO());
+               break;
+            default:
+               throw new ApplicationException("Bad GeneratorMode");
+         }
+         var jsonStr = new Generators.POCOs.Preset { MultiSignals = pocos.ToList() }.ToJson();
+         //Generators.POCOs.Preset.FromJson<Generators.POCOs.MonoPreset>("jsonStr");
+      }
+
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
+
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)
       {

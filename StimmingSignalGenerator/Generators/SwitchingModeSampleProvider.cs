@@ -39,10 +39,7 @@ namespace StimmingSignalGenerator.Generators
          ISampleProvider monoSampleProvider,
          IEnumerable<ISampleProvider> stereoSampleProviders)
       {
-         WaveFormat =
-            WaveFormat.CreateIeeeFloatWaveFormat(
-               monoSampleProvider.WaveFormat.SampleRate, 2
-            );
+         WaveFormat = Constants.DefaultStereoWaveFormat;
 
          monoSample =
             new MonoToStereoSampleProvider(monoSampleProvider);

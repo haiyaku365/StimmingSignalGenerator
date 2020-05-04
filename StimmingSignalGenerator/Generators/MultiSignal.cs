@@ -23,11 +23,11 @@ namespace StimmingSignalGenerator.Generators
       private readonly MixingSampleProvider mixingSampleProvider;
       private readonly List<BasicSignal> sources;
 
-      public MultiSignal(WaveFormat waveFormat)
+      public MultiSignal()
       {
-         WaveFormat = waveFormat;
+         WaveFormat = Constants.DefaultMonoWaveFormat;
 
-         mixingSampleProvider = new MixingSampleProvider(waveFormat);
+         mixingSampleProvider = new MixingSampleProvider(WaveFormat);
          sources = new List<BasicSignal>();
       }
 
@@ -88,5 +88,12 @@ namespace StimmingSignalGenerator.Generators
          }
          return read;
       }
+
+      public POCOs.MultiSignal ToPoco() =>
+         new POCOs.MultiSignal()
+         {
+            Gain = Gain,
+            BasicSignals = sources.Select(s => s.ToPoco()).ToList()
+         };
    }
 }

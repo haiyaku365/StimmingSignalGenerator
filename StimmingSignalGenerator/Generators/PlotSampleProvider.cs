@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace StimmingSignalGenerator.Generators
 {
-   public class PlotSampleProvider : ISingleSignalInputSampleProvider
+   class PlotSampleProvider : ISingleSignalInputSampleProvider
    {
       public ISampleProvider InputSample { get; set; }
       public PlotModel PlotModel { get; }

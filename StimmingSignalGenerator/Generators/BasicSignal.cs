@@ -25,7 +25,7 @@ namespace StimmingSignalGenerator.Generators
    /// _waveOutGene.Init(wg);
    /// _waveOutGene.Play();
    /// </remarks>
-   public class BasicSignal : ISampleProvider
+   class BasicSignal : ISampleProvider
    {
 
       // Random Number for the White Noise & Pink Noise Generator
@@ -34,30 +34,19 @@ namespace StimmingSignalGenerator.Generators
       private readonly double[] pinkNoiseBuffer = new double[7];
 
       /// <summary>
-      /// Initializes a new instance for the Generator (Default :: 44.1Khz, 2 channels, Sinus, Frequency = 440, Gain = 1)
-      /// </summary>
-      public BasicSignal()
-          : this(44100, 1)
-      {
-
-      }
-
-      /// <summary>
-      /// Initializes a new instance for the Generator (UserDef SampleRate &amp; Channels)
+      /// Initializes a new instance for the Generator
       /// </summary>
       /// <param name="sampleRate">Desired sample rate</param>
       /// <param name="channel">Number of channels</param>
-      public BasicSignal(int sampleRate, int channel)
+      public BasicSignal()
       {
-         WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channel);
+         WaveFormat = Constants.DefaultMonoWaveFormat;
 
          // Default
          Type = BasicSignalType.Sin;
          Frequency = 440.0;
          ZeroCrossingPosition = 0.5;
          Gain = 1;
-         ChannelGain = new double[channel];
-         Array.Fill(ChannelGain, 1);
 
          AMSignals = new List<BasicSignal>();
          FMSignals = new List<BasicSignal>();
@@ -129,14 +118,6 @@ namespace StimmingSignalGenerator.Generators
       /// Gain step delta of latest read.
       /// </summary>
       public double GainStepDelta { get => gainStepDelta; }
-
-      /// <summary>
-      /// Gain for each channel.
-      /// Negative gain will reverse phase.
-      /// default are 1.0 for all channel.
-      /// (-1.0 to 1.0)
-      /// </summary>
-      public double[] ChannelGain { get; }
 
       List<BasicSignal> AMSignals;
       float[] amBuffer;
@@ -261,7 +242,7 @@ namespace StimmingSignalGenerator.Generators
          }
 
          //skip calc if gain is 0
-         if (Gain == 0 || ChannelGain.All(g => g == 0))
+         if (Gain == 0)
          {
             for (int i = 0; i < count; i++)
                buffer[i] = 0;
@@ -365,7 +346,7 @@ namespace StimmingSignalGenerator.Generators
             // Phase Reverse, Gain Per Channel and AM signal
             for (int i = 0; i < WaveFormat.Channels; i++)
             {
-               buffer[outIndex++] = (float)(sampleValue * ChannelGain[i]) * aggregateAMBuffer[sampleCount];
+               buffer[outIndex++] = (float)sampleValue * aggregateAMBuffer[sampleCount];
             }
          }
          return count;
@@ -439,7 +420,16 @@ namespace StimmingSignalGenerator.Generators
          return 2 * random.NextDouble() - 1;
       }
 
-
+      public POCOs.BasicSignal ToPoco() =>
+         new POCOs.BasicSignal()
+         {
+            Type = Type,
+            Frequency = Frequency,
+            Gain = Gain,
+            ZeroCrossingPosition = ZeroCrossingPosition,
+            AMSignals = AMSignals.Select(s => s.ToPoco()).ToList(),
+            FMSignals = FMSignals.Select(s => s.ToPoco()).ToList()
+         };
    }
 
    /// <summary>

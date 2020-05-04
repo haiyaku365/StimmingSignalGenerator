@@ -9,7 +9,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   public class PlotSampleViewModel : ViewModelBase, IDisposable
+   class PlotSampleViewModel : ViewModelBase, IDisposable
    {
       public PlotModel PlotModel { get; }
       private bool isPlotEnable;

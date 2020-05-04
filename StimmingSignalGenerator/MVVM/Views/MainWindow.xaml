@@ -19,6 +19,7 @@
       <ComboBox DockPanel.Dock="Left"
                 Items="{Binding Source={helper:EnumBindingSource {x:Type p:GeneratorModeType}}}"
                 SelectedItem="{Binding GeneratorMode}"/>
+      <Button Content="Save" Command="{Binding Save}" />
       <v:AudioPlayerView DockPanel.Dock="Right" DataContext="{Binding AudioPlayerViewModel}"
                        VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
     </DockPanel>

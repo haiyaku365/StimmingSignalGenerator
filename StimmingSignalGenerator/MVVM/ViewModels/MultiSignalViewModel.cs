@@ -14,7 +14,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   public class MultiSignalViewModel : ViewModelBase, IDisposable
+   class MultiSignalViewModel : ViewModelBase, IDisposable
    {
       private string name = "MultiSignal";
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
@@ -30,11 +30,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private readonly MultiSignal multiSignal;
       public MultiSignalViewModel(string firstSignalName = "Signal1")
       {
-         BasicSignalVMsSourceCache = 
+         BasicSignalVMsSourceCache =
             new SourceCache<BasicSignalViewModel, int>(x => x.Id)
             .DisposeWith(Disposables);
          var initVM = CreateVM(firstSignalName, 1);
-         multiSignal = new MultiSignal(initVM.BasicSignal.WaveFormat);
+         multiSignal = new MultiSignal();
 
          BasicSignalVMsSourceCache.Connect()
             .OnItemAdded(vm => multiSignal.AddSignal(vm.BasicSignal))
@@ -91,10 +91,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          new BasicSignalViewModel { Name = name, Id = GetNextId(), Volume = volume }
          .DisposeWith(Disposables);
 
-      private int GetNextId() => 
-         BasicSignalVMsSourceCache.Count == 0 ? 
+      private int GetNextId() =>
+         BasicSignalVMsSourceCache.Count == 0 ?
             0 : BasicSignalVMsSourceCache.Keys.Max() + 1;
 
+      public Generators.POCOs.MultiSignal ToPOCO() => multiSignal.ToPoco();
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)

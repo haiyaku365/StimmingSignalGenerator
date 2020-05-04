@@ -14,7 +14,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   public class BasicSignalViewModel : ViewModelBase, IDisposable
+   class BasicSignalViewModel : ViewModelBase, IDisposable
    {
       public int Id { get; internal set; }
       private string name = "SignalGenerator";

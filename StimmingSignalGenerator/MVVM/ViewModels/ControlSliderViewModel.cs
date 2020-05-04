@@ -6,7 +6,7 @@ using ReactiveUI;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   public class ControlSliderViewModel : ViewModelBase
+   class ControlSliderViewModel : ViewModelBase
    {
       private double _value;
       private double minValue;
