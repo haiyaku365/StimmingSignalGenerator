@@ -1,4 +1,5 @@
-﻿using OxyPlot;
+﻿using NAudio.Wave;
+using OxyPlot;
 using ReactiveUI;
 using StimmingSignalGenerator.Generators;
 using System;
@@ -13,8 +14,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public PlotModel PlotModel { get; }
       private bool isPlotEnable;
       public bool IsPlotEnable { get => isPlotEnable; set => this.RaiseAndSetIfChanged(ref isPlotEnable, value); }
+      private PlotSampleProvider plotSampleProvider;
+      public ISampleProvider SampleSignal => plotSampleProvider;
       public PlotSampleViewModel(PlotSampleProvider plotSampleProvider)
       {
+         this.plotSampleProvider = plotSampleProvider;
          PlotModel = plotSampleProvider.PlotModel;
 
          this.ObservableForProperty(x => x.IsPlotEnable)

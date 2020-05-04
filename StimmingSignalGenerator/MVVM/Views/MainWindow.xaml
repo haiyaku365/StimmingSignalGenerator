@@ -3,31 +3,61 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         
+        xmlns:helper="clr-namespace:StimmingSignalGenerator.MVVM.UiHelper;assembly=StimmingSignalGenerator"
         xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
         xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
+        xmlns:p="clr-namespace:StimmingSignalGenerator.Generators;assembly=StimmingSignalGenerator"
         xmlns:oxy="clr-namespace:OxyPlot.Avalonia;assembly=OxyPlot.Avalonia"
         
         mc:Ignorable="d"
         x:Class="StimmingSignalGenerator.MVVM.Views.MainWindow"
         d:DataContext="vm:MainWindowViewModel"
-        Width="750"
+        Width="800"
         Title="StimmingSignalGenerator">
   <DockPanel Margin="10">
-    <v:AudioPlayerView DockPanel.Dock="Top" DataContext="{Binding AudioPlayerViewModel}"
+    <DockPanel DockPanel.Dock="Top" Margin="5">
+      <ComboBox DockPanel.Dock="Left"
+                Items="{Binding Source={helper:EnumBindingSource {x:Type p:GeneratorModeType}}}"
+                SelectedItem="{Binding GeneratorMode}"/>
+      <v:AudioPlayerView DockPanel.Dock="Right" DataContext="{Binding AudioPlayerViewModel}"
                        VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
-    <TabControl DockPanel.Dock="Bottom" >
-      <TabItem Header="Left" VerticalContentAlignment="Center">
+    </DockPanel>
+
+    <!-- Mono -->
+    <Border DockPanel.Dock="Top" IsVisible="{Binding !GeneratorMode}"
+            BorderBrush="Goldenrod" BorderThickness="1" CornerRadius="2">
+      <DockPanel Margin="5" >
+        <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding SignalPlotVMs[0]}" />
+        <Grid DockPanel.Dock="Top">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+          </Grid.ColumnDefinitions>
+          <v:ControlSliderView Grid.Column="0" DataContext="{Binding MonoVolVMs[0]}"/>
+          <v:ControlSliderView Grid.Column="1" DataContext="{Binding MonoVolVMs[1]}"/>
+        </Grid>
+        <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding MultiSignalVMs[0]}"/>
+      </DockPanel>
+    </Border>
+
+    <!-- stereo -->
+    <Grid DockPanel.Dock="Top" IsVisible="{Binding !!GeneratorMode}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition />
+        <ColumnDefinition />
+      </Grid.ColumnDefinitions>
+      <Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" CornerRadius="2">
         <DockPanel Margin="5" >
-          <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding LeftSignalPlotVM}" />
-          <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding LeftSignalGeneratorsVM}"/>
+          <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding SignalPlotVMs[1]}" />
+          <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding MultiSignalVMs[1]}"/>
         </DockPanel>
-      </TabItem>
-      <TabItem Header="Right" VerticalContentAlignment="Center">
+      </Border>
+      <Border Grid.Column="1"  BorderBrush="Red" BorderThickness="1" CornerRadius="2">
         <DockPanel Margin="5" >
-          <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding RightSignalPlotVM}" />
-          <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding RightSignalGeneratorsVM}"/>
+          <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding SignalPlotVMs[2]}" />
+          <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding MultiSignalVMs[2]}"/>
         </DockPanel>
-      </TabItem>
-    </TabControl>
+      </Border>
+    </Grid>
   </DockPanel>
 </Window>

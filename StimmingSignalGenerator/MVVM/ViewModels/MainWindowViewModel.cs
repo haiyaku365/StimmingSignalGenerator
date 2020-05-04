@@ -4,6 +4,7 @@ using ReactiveUI;
 using StimmingSignalGenerator.Generators;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -13,34 +14,58 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    public class MainWindowViewModel : ViewModelBase, IDisposable
    {
-      public MultiSignalViewModel LeftSignalGeneratorsVM { get; }
-      public MultiSignalViewModel RightSignalGeneratorsVM { get; }
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
-      public PlotSampleViewModel LeftSignalPlotVM { get; }
-      public PlotSampleViewModel RightSignalPlotVM { get; }
+      public List<MultiSignalViewModel> MultiSignalVMs { get; }
+      public List<PlotSampleViewModel> SignalPlotVMs { get; }
+      public List<ControlSliderViewModel> MonoVolVMs { get; set; }
+      public GeneratorModeType GeneratorMode
+      {
+         get => generatorMode;
+         set => this.RaiseAndSetIfChanged(ref generatorMode, value);
+      }
+      private GeneratorModeType generatorMode;
       public MainWindowViewModel()
       {
-         LeftSignalGeneratorsVM = new MultiSignalViewModel();
-         RightSignalGeneratorsVM = new MultiSignalViewModel();
-         RightSignalGeneratorsVM.Volume = 0;
+         MultiSignalVMs = new List<MultiSignalViewModel>(3)
+         {
+            new MultiSignalViewModel().DisposeWith(Disposables),
+            new MultiSignalViewModel().DisposeWith(Disposables),
+            new MultiSignalViewModel().DisposeWith(Disposables)
+         };
 
-         ISampleProvider leftSignal = LeftSignalGeneratorsVM.SampleSignal;
-         ISampleProvider rightSignal = RightSignalGeneratorsVM.SampleSignal;
-
-         leftSignal = new PlotSampleProvider(leftSignal);
-         LeftSignalPlotVM = new PlotSampleViewModel(leftSignal as PlotSampleProvider).DisposeWith(Disposables);
-         rightSignal = new PlotSampleProvider(rightSignal);
-         RightSignalPlotVM = new PlotSampleViewModel(rightSignal as PlotSampleProvider).DisposeWith(Disposables);
-
-         //combine ch
-         var multiplexedSignal = new MultiplexingSampleProvider(
-            new[] {
-               leftSignal , //left ch
-               rightSignal },//right ch
-            2
+         SignalPlotVMs = new List<PlotSampleViewModel>(3);
+         SignalPlotVMs.AddRange(
+            MultiSignalVMs.Select(s =>
+               new PlotSampleViewModel(
+                  new PlotSampleProvider(s.SampleSignal)
+               ).DisposeWith(Disposables))
             );
 
-         AudioPlayerViewModel = new AudioPlayerViewModel(multiplexedSignal).DisposeWith(Disposables);
+         var finalSample =
+            new SwitchingModeSampleProvider(
+               SignalPlotVMs.Take(1).Select(s => s.SampleSignal).Single(),
+               SignalPlotVMs.Skip(1).Select(s => s.SampleSignal)
+            );
+
+         MonoVolVMs = new List<ControlSliderViewModel>(2)
+         {
+            ControlSliderViewModel.BasicVol,
+            ControlSliderViewModel.BasicVol
+         };
+
+         this.WhenAnyValue(vm => vm.GeneratorMode)
+            .Subscribe(m => finalSample.GeneratorMode = m)
+            .DisposeWith(Disposables);
+         MonoVolVMs[0].WhenAnyValue(vm => vm.Value)
+            .Subscribe(m => finalSample.MonoLeftVolume = (float)m)
+            .DisposeWith(Disposables);
+         MonoVolVMs[1].WhenAnyValue(vm => vm.Value)
+           .Subscribe(m => finalSample.MonoRightVolume = (float)m)
+           .DisposeWith(Disposables);
+
+         AudioPlayerViewModel =
+            new AudioPlayerViewModel(finalSample)
+            .DisposeWith(Disposables);
       }
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
