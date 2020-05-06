@@ -17,8 +17,24 @@ namespace StimmingSignalGenerator.Generators
       public PlotModel PlotModel { get; }
       public int PointLimit { get; }
       public bool IsEnable { get; set; }
+      public bool IsHighDefinition
+      {
+         get => isHighDefinition;
+         set
+         {
+            if (isHighDefinition != value)
+            {
+               isHighDefinition = value;
+               if (isHighDefinition)
+                  lineSeries.Decimator = null;
+               else
+                  lineSeries.Decimator = Decimator.Decimate;
+            }
+         }
+      }
       public WaveFormat WaveFormat => InputSample.WaveFormat;
 
+      private bool isHighDefinition;
       private readonly LineSeries lineSeries = new LineSeries();
       private readonly SynchronizationContext synchronizationContext;
 
@@ -56,7 +72,7 @@ namespace StimmingSignalGenerator.Generators
               AbsoluteMaximum = PointLimit
            });
 
-
+         lineSeries.Decimator = Decimator.Decimate;
          this.synchronizationContext = synchronizationContext;
 
          PlotModel.Series.Add(lineSeries);

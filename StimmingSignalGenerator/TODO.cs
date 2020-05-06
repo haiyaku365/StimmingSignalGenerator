@@ -8,7 +8,7 @@
 //TODO UpdateSourceTrigger=LostFocus in ControlSlider (wait for avalonia implement https://github.com/AvaloniaUI/Avalonia/issues/3754)
 
 //-TODO Waveform visualization (OxyPlot)
-//TODO Exp with faster way to plot or optimize oxyplot
+//-TODO Exp with faster way to plot or optimize oxyplot(use Decimator to reduce datapoint)
 //TODO Waveform in BasicSignalView
 
 
