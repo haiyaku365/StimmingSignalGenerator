@@ -18,7 +18,7 @@
 //TODO UpdateSourceTrigger=LostFocus in ControlSlider (wait for avalonia implement https://github.com/AvaloniaUI/Avalonia/issues/3754)
 
 //-TODO Waveform visualization (OxyPlot)
-//TODO Exp with faster way to plot or optimize oxyplot
+//-TODO Exp with faster way to plot or optimize oxyplot(use Decimator to reduce datapoint)
 //TODO Waveform in BasicSignalView
 //-TODO Fix cracking noise when move slider (meybe Portamento will fixes this? check out https://github.com/naudio/sinegenerator-sample/blob/master/SineGenerator/SineWaveProvider.cs)
 //-TODO Rename SignalSlider -> ControlSlider

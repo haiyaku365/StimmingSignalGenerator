@@ -12,10 +12,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    public class PlotSampleViewModel : ViewModelBase, IDisposable
    {
       public PlotModel PlotModel { get; }
-      private bool isPlotEnable;
       public bool IsPlotEnable { get => isPlotEnable; set => this.RaiseAndSetIfChanged(ref isPlotEnable, value); }
-      private PlotSampleProvider plotSampleProvider;
+      public bool IsHighDefinition { get => isHighDefinition; set => this.RaiseAndSetIfChanged(ref isHighDefinition, value); }
       public ISampleProvider SampleSignal => plotSampleProvider;
+
+      private bool isPlotEnable;
+      private bool isHighDefinition;
+      private PlotSampleProvider plotSampleProvider;
       public PlotSampleViewModel(PlotSampleProvider plotSampleProvider)
       {
          this.plotSampleProvider = plotSampleProvider;
@@ -23,6 +26,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          this.ObservableForProperty(x => x.IsPlotEnable)
             .Subscribe(x => plotSampleProvider.IsEnable = x.Value)
+            .DisposeWith(Disposables);
+         this.ObservableForProperty(x => x.IsHighDefinition)
+            .Subscribe(x => plotSampleProvider.IsHighDefinition = x.Value)
             .DisposeWith(Disposables);
       }
 

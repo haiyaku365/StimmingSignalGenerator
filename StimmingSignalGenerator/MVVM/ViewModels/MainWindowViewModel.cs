@@ -18,6 +18,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public List<MultiSignalViewModel> MultiSignalVMs { get; }
       public List<PlotSampleViewModel> SignalPlotVMs { get; }
       public List<ControlSliderViewModel> MonoVolVMs { get; set; }
+      public bool IsHDPlot { get => isHDPlot; set => this.RaiseAndSetIfChanged(ref isHDPlot, value); }
+      private bool isHDPlot;
       public GeneratorModeType GeneratorMode
       {
          get => generatorMode;
@@ -40,6 +42,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                   new PlotSampleProvider(s.SampleSignal)
                ).DisposeWith(Disposables))
             );
+
+         foreach (var plotVM in SignalPlotVMs)
+         {
+            this.WhenAnyValue(vm => vm.IsHDPlot)
+               .Subscribe(x => plotVM.IsHighDefinition = x)
+               .DisposeWith(Disposables);
+         }
 
          var finalSample =
             new SwitchingModeSampleProvider(

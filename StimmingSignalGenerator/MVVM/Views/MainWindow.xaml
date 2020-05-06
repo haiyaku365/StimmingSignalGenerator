@@ -19,6 +19,9 @@
       <ComboBox DockPanel.Dock="Left"
                 Items="{Binding Source={helper:EnumBindingSource {x:Type p:GeneratorModeType}}}"
                 SelectedItem="{Binding GeneratorMode}"/>
+
+
+      <ToggleButton Margin="5 0" Content="HD Plot" IsChecked="{Binding IsHDPlot}" />
       <v:AudioPlayerView DockPanel.Dock="Right" DataContext="{Binding AudioPlayerViewModel}"
                        VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
     </DockPanel>
