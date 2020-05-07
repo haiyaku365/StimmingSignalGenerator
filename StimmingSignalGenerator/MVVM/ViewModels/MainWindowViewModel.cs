@@ -1,6 +1,7 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
+using Splat;
 using StimmingSignalGenerator.Generators;
 using System;
 using System.Collections.Generic;
@@ -15,84 +16,16 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    class MainWindowViewModel : ViewModelBase, IDisposable
    {
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
-      public List<MultiSignalViewModel> MultiSignalVMs { get; }
-      public List<PlotSampleViewModel> SignalPlotVMs { get; }
-      public List<ControlSliderViewModel> MonoVolVMs { get; set; }
-      public bool IsHDPlot { get => isHDPlot; set => this.RaiseAndSetIfChanged(ref isHDPlot, value); }
-      private bool isHDPlot;
-      public GeneratorModeType GeneratorMode
-      {
-         get => generatorMode;
-         set => this.RaiseAndSetIfChanged(ref generatorMode, value);
-      }
-      private GeneratorModeType generatorMode;
+      public PresetViewModel PresetViewModel { get;  }
+      private AppState AppState { get; }
       public MainWindowViewModel()
       {
-         MultiSignalVMs = new List<MultiSignalViewModel>(3)
-         {
-            new MultiSignalViewModel().DisposeWith(Disposables),
-            new MultiSignalViewModel().DisposeWith(Disposables),
-            new MultiSignalViewModel().DisposeWith(Disposables)
-         };
-
-         SignalPlotVMs = new List<PlotSampleViewModel>(3);
-         SignalPlotVMs.AddRange(
-            MultiSignalVMs.Select(s =>
-               new PlotSampleViewModel(
-                  new PlotSampleProvider(s.SampleSignal)
-               ).DisposeWith(Disposables))
-            );
-
-         foreach (var plotVM in SignalPlotVMs)
-         {
-            this.WhenAnyValue(vm => vm.IsHDPlot)
-               .Subscribe(x => plotVM.IsHighDefinition = x)
-               .DisposeWith(Disposables);
-         }
-
-         var finalSample =
-            new SwitchingModeSampleProvider(
-               SignalPlotVMs.Take(1).Select(s => s.SampleSignal).Single(),
-               SignalPlotVMs.Skip(1).Select(s => s.SampleSignal)
-            );
-
-         MonoVolVMs = new List<ControlSliderViewModel>(2)
-         {
-            ControlSliderViewModel.BasicVol,
-            ControlSliderViewModel.BasicVol
-         };
-
-         this.WhenAnyValue(vm => vm.GeneratorMode)
-            .Subscribe(m => finalSample.GeneratorMode = m)
-            .DisposeWith(Disposables);
-         MonoVolVMs[0].WhenAnyValue(vm => vm.Value)
-            .Subscribe(m => finalSample.MonoLeftVolume = (float)m)
-            .DisposeWith(Disposables);
-         MonoVolVMs[1].WhenAnyValue(vm => vm.Value)
-           .Subscribe(m => finalSample.MonoRightVolume = (float)m)
-           .DisposeWith(Disposables);
+         AppState = Locator.Current.GetService<AppState>();
+         PresetViewModel = new PresetViewModel();
 
          AudioPlayerViewModel =
-            new AudioPlayerViewModel(finalSample)
+            new AudioPlayerViewModel(PresetViewModel.FinalSample)
             .DisposeWith(Disposables);
-      }
-
-      void Save()
-      {
-         IEnumerable<Generators.POCOs.MultiSignal> pocos;
-         switch (GeneratorMode)
-         {
-            case GeneratorModeType.Mono:
-               pocos = MultiSignalVMs.Take(1).Select(vm => vm.ToPOCO());
-               break;
-            case GeneratorModeType.Stereo:
-               pocos = MultiSignalVMs.Skip(1).Select(vm => vm.ToPOCO());
-               break;
-            default:
-               throw new ApplicationException("Bad GeneratorMode");
-         }
-         var jsonStr = new Generators.POCOs.Preset { MultiSignals = pocos.ToList() }.ToJson();
-         //Generators.POCOs.Preset.FromJson<Generators.POCOs.MonoPreset>("jsonStr");
       }
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();

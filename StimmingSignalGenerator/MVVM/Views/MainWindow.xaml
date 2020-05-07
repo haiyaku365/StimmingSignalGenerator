@@ -18,48 +18,12 @@
     <DockPanel DockPanel.Dock="Top" Margin="5">
       <ComboBox DockPanel.Dock="Left"
                 Items="{Binding Source={helper:EnumBindingSource {x:Type p:GeneratorModeType}}}"
-                SelectedItem="{Binding GeneratorMode}"/>
-      <Button Margin="5 0" Content="Save" Command="{Binding Save}" />
-      <ToggleButton Margin="5 0" Content="HD Plot" IsChecked="{Binding IsHDPlot}" />
+                SelectedItem="{Binding AppState.GeneratorMode}"/>
+      <ToggleButton Margin="5 0" Content="HD Plot" IsChecked="{Binding AppState.IsHDPlot}" />
       <v:AudioPlayerView DockPanel.Dock="Right" DataContext="{Binding AudioPlayerViewModel}"
                        VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
     </DockPanel>
 
-    <!-- Mono -->
-    <Border DockPanel.Dock="Top" IsVisible="{Binding !GeneratorMode}"
-            BorderBrush="Goldenrod" BorderThickness="1" CornerRadius="2">
-      <DockPanel Margin="5" >
-        <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding SignalPlotVMs[0]}" />
-        <Grid DockPanel.Dock="Top">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-          </Grid.ColumnDefinitions>
-          <v:ControlSliderView Grid.Column="0" DataContext="{Binding MonoVolVMs[0]}"/>
-          <v:ControlSliderView Grid.Column="1" DataContext="{Binding MonoVolVMs[1]}"/>
-        </Grid>
-        <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding MultiSignalVMs[0]}"/>
-      </DockPanel>
-    </Border>
-
-    <!-- stereo -->
-    <Grid DockPanel.Dock="Top" IsVisible="{Binding !!GeneratorMode}">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition />
-        <ColumnDefinition />
-      </Grid.ColumnDefinitions>
-      <Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" CornerRadius="2">
-        <DockPanel Margin="5" >
-          <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding SignalPlotVMs[1]}" />
-          <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding MultiSignalVMs[1]}"/>
-        </DockPanel>
-      </Border>
-      <Border Grid.Column="1"  BorderBrush="Red" BorderThickness="1" CornerRadius="2">
-        <DockPanel Margin="5" >
-          <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding SignalPlotVMs[2]}" />
-          <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding MultiSignalVMs[2]}"/>
-        </DockPanel>
-      </Border>
-    </Grid>
+    <v:PresetView DockPanel.Dock="Top" DataContext="{Binding PresetViewModel}" />
   </DockPanel>
 </Window>
