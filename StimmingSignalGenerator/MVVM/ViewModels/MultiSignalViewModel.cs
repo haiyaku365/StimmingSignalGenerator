@@ -28,12 +28,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ISampleProvider SampleSignal => multiSignal;
 
       private readonly MultiSignal multiSignal;
-      public MultiSignalViewModel(string firstSignalName = "Signal1")
+      public MultiSignalViewModel()
       {
          BasicSignalVMsSourceCache =
             new SourceCache<BasicSignalViewModel, int>(x => x.Id)
             .DisposeWith(Disposables);
-         var initVM = CreateVM(firstSignalName, 1);
          multiSignal = new MultiSignal();
 
          BasicSignalVMsSourceCache.Connect()
@@ -48,8 +47,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe()
             .DisposeWith(Disposables);
 
-         BasicSignalVMsSourceCache.AddOrUpdate(initVM);
-
          AddCommand = ReactiveCommand.Create(
             () => AddVM())
             .DisposeWith(Disposables);
@@ -62,6 +59,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
            .ObservableForProperty(x => x.Value, skipInitial: false)
            .Subscribe(x => Volume = x.Value)
            .DisposeWith(Disposables);
+
+         //init vm
+         AddVM();
+         basicSignalVMs.First().Volume = 1;
       }
 
       public double Volume
