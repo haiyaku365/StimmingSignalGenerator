@@ -15,15 +15,15 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private double smallChange;
       private double largeChange;
 
+
+      public const double BasicSignalFreqMin = 300;
       public static ControlSliderViewModel BasicSignalFreq =>
-         new ControlSliderViewModel(440, 20, 10000, 1, 10, 50);
-      public static ControlSliderViewModel AMSignalFreq =>
-         new ControlSliderViewModel(1, 0, 6, 0.01, 0.01, 0.05);
-      public static ControlSliderViewModel FMSignalFreq =>
+         new ControlSliderViewModel(440, BasicSignalFreqMin, 8000, 1, 10, 50);
+      public static ControlSliderViewModel ModulationSignalFreq =>
          new ControlSliderViewModel(1, 0, 6, 0.01, 0.01, 0.05);
       public static ControlSliderViewModel BasicVol => Vol();
       public static ControlSliderViewModel Vol(double initValue = 1) =>
-         new ControlSliderViewModel(initValue, 0, 1, 0.001, 0.001, 0.005);
+         new ControlSliderViewModel(initValue, 0, 1, 0.0001, 0.0001, 0.005);
 
 
       public ControlSliderViewModel() : this(440, 0, 10000, 1, 10, 50) { }

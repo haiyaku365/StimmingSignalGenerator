@@ -11,15 +11,5 @@ namespace StimmingSignalGenerator.Generators.POCOs
    {
       public double Gain { get; set; }
       public List<BasicSignal> BasicSignals { get; set; }
-
-      public Generators.MultiSignal ToObject()
-      {
-         var obj = new Generators.MultiSignal() { Gain = Gain };
-         foreach (var item in BasicSignals)
-         {
-            obj.AddSignal(item.ToObject());
-         }
-         return obj;
-      }
    }
 }

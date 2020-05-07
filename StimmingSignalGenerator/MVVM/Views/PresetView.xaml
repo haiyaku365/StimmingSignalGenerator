@@ -14,7 +14,7 @@
   <DockPanel>
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5">
       <Button Content="Save" Command="{Binding SavePresetCommand}" />
-      <Button Content="Load" Command="{Binding LoadPresetComand}" />
+      <Button Content="Load" Command="{Binding LoadPresetCommand}" />
     </StackPanel>
     <v:PlotView DockPanel.Dock="Top" DataContext="{Binding PlotViewModel}" />
     <DockPanel DockPanel.Dock="Top">

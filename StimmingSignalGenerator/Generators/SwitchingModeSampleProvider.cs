@@ -33,18 +33,33 @@ namespace StimmingSignalGenerator.Generators
          }
       }
 
-      private readonly MultiplexingSampleProvider stereoSample;
-      private readonly MonoToStereoSampleProvider monoSample;
-      public SwitchingModeSampleProvider(
-         ISampleProvider monoSampleProvider,
-         IEnumerable<ISampleProvider> stereoSampleProviders)
+      public ISampleProvider MonoSampleProvider
+      {
+         get => monoSampleProvider;
+         set
+         {
+            monoSampleProvider = value;
+            monoSample = new MonoToStereoSampleProvider(monoSampleProvider);
+         }
+      }
+      public IEnumerable<ISampleProvider> StereoSampleProviders
+      {
+         get => stereoSampleProviders;
+         set
+         {
+            stereoSampleProviders = value;
+            stereoSample = new MultiplexingSampleProvider(stereoSampleProviders, 2);
+         }
+      }
+
+      private MultiplexingSampleProvider stereoSample;
+      private MonoToStereoSampleProvider monoSample;
+      private IEnumerable<ISampleProvider> stereoSampleProviders;
+      private ISampleProvider monoSampleProvider;
+
+      public SwitchingModeSampleProvider()
       {
          WaveFormat = Constants.DefaultStereoWaveFormat;
-
-         monoSample =
-            new MonoToStereoSampleProvider(monoSampleProvider);
-         stereoSample =
-            new MultiplexingSampleProvider(stereoSampleProviders, 2);
       }
 
       public int Read(float[] buffer, int offset, int count)

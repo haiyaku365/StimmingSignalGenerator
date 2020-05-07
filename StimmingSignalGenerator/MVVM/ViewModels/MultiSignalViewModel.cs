@@ -28,12 +28,32 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ISampleProvider SampleSignal => multiSignal;
 
       private readonly MultiSignal multiSignal;
-      public MultiSignalViewModel()
+
+      public static MultiSignalViewModel FromPOCO(Generators.POCOs.MultiSignal multiSignal)
+      {
+         var multiSignalVM = new MultiSignalViewModel(new MultiSignal())
+         {
+            Volume = multiSignal.Gain
+         };
+         foreach (var signal in multiSignal.BasicSignals)
+         {
+            multiSignalVM.AddVM(BasicSignalViewModel.FromPOCO(signal));
+         }
+         return multiSignalVM;
+      }
+
+      public MultiSignalViewModel() : this(new MultiSignal())
+      {
+         //init vm
+         AddVM();
+         basicSignalVMs.First().Volume = 1;
+      }
+      public MultiSignalViewModel(MultiSignal multiSignal)
       {
          BasicSignalVMsSourceCache =
             new SourceCache<BasicSignalViewModel, int>(x => x.Id)
             .DisposeWith(Disposables);
-         multiSignal = new MultiSignal();
+         this.multiSignal = multiSignal;
 
          BasicSignalVMsSourceCache.Connect()
             .OnItemAdded(vm => multiSignal.AddSignal(vm.BasicSignal))
@@ -59,10 +79,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
            .ObservableForProperty(x => x.Value, skipInitial: false)
            .Subscribe(x => Volume = x.Value)
            .DisposeWith(Disposables);
-
-         //init vm
-         AddVM();
-         basicSignalVMs.First().Volume = 1;
       }
 
       public double Volume
@@ -78,10 +94,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
 
-      public void AddVM() => AddVM($"Signal{GetNextId() + 1}");
-      public void AddVM(string name)
+      private string CreateVMName() => $"Signal{GetNextId() + 1}";
+      private void AddVM() => AddVM(CreateVM(CreateVMName()));
+      private void AddVM(BasicSignalViewModel VM)
       {
-         BasicSignalVMsSourceCache.AddOrUpdate(CreateVM(name));
+         BasicSignalVMsSourceCache.AddOrUpdate(VM);
       }
 
       public void RemoveVM(BasicSignalViewModel vm)

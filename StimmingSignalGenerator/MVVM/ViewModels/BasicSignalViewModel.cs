@@ -39,6 +39,42 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReactiveCommand<BasicSignalViewModel, Unit> RemoveFMCommand { get; }
 
       public Brush BGColor { get; }
+
+      public static BasicSignalViewModel FromPOCO(Generators.POCOs.BasicSignal basicSignal)
+      {
+
+         ControlSliderViewModel freqControlSlider =
+            (basicSignal.Frequency < ControlSliderViewModel.BasicSignalFreqMin) ?
+               ControlSliderViewModel.ModulationSignalFreq :
+               ControlSliderViewModel.BasicSignalFreq;
+         if (basicSignal.Frequency > freqControlSlider.MaxValue)
+         {
+            freqControlSlider.MaxValue = basicSignal.Frequency;
+         }
+         var basicSignalVM = new BasicSignalViewModel(freqControlSlider)
+         {
+            SignalType = basicSignal.Type,
+            Volume = basicSignal.Gain,
+            Frequency = basicSignal.Frequency,
+            ZeroCrossingPosition = basicSignal.ZeroCrossingPosition
+         };
+         foreach (var am in basicSignal.AMSignals)
+         {
+            var amVM = FromPOCO(am);
+            amVM.Id = basicSignalVM.GetNextId(basicSignalVM.AMSignalVMsSourceCache);
+            amVM.Name = basicSignalVM.CreateAMName();
+            basicSignalVM.AddAM(amVM);
+         }
+         foreach (var fm in basicSignal.FMSignals)
+         {
+            var fmVM = FromPOCO(fm);
+            fmVM.Id = basicSignalVM.GetNextId(basicSignalVM.FMSignalVMsSourceCache);
+            fmVM.Name = basicSignalVM.CreateFMName();
+            basicSignalVM.AddAM(fmVM);
+         }
+         return basicSignalVM;
+      }
+
       public BasicSignalViewModel()
          : this(ControlSliderViewModel.BasicSignalFreq)
       {
@@ -96,7 +132,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe()
             .DisposeWith(Disposables);
          AddAMCommand = ReactiveCommand.Create(
-            () => AMSignalVMsSourceCache.AddOrUpdate(CreateAMVM($"AMSignal{GetNextId(AMSignalVMsSourceCache) + 1}")))
+            () => AddAM())
             .DisposeWith(Disposables);
          RemoveAMCommand = ReactiveCommand.Create<BasicSignalViewModel>(
             vm => AMSignalVMsSourceCache.Remove(vm))
@@ -118,11 +154,24 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe()
             .DisposeWith(Disposables);
          AddFMCommand = ReactiveCommand.Create(
-            () => FMSignalVMsSourceCache.AddOrUpdate(CreateFMVM($"FMSignal{GetNextId(FMSignalVMsSourceCache) + 1}")))
+            () => AddFM())
             .DisposeWith(Disposables);
          RemoveFMCommand = ReactiveCommand.Create<BasicSignalViewModel>(
             vm => FMSignalVMsSourceCache.Remove(vm))
             .DisposeWith(Disposables);
+      }
+
+      private string CreateFMName() => $"FMSignal{GetNextId(FMSignalVMsSourceCache) + 1}";
+      private void AddFM() => AddFM(CreateFMVM(CreateFMName()));
+      private void AddFM(BasicSignalViewModel FMVM)
+      {
+         FMSignalVMsSourceCache.AddOrUpdate(FMVM);
+      }
+      private string CreateAMName() => $"AMSignal{GetNextId(AMSignalVMsSourceCache) + 1}";
+      private void AddAM() => AddAM(CreateAMVM(CreateAMName()));
+      private void AddAM(BasicSignalViewModel AMVM)
+      {
+         AMSignalVMsSourceCache.AddOrUpdate(AMVM);
       }
 
       private BasicSignalType signalType;
@@ -182,13 +231,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private BasicSignalViewModel CreateAMVM(string name, double volume = 0) =>
          new BasicSignalViewModel(
-            ControlSliderViewModel.AMSignalFreq)
+            ControlSliderViewModel.ModulationSignalFreq)
          { Name = name, Id = GetNextId(AMSignalVMsSourceCache), Volume = 0 }
          .DisposeWith(Disposables);
 
       private BasicSignalViewModel CreateFMVM(string name, double volume = 0) =>
          new BasicSignalViewModel(
-            ControlSliderViewModel.FMSignalFreq,
+            ControlSliderViewModel.ModulationSignalFreq,
             new ControlSliderViewModel(0, 0, 100, 1, 1, 5))
          { Name = name, Id = GetNextId(FMSignalVMsSourceCache), Volume = 0 }
          .DisposeWith(Disposables);

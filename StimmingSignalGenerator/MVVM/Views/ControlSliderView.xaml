@@ -24,7 +24,6 @@
                    Increment="{Binding LargeChange}" 
                    Minimum="{Binding MinValue, Mode=OneWay}"
                    Maximum="{Binding MaxValue, Mode=OneWay}"
-                   ClipToBounds="True"
                    Value="{Binding Value,Mode=TwoWay}" />
     <NumericUpDown Grid.Column="2" ShowButtonSpinner="False" 
                    Increment="{Binding LargeChange}"

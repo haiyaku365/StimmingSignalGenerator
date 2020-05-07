@@ -16,4 +16,4 @@
 //TODO Waveform in BasicSignalView
 
 
-//TODO Compact ui
+//TODO Compact ui (BasicSignal control popup when select and pin to stay open )

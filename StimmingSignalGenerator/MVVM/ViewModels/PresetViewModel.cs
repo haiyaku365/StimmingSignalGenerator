@@ -1,33 +1,40 @@
-﻿using ReactiveUI;
+﻿using Avalonia;
+using ReactiveUI;
 using Splat;
 using StimmingSignalGenerator.Generators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Threading.Tasks;
 using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    class PresetViewModel : ViewModelBase, IDisposable
    {
       public AppState AppState { get; }
-      public List<MultiSignalViewModel> MultiSignalVMs { get; }
-
-      public PlotViewModel PlotViewModel { get; }
+      public List<MultiSignalViewModel> MultiSignalVMs { get => multiSignalVMs; private set => this.RaiseAndSetIfChanged(ref multiSignalVMs, value); }
+      public PlotViewModel PlotViewModel { get => plotViewModel; private set => this.RaiseAndSetIfChanged(ref plotViewModel, value); }
       public List<ControlSliderViewModel> MonoVolVMs { get; }
       public SwitchingModeSampleProvider FinalSample { get; }
 
+      public ReactiveCommand<Unit, Unit> SavePresetCommand { get; }
+      public ReactiveCommand<Unit, Unit> LoadPresetCommand { get; }
+
+      private PlotViewModel plotViewModel;
+      private List<MultiSignalViewModel> multiSignalVMs;
       public PresetViewModel()
       {
          AppState = Locator.Current.GetService<AppState>();
 
-         MultiSignalVMs = new List<MultiSignalViewModel>(3)
-         {
-            new MultiSignalViewModel().DisposeWith(Disposables),
-            new MultiSignalViewModel().DisposeWith(Disposables),
-            new MultiSignalViewModel().DisposeWith(Disposables)
-         };
+         SavePresetCommand = ReactiveCommand.CreateFromTask(SaveAsync);
+         LoadPresetCommand = ReactiveCommand.CreateFromTask(LoadAsync);
+
+         FinalSample = new SwitchingModeSampleProvider();
 
          MonoVolVMs = new List<ControlSliderViewModel>(2)
          {
@@ -35,12 +42,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             ControlSliderViewModel.BasicVol
          };
 
-         PlotViewModel = new PlotViewModel(MultiSignalVMs);
-
-         FinalSample = new SwitchingModeSampleProvider(
-                        PlotViewModel.SampleSignal.Take(1).Single(),
-                        PlotViewModel.SampleSignal.Skip(1)
-                     );
+         SetupMultiSignal(
+            new MultiSignalViewModel(),
+            new MultiSignalViewModel(),
+            new MultiSignalViewModel());
 
          AppState.WhenAnyValue(x => x.GeneratorMode)
             .Subscribe(x =>
@@ -54,9 +59,54 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          MonoVolVMs[1].WhenAnyValue(vm => vm.Value)
            .Subscribe(m => FinalSample.MonoRightVolume = (float)m)
            .DisposeWith(Disposables);
+
       }
 
-      void Save()
+      private void SetupMultiSignal(params MultiSignalViewModel[] multiSignalVMs)
+      {
+         var multiSignalVMsCount = multiSignalVMs.Count();
+         switch (multiSignalVMsCount)
+         {
+            case 1:
+               //mono
+               AppState.GeneratorMode = GeneratorModeType.Mono;
+               MultiSignalVMs = new List<MultiSignalViewModel>(3)
+               {
+                  multiSignalVMs[0].DisposeWith(Disposables),
+                  new MultiSignalViewModel().DisposeWith(Disposables),
+                  new MultiSignalViewModel().DisposeWith(Disposables)
+               };
+               break;
+            case 2:
+               //stereo
+               AppState.GeneratorMode = GeneratorModeType.Stereo;
+               MultiSignalVMs = new List<MultiSignalViewModel>(3)
+               {
+                  new MultiSignalViewModel().DisposeWith(Disposables),
+                  multiSignalVMs[0].DisposeWith(Disposables),
+                  multiSignalVMs[1].DisposeWith(Disposables),
+               };
+               break;
+            case 3:
+               //load all
+               MultiSignalVMs = new List<MultiSignalViewModel>(3)
+               {
+                  multiSignalVMs[0].DisposeWith(Disposables),
+                  multiSignalVMs[1].DisposeWith(Disposables),
+                  multiSignalVMs[2].DisposeWith(Disposables),
+               };
+               break;
+            default:
+               //somthing wrong
+               break;
+         }
+         PlotViewModel = new PlotViewModel(MultiSignalVMs);
+         FinalSample.MonoSampleProvider = PlotViewModel.SampleSignal.Take(1).Single();
+         FinalSample.StereoSampleProviders = PlotViewModel.SampleSignal.Skip(1);
+      }
+
+
+      async Task SaveAsync()
       {
          IEnumerable<Generators.POCOs.MultiSignal> pocos;
          switch (AppState.GeneratorMode)
@@ -70,16 +120,20 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             default:
                throw new ApplicationException("Bad GeneratorMode");
          }
-         var jsonStr = new Generators.POCOs.Preset { MultiSignals = pocos.ToList() }.ToJson();
+         await new Generators.POCOs.Preset { MultiSignals = pocos.ToList() }.SaveFileAsync();
       }
 
-      void Load()
+      async Task LoadAsync()
       {
-         //Generators.POCOs.Preset.FromJson<Generators.POCOs.MonoPreset>("jsonStr");
+         var poco = await Generators.POCOs.Preset.LoadFileAsync();
+         //Clean old stuff
+         foreach (var vm in MultiSignalVMs) { vm.Dispose(); }
+         PlotViewModel?.Dispose();
+         //Load to vm
+         SetupMultiSignal(poco.MultiSignals.Select(x => MultiSignalViewModel.FromPOCO(x)).ToArray());
       }
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
-
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)
       {
