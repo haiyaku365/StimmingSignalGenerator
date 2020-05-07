@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             
+             xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
+             xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
+             
+             mc:Ignorable="d"
+             x:Class="StimmingSignalGenerator.MVVM.Views.PlotView">
+  <Expander IsExpanded="{Binding IsPlotEnable}" Header="Plot">
+    <DockPanel>
+      <!-- Mono -->
+      <DockPanel DockPanel.Dock="Top" IsVisible="{Binding !AppState.GeneratorMode}">
+        <v:PlotSampleView DataContext="{Binding SignalPlotVMs[0]}" />
+      </DockPanel>
+      <!-- stereo -->
+      <Grid DockPanel.Dock="Top" IsVisible="{Binding !!AppState.GeneratorMode}">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition />
+          <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <v:PlotSampleView Grid.Column="0" DataContext="{Binding SignalPlotVMs[1]}" />
+        <v:PlotSampleView Grid.Column="1" DataContext="{Binding SignalPlotVMs[2]}" />
+      </Grid>
+    </DockPanel>
+  </Expander>
+
+</UserControl>

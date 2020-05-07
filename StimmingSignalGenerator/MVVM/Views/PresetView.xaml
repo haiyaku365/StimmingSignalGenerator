@@ -16,12 +16,12 @@
       <Button Content="Save" Command="{Binding SavePresetCommand}" />
       <Button Content="Load" Command="{Binding LoadPresetComand}" />
     </StackPanel>
+    <v:PlotView DockPanel.Dock="Top" DataContext="{Binding PlotViewModel}" />
     <DockPanel DockPanel.Dock="Top">
       <!-- Mono -->
       <Border DockPanel.Dock="Top" IsVisible="{Binding !AppState.GeneratorMode}"
               BorderBrush="Goldenrod" BorderThickness="1" CornerRadius="2">
         <DockPanel Margin="5" >
-          <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding SignalPlotVMs[0]}" />
           <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
               <ColumnDefinition/>
@@ -41,16 +41,12 @@
           <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" CornerRadius="2">
-          <DockPanel Margin="5" >
-            <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding SignalPlotVMs[1]}" />
-            <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding MultiSignalVMs[1]}"/>
-          </DockPanel>
+            <v:MultiSignalView DockPanel.Dock="Bottom" Margin="5"
+                               DataContext="{Binding MultiSignalVMs[1]}"/>
         </Border>
-        <Border Grid.Column="1"  BorderBrush="Red" BorderThickness="1" CornerRadius="2">
-          <DockPanel Margin="5" >
-            <v:PlotSampleView DockPanel.Dock="Top" DataContext="{Binding SignalPlotVMs[2]}" />
-            <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding MultiSignalVMs[2]}"/>
-          </DockPanel>
+        <Border Grid.Column="1" BorderBrush="Red" BorderThickness="1" CornerRadius="2">
+            <v:MultiSignalView DockPanel.Dock="Bottom" Margin="5"
+                               DataContext="{Binding MultiSignalVMs[2]}"/>
         </Border>
       </Grid>
     </DockPanel>

@@ -13,9 +13,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    {
       public AppState AppState { get; }
       public List<MultiSignalViewModel> MultiSignalVMs { get; }
-      public List<PlotSampleViewModel> SignalPlotVMs { get; }
-      public SwitchingModeSampleProvider FinalSample { get; private set; }
+
+      public PlotViewModel PlotViewModel { get; }
       public List<ControlSliderViewModel> MonoVolVMs { get; }
+      public SwitchingModeSampleProvider FinalSample { get; }
 
       public PresetViewModel()
       {
@@ -28,32 +29,18 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             new MultiSignalViewModel().DisposeWith(Disposables)
          };
 
-         SignalPlotVMs = new List<PlotSampleViewModel>(3);
-         SignalPlotVMs.AddRange(
-            MultiSignalVMs.Select(s =>
-               new PlotSampleViewModel(
-                  new PlotSampleProvider(s.SampleSignal)
-               ).DisposeWith(Disposables))
-            );
-
-         foreach (var plotVM in SignalPlotVMs)
-         {
-            AppState.WhenAnyValue(x => x.IsHDPlot)
-               .Subscribe(x => plotVM.IsHighDefinition = x)
-               .DisposeWith(Disposables);
-         }
-
-         FinalSample =
-            new SwitchingModeSampleProvider(
-               SignalPlotVMs.Take(1).Select(s => s.SampleSignal).Single(),
-               SignalPlotVMs.Skip(1).Select(s => s.SampleSignal)
-            );
-
          MonoVolVMs = new List<ControlSliderViewModel>(2)
          {
             ControlSliderViewModel.BasicVol,
             ControlSliderViewModel.BasicVol
          };
+
+         PlotViewModel = new PlotViewModel(MultiSignalVMs);
+
+         FinalSample = new SwitchingModeSampleProvider(
+                        PlotViewModel.SampleSignal.Take(1).Single(),
+                        PlotViewModel.SampleSignal.Skip(1)
+                     );
 
          AppState.WhenAnyValue(x => x.GeneratorMode)
             .Subscribe(x =>

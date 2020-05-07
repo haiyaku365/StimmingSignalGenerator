@@ -7,9 +7,5 @@
              
              mc:Ignorable="d"
              x:Class="StimmingSignalGenerator.MVVM.Views.PlotSampleView">
-  <StackPanel>
-    <Expander IsExpanded="{Binding IsPlotEnable}" Header="Plot" >
-      <oxy:PlotView Model="{Binding PlotModel}" Height="120" />
-    </Expander>
-  </StackPanel>
+  <oxy:PlotView Model="{Binding PlotModel}" Height="120" />
 </UserControl>
