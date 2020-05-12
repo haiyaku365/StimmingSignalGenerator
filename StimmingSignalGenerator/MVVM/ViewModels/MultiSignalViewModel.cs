@@ -29,7 +29,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private readonly MultiSignal multiSignal;
 
-      public static MultiSignalViewModel FromPOCO(Generators.POCOs.MultiSignal multiSignal)
+      public static MultiSignalViewModel FromPOCO(POCOs.MultiSignal multiSignal)
       {
          var multiSignalVM = new MultiSignalViewModel(new MultiSignal())
          {
@@ -113,7 +113,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          BasicSignalVMsSourceCache.Count == 0 ?
             0 : BasicSignalVMsSourceCache.Keys.Max() + 1;
 
-      public Generators.POCOs.MultiSignal ToPOCO() => multiSignal.ToPoco();
+      public POCOs.MultiSignal ToPOCO() => multiSignal.ToPoco();
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)

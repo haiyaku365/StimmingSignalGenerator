@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace StimmingSignalGenerator.Generators.POCOs
+namespace StimmingSignalGenerator.POCOs
 {
    class Preset
    {

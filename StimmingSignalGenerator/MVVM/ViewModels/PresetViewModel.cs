@@ -108,7 +108,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       async Task SaveAsync()
       {
-         IEnumerable<Generators.POCOs.MultiSignal> pocos;
+         IEnumerable<POCOs.MultiSignal> pocos;
          switch (AppState.GeneratorMode)
          {
             case GeneratorModeType.Mono:
@@ -120,12 +120,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             default:
                throw new ApplicationException("Bad GeneratorMode");
          }
-         await new Generators.POCOs.Preset { MultiSignals = pocos.ToList() }.SaveFileAsync();
+         await new POCOs.Preset { MultiSignals = pocos.ToList() }.SaveFileAsync();
       }
 
       async Task LoadAsync()
       {
-         var poco = await Generators.POCOs.Preset.LoadFileAsync();
+         var poco = await POCOs.Preset.LoadFileAsync();
          //Clean old stuff
          foreach (var vm in MultiSignalVMs) { vm.Dispose(); }
          PlotViewModel?.Dispose();

@@ -40,7 +40,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public Brush BGColor { get; }
 
-      public static BasicSignalViewModel FromPOCO(Generators.POCOs.BasicSignal basicSignal)
+      public static BasicSignalViewModel FromPOCO(POCOs.BasicSignal basicSignal)
       {
 
          ControlSliderViewModel freqControlSlider =

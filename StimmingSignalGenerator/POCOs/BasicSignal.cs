@@ -1,9 +1,10 @@
 ﻿using NAudio.Wave;
+using StimmingSignalGenerator.Generators;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace StimmingSignalGenerator.Generators.POCOs
+namespace StimmingSignalGenerator.POCOs
 {
    class BasicSignal
    {
