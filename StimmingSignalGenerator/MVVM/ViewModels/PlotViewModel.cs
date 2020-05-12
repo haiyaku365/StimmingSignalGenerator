@@ -15,9 +15,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public AppState AppState { get; }
       public List<PlotSampleViewModel> SignalPlotVMs { get; }
       public IEnumerable<ISampleProvider> SampleSignal => SignalPlotVMs.Select(vm => vm.SampleSignal);
-      public bool IsPlotEnable { get => isPlotEnable; set => this.RaiseAndSetIfChanged(ref isPlotEnable, value); }
-
-      private bool isPlotEnable;
       public PlotViewModel(List<MultiSignalViewModel> multiSignalVMs)
       {
          AppState = Locator.Current.GetService<AppState>();
@@ -35,7 +32,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             AppState.WhenAnyValue(x => x.IsHDPlot)
                .Subscribe(x => plotVM.IsHighDefinition = x)
                .DisposeWith(Disposables);
-            this.WhenAnyValue(x => x.IsPlotEnable)
+            AppState.WhenAnyValue(x => x.IsPlotEnable)
                .Subscribe(x => plotVM.IsPlotEnable = x)
                .DisposeWith(Disposables);
          }

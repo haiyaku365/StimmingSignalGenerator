@@ -18,7 +18,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private bool isPlotEnable;
       private bool isHighDefinition;
-      private PlotSampleProvider plotSampleProvider;
+      private readonly PlotSampleProvider plotSampleProvider;
       public PlotSampleViewModel(PlotSampleProvider plotSampleProvider)
       {
          this.plotSampleProvider = plotSampleProvider;

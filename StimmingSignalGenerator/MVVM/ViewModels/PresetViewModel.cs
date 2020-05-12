@@ -31,8 +31,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          AppState = Locator.Current.GetService<AppState>();
 
-         SavePresetCommand = ReactiveCommand.CreateFromTask(SaveAsync);
-         LoadPresetCommand = ReactiveCommand.CreateFromTask(LoadAsync);
+         SavePresetCommand = ReactiveCommand.CreateFromTask(SaveAsync).DisposeWith(Disposables);
+         LoadPresetCommand = ReactiveCommand.CreateFromTask(LoadAsync).DisposeWith(Disposables);
 
          FinalSample = new SwitchingModeSampleProvider();
 
@@ -98,7 +98,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                break;
             default:
                //somthing wrong
-               break;
+               throw new ApplicationException("somthing wrong in PresetViewModel.SetupMultiSignal(params MultiSignalViewModel[] multiSignalVMs)");
          }
          PlotViewModel = new PlotViewModel(MultiSignalVMs);
          FinalSample.MonoSampleProvider = PlotViewModel.SampleSignal.Take(1).Single();

@@ -8,7 +8,7 @@
              
              mc:Ignorable="d"
              x:Class="StimmingSignalGenerator.MVVM.Views.PlotView">
-  <Expander IsExpanded="{Binding IsPlotEnable}" Header="Plot">
+  <Expander IsExpanded="{Binding AppState.IsPlotEnable}" Header="Plot">
     <DockPanel>
       <!-- Mono -->
       <DockPanel DockPanel.Dock="Top" IsVisible="{Binding !AppState.GeneratorMode}">
