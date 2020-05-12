@@ -13,13 +13,7 @@
              x:Class="StimmingSignalGenerator.MVVM.Views.BasicSignalView"
              
              Margin="5">
-  <Expander>
-    <!-- Style -->
-    <Expander.Styles>
-      <Style Selector="Expander">
-        <Setter Property="IsExpanded" Value="True"/>
-      </Style>
-    </Expander.Styles>
+  <Expander IsExpanded="{Binding IsExpanded}">
 
     <!-- Header -->
     <Expander.Header>
@@ -34,11 +28,6 @@
 
     <!-- Content -->
     <Grid>
-      <Grid.Styles>
-        <Style Selector="Expander">
-          <Setter Property="IsExpanded" Value="false"/>
-        </Style>
-      </Grid.Styles>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="35" />
         <ColumnDefinition Width="*" />
@@ -69,7 +58,8 @@
       <v:ControlSliderView Grid.Row="3" Grid.Column="1"
                            DataContext="{Binding ZCPosControlSliderViewModel}"/>
       <DockPanel Grid.Row="4" Grid.Column="1">
-        <Expander DockPanel.Dock="Top" Header="{Binding AMSignalVMs.Count,StringFormat={}{0} AM Signal(s)}" >
+        <Expander DockPanel.Dock="Top" IsExpanded="{Binding IsAMExpanded}"
+                  Header="{Binding AMSignalVMs.Count,StringFormat={}{0} AM Signal(s)}" >
           <DockPanel>
             <ItemsControl DockPanel.Dock="Top" Margin="2"
                           Items="{Binding AMSignalVMs }">
@@ -99,7 +89,8 @@
                     Command="{Binding AddAMCommand}"/>
           </DockPanel>
         </Expander>
-        <Expander DockPanel.Dock="Top" Header="{Binding FMSignalVMs.Count,StringFormat={}{0} FM Signal(s)}" >
+        <Expander DockPanel.Dock="Top" IsExpanded="{Binding IsFMExpanded}"
+                  Header="{Binding FMSignalVMs.Count,StringFormat={}{0} FM Signal(s)}">
           <DockPanel>
             <ItemsControl DockPanel.Dock="Top" Margin="2"
                           Items="{Binding FMSignalVMs }">

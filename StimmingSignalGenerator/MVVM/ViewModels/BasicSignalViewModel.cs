@@ -24,6 +24,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ControlSliderViewModel VolControlSliderViewModel { get; }
       public ControlSliderViewModel ZCPosControlSliderViewModel { get; }
 
+      public bool IsExpanded { get => isExpanded; set => this.RaiseAndSetIfChanged(ref isExpanded, value); }
+      private bool isExpanded;
+      public bool IsAMExpanded { get => isAMExpanded; set => this.RaiseAndSetIfChanged(ref isAMExpanded, value); }
+      private bool isAMExpanded;
+      public bool IsFMExpanded { get => isFMExpanded; set => this.RaiseAndSetIfChanged(ref isFMExpanded, value); }
+      private bool isFMExpanded;
 
       private readonly ReadOnlyObservableCollection<BasicSignalViewModel> amSignalVMs;
       public ReadOnlyObservableCollection<BasicSignalViewModel> AMSignalVMs => amSignalVMs;
@@ -64,6 +70,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             fmVM.Name = basicSignalVM.CreateFMName();
             basicSignalVM.AddAM(fmVM);
          }
+
          return basicSignalVM;
       }
       public POCOs.BasicSignal ToPOCO() =>
@@ -160,6 +167,23 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
          RemoveFMCommand = ReactiveCommand.Create<BasicSignalViewModel>(
             vm => FMSignalVMsSourceCache.Remove(vm))
+            .DisposeWith(Disposables);
+
+         // HACK Expander IsExpanded is set somewhere from internal avalonia uncontrollable
+         this.WhenAnyValue(x => x.IsAMExpanded)
+            .ObserveOn(RxApp.TaskpoolScheduler)
+            .Sample(TimeSpan.FromMilliseconds(30),RxApp.TaskpoolScheduler)
+            .Where(x => x).Take(1)
+            .SubscribeOn(RxApp.MainThreadScheduler)
+            .Subscribe(_ => IsAMExpanded = AMSignalVMs.Count > 0)
+            .DisposeWith(Disposables);
+
+         this.WhenAnyValue(x => x.IsFMExpanded)
+            .ObserveOn(RxApp.TaskpoolScheduler)
+            .Sample(TimeSpan.FromMilliseconds(30), RxApp.TaskpoolScheduler)
+            .Where(x => x).Take(1)
+            .SubscribeOn(RxApp.MainThreadScheduler)
+            .Subscribe(_ => IsFMExpanded = FMSignalVMs.Count > 0)
             .DisposeWith(Disposables);
       }
 
