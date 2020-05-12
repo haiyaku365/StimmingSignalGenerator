@@ -88,12 +88,5 @@ namespace StimmingSignalGenerator.Generators
          }
          return read;
       }
-
-      public POCOs.MultiSignal ToPoco() =>
-         new POCOs.MultiSignal()
-         {
-            Gain = Gain,
-            BasicSignals = sources.Select(s => s.ToPoco()).ToList()
-         };
    }
 }

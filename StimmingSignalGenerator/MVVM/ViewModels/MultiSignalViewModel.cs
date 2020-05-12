@@ -29,18 +29,26 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private readonly MultiSignal multiSignal;
 
-      public static MultiSignalViewModel FromPOCO(POCOs.MultiSignal multiSignal)
+      public static MultiSignalViewModel FromPOCO(POCOs.MultiSignal poco)
       {
-         var multiSignalVM = new MultiSignalViewModel(new MultiSignal())
-         {
-            Volume = multiSignal.Gain
-         };
-         foreach (var signal in multiSignal.BasicSignals)
+         var multiSignalVM = new MultiSignalViewModel(new MultiSignal());
+         multiSignalVM.VolControlSliderViewModel.MinValue = poco.Volume.Min;
+         multiSignalVM.VolControlSliderViewModel.MaxValue = poco.Volume.Max;
+         multiSignalVM.VolControlSliderViewModel.Value = poco.Volume.Value;
+
+         foreach (var signal in poco.BasicSignals)
          {
             multiSignalVM.AddVM(BasicSignalViewModel.FromPOCO(signal));
          }
          return multiSignalVM;
       }
+
+      public POCOs.MultiSignal ToPOCO() =>
+         new POCOs.MultiSignal()
+         {
+            Volume = VolControlSliderViewModel.ToPOCO(),
+            BasicSignals = BasicSignalVMs.Select(x => x.ToPOCO()).ToList()
+         };
 
       public MultiSignalViewModel() : this(new MultiSignal())
       {
@@ -113,7 +121,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          BasicSignalVMsSourceCache.Count == 0 ?
             0 : BasicSignalVMsSourceCache.Keys.Max() + 1;
 
-      public POCOs.MultiSignal ToPOCO() => multiSignal.ToPoco();
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)

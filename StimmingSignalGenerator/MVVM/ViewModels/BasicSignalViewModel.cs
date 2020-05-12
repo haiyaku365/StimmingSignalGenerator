@@ -40,32 +40,24 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public Brush BGColor { get; }
 
-      public static BasicSignalViewModel FromPOCO(POCOs.BasicSignal basicSignal)
+      public static BasicSignalViewModel FromPOCO(POCOs.BasicSignal poco)
       {
-
-         ControlSliderViewModel freqControlSlider =
-            (basicSignal.Frequency < ControlSliderViewModel.BasicSignalFreqMin) ?
-               ControlSliderViewModel.ModulationSignalFreq :
-               ControlSliderViewModel.BasicSignalFreq;
-         if (basicSignal.Frequency > freqControlSlider.MaxValue)
+         var basicSignalVM = new BasicSignalViewModel(
+            ControlSliderViewModel.FromPOCO(poco.Frequency),
+            ControlSliderViewModel.FromPOCO(poco.Volume),
+            ControlSliderViewModel.FromPOCO(poco.ZeroCrossingPosition))
          {
-            freqControlSlider.MaxValue = basicSignal.Frequency;
-         }
-         var basicSignalVM = new BasicSignalViewModel(freqControlSlider)
-         {
-            SignalType = basicSignal.Type,
-            Volume = basicSignal.Gain,
-            Frequency = basicSignal.Frequency,
-            ZeroCrossingPosition = basicSignal.ZeroCrossingPosition
+            SignalType = poco.Type
          };
-         foreach (var am in basicSignal.AMSignals)
+
+         foreach (var am in poco.AMSignals)
          {
             var amVM = FromPOCO(am);
             amVM.Id = basicSignalVM.GetNextId(basicSignalVM.AMSignalVMsSourceCache);
             amVM.Name = basicSignalVM.CreateAMName();
             basicSignalVM.AddAM(amVM);
          }
-         foreach (var fm in basicSignal.FMSignals)
+         foreach (var fm in poco.FMSignals)
          {
             var fmVM = FromPOCO(fm);
             fmVM.Id = basicSignalVM.GetNextId(basicSignalVM.FMSignalVMsSourceCache);
@@ -74,6 +66,16 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
          return basicSignalVM;
       }
+      public POCOs.BasicSignal ToPOCO() =>
+         new POCOs.BasicSignal()
+         {
+            Type = BasicSignal.Type,
+            Frequency = FreqControlSliderViewModel.ToPOCO(),
+            Volume = VolControlSliderViewModel.ToPOCO(),
+            ZeroCrossingPosition = ZCPosControlSliderViewModel.ToPOCO(),
+            AMSignals = AMSignalVMs.Select(x => x.ToPOCO()).ToList(),
+            FMSignals = FMSignalVMs.Select(x => x.ToPOCO()).ToList()
+         };
 
       public BasicSignalViewModel()
          : this(ControlSliderViewModel.BasicSignalFreq)

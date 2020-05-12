@@ -15,17 +15,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private double smallChange;
       private double largeChange;
 
-
       public const double BasicSignalFreqMin = 300;
+      public const double Tick = 1;
+      public const double SmallTick = 0.01;
+      public const double SuperSmallTick = 0.0001;
       public static ControlSliderViewModel BasicSignalFreq =>
-         new ControlSliderViewModel(440, BasicSignalFreqMin, 8000, 1, 10, 50);
+         new ControlSliderViewModel(440, BasicSignalFreqMin, 8000, Tick, Tick, Tick);
       public static ControlSliderViewModel ModulationSignalFreq =>
-         new ControlSliderViewModel(1, 0, 6, 0.01, 0.01, 0.05);
+         new ControlSliderViewModel(1, 0, 6, SmallTick, SmallTick, SmallTick);
       public static ControlSliderViewModel BasicVol => Vol();
       public static ControlSliderViewModel Vol(double initValue = 1) =>
-         new ControlSliderViewModel(initValue, 0, 1, 0.0001, 0.0001, 0.005);
-
-
+         new ControlSliderViewModel(initValue, 0, 1, SuperSmallTick, SuperSmallTick, SuperSmallTick);
       public ControlSliderViewModel() : this(440, 0, 10000, 1, 10, 50) { }
       public ControlSliderViewModel(double value, double minValue, double maxValue, double tickFrequency, double smallChange, double largeChange)
       {
@@ -39,10 +39,47 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public double Value { get => _value; set => this.RaiseAndSetIfChanged(ref _value, value); }
       public double MinValue { get => minValue; set => this.RaiseAndSetIfChanged(ref minValue, value); }
-      public double MaxValue { get => maxValue; set => this.RaiseAndSetIfChanged(ref maxValue, value); }
+      public double MaxValue
+      {
+         get => maxValue; set
+         {
+            this.RaiseAndSetIfChanged(ref maxValue, value);
+            if (MaxValue <= 1)
+            {
+               TickFrequency = SmallChange = LargeChange = SuperSmallTick;
+            }
+            else if (MaxValue < 20)
+            {
+               TickFrequency = SmallChange = LargeChange = SmallTick;
+            }
+            else
+            {
+               TickFrequency = SmallChange = LargeChange = Tick;
+            }
+         }
+      }
 
       public double TickFrequency { get => tickFrequency; set => this.RaiseAndSetIfChanged(ref tickFrequency, value); }
       public double SmallChange { get => smallChange; set => this.RaiseAndSetIfChanged(ref smallChange, value); }
       public double LargeChange { get => largeChange; set => this.RaiseAndSetIfChanged(ref largeChange, value); }
+
+      public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco)
+      {
+         var controlSliderVM = new ControlSliderViewModel
+         {
+            MinValue = poco.Min,
+            MaxValue = poco.Max,
+            Value = poco.Value
+         };
+
+         return controlSliderVM;
+      }
+      public POCOs.ControlSlider ToPOCO() =>
+         new POCOs.ControlSlider()
+         {
+            Min = MinValue,
+            Max = MaxValue,
+            Value = Value
+         };
    }
 }

@@ -9,7 +9,7 @@ namespace StimmingSignalGenerator.POCOs
 {
    class MultiSignal
    {
-      public double Gain { get; set; }
+      public ControlSlider Volume { get; set; }
       public List<BasicSignal> BasicSignals { get; set; }
    }
 }

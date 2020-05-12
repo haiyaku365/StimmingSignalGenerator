@@ -419,17 +419,6 @@ namespace StimmingSignalGenerator.Generators
       {
          return 2 * random.NextDouble() - 1;
       }
-
-      public POCOs.BasicSignal ToPoco() =>
-         new POCOs.BasicSignal()
-         {
-            Type = Type,
-            Frequency = Frequency,
-            Gain = Gain,
-            ZeroCrossingPosition = ZeroCrossingPosition,
-            AMSignals = AMSignals.Select(s => s.ToPoco()).ToList(),
-            FMSignals = FMSignals.Select(s => s.ToPoco()).ToList()
-         };
    }
 
    /// <summary>
