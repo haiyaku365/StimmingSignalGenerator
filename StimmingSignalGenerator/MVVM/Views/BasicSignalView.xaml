@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -13,8 +13,21 @@
              x:Class="StimmingSignalGenerator.MVVM.Views.BasicSignalView"
              
              Margin="5">
-  <Expander IsExpanded="{Binding IsExpanded}">
-
+  <Expander IsExpanded="{Binding IsExpanded}" Name="TopExpander">
+    <Expander.Styles>
+      <!-- Context menu in header -->
+      <Style Selector="Expander#TopExpander /template/ ToggleButton#PART_toggle">
+        <Setter Property="ContextMenu">
+          <Setter.Value>
+            <Template>
+              <ContextMenu>
+                <MenuItem Icon="📋" Header="Copy to clipboard" Command="{Binding CopyToClipboard}" />
+              </ContextMenu>
+            </Template>
+          </Setter.Value>
+        </Setter>
+      </Style>
+    </Expander.Styles>
     <!-- Header -->
     <Expander.Header>
       <StackPanel Orientation="Horizontal" Spacing="5">
@@ -86,7 +99,13 @@
             <Button DockPanel.Dock="Top" HorizontalAlignment="Left"
                     Width="{Binding $parent.Width,Mode=OneWay}" Height="30" Margin="2"
                     Background="#4dff4d" Content="+AM"
-                    Command="{Binding AddAMCommand}"/>
+                    Command="{Binding AddAMCommand}" >
+              <Button.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Icon="📋" Header="Add from clipboard" Command="{Binding AddAMFromClipboardCommand}" />
+                </ContextMenu>
+              </Button.ContextMenu>
+            </Button>
           </DockPanel>
         </Expander>
         <Expander DockPanel.Dock="Top" IsExpanded="{Binding IsFMExpanded}"
@@ -117,7 +136,13 @@
             <Button DockPanel.Dock="Top" HorizontalAlignment="Left"
                         Width="{Binding $parent.Width,Mode=OneWay}" Height="30" Margin="2"
                         Background="#4dff4d" Content="+FM"
-                        Command="{Binding AddFMCommand}"/>
+                        Command="{Binding AddFMCommand}">
+              <Button.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Icon="📋" Header="Add from clipboard" Command="{Binding AddFMFromClipboardCommand}" />
+                </ContextMenu>
+              </Button.ContextMenu>
+            </Button>
           </DockPanel>
         </Expander>
 

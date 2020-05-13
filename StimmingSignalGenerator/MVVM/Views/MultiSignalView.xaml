@@ -67,7 +67,13 @@
           <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom"
                   Width="{Binding $parent.Width,Mode=OneWay}" Height="30"
                   Background="#4dff4d" Content="BRRRR"
-                  Command="{Binding AddCommand}"/>
+                  Command="{Binding AddCommand}">
+            <Button.ContextMenu>
+              <ContextMenu>
+                <MenuItem Icon="📋" Header="Add from clipboard" Command="{Binding AddFromClipboardCommand}" />
+              </ContextMenu>
+            </Button.ContextMenu>
+          </Button>
 
         </DockPanel>
       </ScrollViewer>

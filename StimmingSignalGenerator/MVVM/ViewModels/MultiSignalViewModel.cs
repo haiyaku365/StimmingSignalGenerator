@@ -3,6 +3,7 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
 using StimmingSignalGenerator.Generators;
+using StimmingSignalGenerator.Helper;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,6 +12,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
@@ -20,6 +22,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
       public ControlSliderViewModel VolControlSliderViewModel { get; }
       public ReactiveCommand<Unit, Unit> AddCommand { get; }
+      public ReactiveCommand<Unit, Unit> AddFromClipboardCommand { get; }
       public ReactiveCommand<BasicSignalViewModel, Unit> RemoveCommand { get; }
 
       private readonly ReadOnlyObservableCollection<BasicSignalViewModel> basicSignalVMs;
@@ -38,7 +41,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          foreach (var signal in poco.BasicSignals)
          {
-            multiSignalVM.AddVM(BasicSignalViewModel.FromPOCO(signal));
+            BasicSignalViewModel.FromPOCO(signal)
+               .AddTo(multiSignalVM.BasicSignalVMsSourceCache);
          }
          return multiSignalVM;
       }
@@ -75,18 +79,21 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe()
             .DisposeWith(Disposables);
 
-         AddCommand = ReactiveCommand.Create(
-            () => AddVM())
+         AddCommand = ReactiveCommand
+            .Create(AddVM)
             .DisposeWith(Disposables);
-         RemoveCommand = ReactiveCommand.Create<BasicSignalViewModel>(
-            vm => RemoveVM(vm))
+         AddFromClipboardCommand = ReactiveCommand
+            .CreateFromTask(AddVMFromClipboard)
+            .DisposeWith(Disposables);
+         RemoveCommand = ReactiveCommand
+            .Create<BasicSignalViewModel>(RemoveVM)
             .DisposeWith(Disposables);
 
          VolControlSliderViewModel = ControlSliderViewModel.BasicVol;
          VolControlSliderViewModel
-           .ObservableForProperty(x => x.Value, skipInitial: false)
-           .Subscribe(x => Volume = x.Value)
-           .DisposeWith(Disposables);
+            .ObservableForProperty(x => x.Value, skipInitial: false)
+            .Subscribe(x => Volume = x.Value)
+            .DisposeWith(Disposables);
       }
 
       public double Volume
@@ -102,24 +109,18 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
 
-      private string CreateVMName() => $"Signal{GetNextId() + 1}";
-      private void AddVM() => AddVM(CreateVM(CreateVMName()));
-      private void AddVM(BasicSignalViewModel VM)
-      {
-         BasicSignalVMsSourceCache.AddOrUpdate(VM);
-      }
-
+      private void AddVM() => CreateVM().AddTo(BasicSignalVMsSourceCache);
+      private Task AddVMFromClipboard() => BasicSignalVMsSourceCache.AddFromClipboard(BasicSignalVMName);
       public void RemoveVM(BasicSignalViewModel vm)
       {
          BasicSignalVMsSourceCache.Remove(vm);
       }
-      private BasicSignalViewModel CreateVM(string name, double volume = 0) =>
-         new BasicSignalViewModel { Name = name, Id = GetNextId(), Volume = volume }
-         .DisposeWith(Disposables);
 
-      private int GetNextId() =>
-         BasicSignalVMsSourceCache.Count == 0 ?
-            0 : BasicSignalVMsSourceCache.Keys.Max() + 1;
+      private const string BasicSignalVMName = "Signal";
+      private BasicSignalViewModel CreateVM(double volume = 0) =>
+            new BasicSignalViewModel { Volume = volume }
+            .SetNameAndId(BasicSignalVMName, BasicSignalVMsSourceCache)
+         .DisposeWith(Disposables);
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       private bool disposedValue;
