@@ -18,9 +18,9 @@
     <None Include="TODO.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.9.9" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.9.9" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.9" />
+    <PackageReference Include="Avalonia" Version="0.9.10" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.9.10" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.10" />
     <PackageReference Include="NAudio" Version="1.10.0" />
     <PackageReference Include="OxyPlot.Avalonia-alpha-2020-04-15" Version="1.0.0" />
   </ItemGroup>
