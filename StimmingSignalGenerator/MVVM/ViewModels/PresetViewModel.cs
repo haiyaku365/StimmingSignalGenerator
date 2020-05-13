@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using ReactiveUI;
 using Splat;
+using StimmingSignalGenerator.FileService;
 using StimmingSignalGenerator.Generators;
 using System;
 using System.Collections.Generic;
@@ -120,12 +121,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             default:
                throw new ApplicationException("Bad GeneratorMode");
          }
-         await new POCOs.Preset { MultiSignals = pocos.ToList() }.SaveFileAsync();
+         await new POCOs.Preset { MultiSignals = pocos.ToList() }.SavePresetAsync();
       }
 
       async Task LoadAsync()
       {
-         var poco = await POCOs.Preset.LoadFileAsync();
+         var poco = await PresetFile.LoadPresetAsync();
+         if (poco == null) return;
          //Clean old stuff
          foreach (var vm in MultiSignalVMs) { vm.Dispose(); }
          PlotViewModel?.Dispose();

@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Splat;
 using StimmingSignalGenerator.MVVM.ViewModels;
 using StimmingSignalGenerator.MVVM.Views;
 using System;
@@ -24,6 +25,7 @@ namespace StimmingSignalGenerator
             {
                DataContext = new MainWindowViewModel().DisposeWith(Disposables)
             };
+            Locator.CurrentMutable.RegisterConstant(desktop.MainWindow);
             desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnMainWindowClose;
 
             Observable.FromEventPattern<ControlledApplicationLifetimeExitEventArgs>

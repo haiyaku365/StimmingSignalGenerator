@@ -41,12 +41,12 @@
           <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" CornerRadius="2">
-            <v:MultiSignalView DockPanel.Dock="Bottom" Margin="5"
-                               DataContext="{Binding MultiSignalVMs[1]}"/>
+          <v:MultiSignalView DockPanel.Dock="Bottom" Margin="5"
+                             DataContext="{Binding MultiSignalVMs[1]}"/>
         </Border>
         <Border Grid.Column="1" BorderBrush="Red" BorderThickness="1" CornerRadius="2">
-            <v:MultiSignalView DockPanel.Dock="Bottom" Margin="5"
-                               DataContext="{Binding MultiSignalVMs[2]}"/>
+          <v:MultiSignalView DockPanel.Dock="Bottom" Margin="5"
+                             DataContext="{Binding MultiSignalVMs[2]}"/>
         </Border>
       </Grid>
     </DockPanel>

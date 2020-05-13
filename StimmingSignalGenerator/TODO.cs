@@ -1,11 +1,13 @@
 
 //TODO master vol
+//TODO preset vol
 //TODO signal phase shift
 //TODO phase, frequency lock and sync between signal
-//TODO Serialize setting
+//-TODO Serialize setting
 //TODO Command to copy BasicSignal to clipboard as json
 //TODO Add BasicSignal from clipboard
-//TODO preset
+//-TODO preset
+//TODO default preset to load when app init
 //TODO playlist
 //TODO UpdateSourceTrigger=LostFocus in ControlSlider (wait for avalonia implement https://github.com/AvaloniaUI/Avalonia/issues/3754)
 //TODO IsPlaying in AppState
