@@ -10,6 +10,9 @@ namespace StimmingSignalGenerator.Generators
    {
       public WaveFormat WaveFormat { get; }
       public GeneratorModeType GeneratorMode { get; set; }
+      /// <summary>
+      /// Multiplier for mono right channel (default is 1.0)
+      /// </summary>
       public float MonoRightVolume
       {
          get
@@ -21,6 +24,9 @@ namespace StimmingSignalGenerator.Generators
             monoSample.RightVolume = value;
          }
       }
+      /// <summary>
+      /// Multiplier for mono left channel (default is 1.0)
+      /// </summary>
       public float MonoLeftVolume
       {
          get
@@ -32,7 +38,10 @@ namespace StimmingSignalGenerator.Generators
             monoSample.LeftVolume = value;
          }
       }
-
+      /// <summary>
+      /// Multiplier for stereo channels (default is 1.0)
+      /// </summary>
+      public float StereoVolume { get; set; } = 1.0f;
       public ISampleProvider MonoSampleProvider
       {
          get => monoSampleProvider;
@@ -72,6 +81,10 @@ namespace StimmingSignalGenerator.Generators
                break;
             case GeneratorModeType.Stereo:
                read = stereoSample.Read(buffer, offset, count);
+               for (int i = 0; i < count; i++)
+               {
+                  buffer[i] *= StereoVolume;
+               }
                break;
             default:
                read = 0;

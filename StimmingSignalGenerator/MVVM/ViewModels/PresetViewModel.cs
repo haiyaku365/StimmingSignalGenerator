@@ -20,7 +20,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public AppState AppState { get; }
       public List<MultiSignalViewModel> MultiSignalVMs { get => multiSignalVMs; private set => this.RaiseAndSetIfChanged(ref multiSignalVMs, value); }
       public PlotViewModel PlotViewModel { get => plotViewModel; private set => this.RaiseAndSetIfChanged(ref plotViewModel, value); }
-      public List<ControlSliderViewModel> MonoVolVMs { get; }
+      public List<ControlSliderViewModel> VolVMs { get; }
       public SwitchingModeSampleProvider FinalSample { get; }
 
       public ReactiveCommand<Unit, Unit> SavePresetCommand { get; }
@@ -37,13 +37,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          FinalSample = new SwitchingModeSampleProvider();
 
-         MonoVolVMs = new List<ControlSliderViewModel>(2)
+         VolVMs = new List<ControlSliderViewModel>(3)
          {
+            ControlSliderViewModel.BasicVol,
             ControlSliderViewModel.BasicVol,
             ControlSliderViewModel.BasicVol
          };
 
-         SetupMultiSignal(
+         SetupSwitchingModeSignal(
             new MultiSignalViewModel(),
             new MultiSignalViewModel(),
             new MultiSignalViewModel());
@@ -54,16 +55,19 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                FinalSample.GeneratorMode = x;
             })
             .DisposeWith(Disposables);
-         MonoVolVMs[0].WhenAnyValue(vm => vm.Value)
+         VolVMs[0].WhenAnyValue(vm => vm.Value)
             .Subscribe(m => FinalSample.MonoLeftVolume = (float)m)
             .DisposeWith(Disposables);
-         MonoVolVMs[1].WhenAnyValue(vm => vm.Value)
+         VolVMs[1].WhenAnyValue(vm => vm.Value)
            .Subscribe(m => FinalSample.MonoRightVolume = (float)m)
+           .DisposeWith(Disposables);
+         VolVMs[2].WhenAnyValue(vm => vm.Value)
+           .Subscribe(m => FinalSample.StereoVolume = (float)m)
            .DisposeWith(Disposables);
 
       }
 
-      private void SetupMultiSignal(params MultiSignalViewModel[] multiSignalVMs)
+      private void SetupSwitchingModeSignal(params MultiSignalViewModel[] multiSignalVMs)
       {
          var multiSignalVMsCount = multiSignalVMs.Count();
          switch (multiSignalVMsCount)
@@ -106,23 +110,56 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          FinalSample.StereoSampleProviders = PlotViewModel.SampleSignal.Skip(1);
       }
 
-
-      async Task SaveAsync()
+      private void SetVolumesFromPOCOs(POCOs.ControlSlider[] pocoVols)
       {
-         IEnumerable<POCOs.MultiSignal> pocos;
+         if (pocoVols == null) return;
+         switch (pocoVols.Length)
+         {
+
+            case 2://mono
+            case 3://load all
+               for (int i = 0; i < pocoVols.Length; i++)
+               {
+                  VolVMs[i].SetToPOCO(pocoVols[i]);
+               }
+               break;
+            case 1:
+               //stereo
+               VolVMs[2].SetToPOCO(pocoVols[0]);
+               break;
+            case 0://no load
+               break;
+            default:
+               //somthing wrong
+               throw new ApplicationException("somthing wrong in PresetViewModel.SetVolumesFromPOCOs(POCOs.ControlSlider[] pocoVols)");
+         }
+      }
+
+      public POCOs.Preset ToPOCO()
+      {
+         IEnumerable<POCOs.MultiSignal> signalPocos;
+         IEnumerable<POCOs.ControlSlider> volPocos;
          switch (AppState.GeneratorMode)
          {
             case GeneratorModeType.Mono:
-               pocos = MultiSignalVMs.Take(1).Select(vm => vm.ToPOCO());
+               signalPocos = MultiSignalVMs.Take(1).Select(vm => vm.ToPOCO());
+               volPocos = VolVMs.Take(2).Select(vm => vm.ToPOCO());
                break;
             case GeneratorModeType.Stereo:
-               pocos = MultiSignalVMs.Skip(1).Select(vm => vm.ToPOCO());
+               signalPocos = MultiSignalVMs.Skip(1).Select(vm => vm.ToPOCO());
+               volPocos = VolVMs.Skip(2).Take(1).Select(vm => vm.ToPOCO());
                break;
             default:
                throw new ApplicationException("Bad GeneratorMode");
          }
-         await new POCOs.Preset { MultiSignals = pocos.ToList() }.SavePresetAsync();
+         return new POCOs.Preset
+         {
+            MultiSignals = signalPocos.ToList(),
+            Volumes = volPocos.ToList()
+         };
       }
+
+      async Task SaveAsync() => await this.ToPOCO().SavePresetAsync();
 
       async Task LoadAsync()
       {
@@ -132,7 +169,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          foreach (var vm in MultiSignalVMs) { vm.Dispose(); }
          PlotViewModel?.Dispose();
          //Load to vm
-         SetupMultiSignal(poco.MultiSignals.Select(x => MultiSignalViewModel.FromPOCO(x)).ToArray());
+         SetupSwitchingModeSignal(poco.MultiSignals.Select(x => MultiSignalViewModel.FromPOCO(x)).ToArray());
+         SetVolumesFromPOCOs(poco.Volumes?.ToArray());
       }
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();

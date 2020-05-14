@@ -63,16 +63,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public double SmallChange { get => smallChange; set => this.RaiseAndSetIfChanged(ref smallChange, value); }
       public double LargeChange { get => largeChange; set => this.RaiseAndSetIfChanged(ref largeChange, value); }
 
-      public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco)
+      public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco) 
+         => new ControlSliderViewModel().SetToPOCO(poco);
+      public ControlSliderViewModel SetToPOCO(POCOs.ControlSlider poco)
       {
-         var controlSliderVM = new ControlSliderViewModel
-         {
-            MinValue = poco.Min,
-            MaxValue = poco.Max,
-            Value = poco.Value
-         };
-
-         return controlSliderVM;
+         MinValue = poco.Min;
+         MaxValue = poco.Max;
+         Value = poco.Value;
+         return this;
       }
       public POCOs.ControlSlider ToPOCO() =>
          new POCOs.ControlSlider()
