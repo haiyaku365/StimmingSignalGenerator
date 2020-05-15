@@ -1,6 +1,6 @@
 
 //TODO master vol
-//TODO preset vol
+//-TODO preset vol
 //TODO signal phase shift
 //TODO phase, frequency lock and sync between signal
 //-TODO Serialize setting
@@ -10,8 +10,8 @@
 //TODO default preset to load when app init
 //TODO playlist
 //TODO UpdateSourceTrigger=LostFocus in ControlSlider (wait for avalonia implement https://github.com/AvaloniaUI/Avalonia/issues/3754)
-//TODO IsPlaying in AppState
-//TODO disable max min slider changing when AudioPlayer IsPlaying
+//-TODO IsPlaying in AppState
+//-TODO disable max min slider changing when AudioPlayer IsPlaying
 
 //-TODO Waveform visualization (OxyPlot)
 //-TODO Exp with faster way to plot or optimize oxyplot(use Decimator to reduce datapoint)

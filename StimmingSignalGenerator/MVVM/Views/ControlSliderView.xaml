@@ -17,7 +17,10 @@
       <ColumnDefinition Width="50"></ColumnDefinition>
       <ColumnDefinition Width="*"></ColumnDefinition>
     </Grid.ColumnDefinitions>
-    <NumericUpDown Grid.Column="0" ShowButtonSpinner="False"
+    <!-- Disable max min editing to prevent value clip and jump when playing -->
+    <!-- Disable max min editing can be remove if avalonia implement UpdateSourceTrigger=LostFocus -->
+    <NumericUpDown Grid.Column="0" ShowButtonSpinner="False" 
+                   IsEnabled="{Binding !AppState.IsPlaying}"
                    Increment="{Binding LargeChange}"
                    Value="{Binding MinValue,Mode=TwoWay}" />
     <NumericUpDown Grid.Column="1" ShowButtonSpinner="False" 
@@ -26,6 +29,7 @@
                    Maximum="{Binding MaxValue, Mode=OneWay}"
                    Value="{Binding Value,Mode=TwoWay}" />
     <NumericUpDown Grid.Column="2" ShowButtonSpinner="False" 
+                   IsEnabled="{Binding !AppState.IsPlaying}"
                    Increment="{Binding LargeChange}"
                    Value="{Binding MaxValue,Mode=TwoWay}" />
     

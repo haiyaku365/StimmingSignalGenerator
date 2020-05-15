@@ -1,6 +1,7 @@
 ﻿using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using ReactiveUI;
+using Splat;
 using StimmingSignalGenerator.Generators;
 using System;
 using System.Collections.Generic;
@@ -29,9 +30,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReactiveCommand<Unit, Unit> StopCommand { get; }
 
       private readonly AudioPlayer audioPlayer;
-      
+      public AppState AppState { get; }
       public AudioPlayerViewModel(ISampleProvider sampleProvider)
       {
+         AppState = Locator.Current.GetService<AppState>();
+
          audioPlayer = new AudioPlayer(sampleProvider);
          PlayCommand = ReactiveCommand.Create(() => Play()).DisposeWith(Disposables);
          StopCommand = ReactiveCommand.Create(() => Stop()).DisposeWith(Disposables);
@@ -39,11 +42,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public void Play()
       {
+         AppState.IsPlaying = true;
          audioPlayer.Play();
       }
 
       public void Stop()
       {
+         AppState.IsPlaying = false;
          audioPlayer.Stop();
       }
 

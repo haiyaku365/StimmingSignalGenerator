@@ -2,19 +2,27 @@
 using System.Collections.Generic;
 using System.Text;
 using ReactiveUI;
-
+using Splat;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    class ControlSliderViewModel : ViewModelBase
    {
-      private double _value;
-      private double minValue;
-      private double maxValue;
-      private double tickFrequency;
-      private double smallChange;
-      private double largeChange;
-
+      public AppState AppState { get; }
+      public double Value { get => _value; set => this.RaiseAndSetIfChanged(ref _value, value); }
+      public double MinValue { get => minValue; set => this.RaiseAndSetIfChanged(ref minValue, value); }
+      public double MaxValue
+      {
+         get => maxValue; set
+         {
+            this.RaiseAndSetIfChanged(ref maxValue, value);
+            AdjustStepChange();
+         }
+      }
+      public double TickFrequency { get => tickFrequency; set => this.RaiseAndSetIfChanged(ref tickFrequency, value); }
+      public double SmallChange { get => smallChange; set => this.RaiseAndSetIfChanged(ref smallChange, value); }
+      public double LargeChange { get => largeChange; set => this.RaiseAndSetIfChanged(ref largeChange, value); }
+      
       public const double BasicSignalFreqMin = 300;
       public const double Tick = 1;
       public const double SmallTick = 0.01;
@@ -29,6 +37,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ControlSliderViewModel() : this(440, 0, 10000, 1, 10, 50) { }
       public ControlSliderViewModel(double value, double minValue, double maxValue, double tickFrequency, double smallChange, double largeChange)
       {
+         AppState = Locator.Current.GetService<AppState>();
+
          Value = value;
          MinValue = minValue;
          MaxValue = maxValue;
@@ -37,32 +47,27 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          LargeChange = largeChange;
       }
 
-      public double Value { get => _value; set => this.RaiseAndSetIfChanged(ref _value, value); }
-      public double MinValue { get => minValue; set => this.RaiseAndSetIfChanged(ref minValue, value); }
-      public double MaxValue
+      private double _value;
+      private double minValue;
+      private double maxValue;
+      private double tickFrequency;
+      private double smallChange;
+      private double largeChange;
+      private void AdjustStepChange()
       {
-         get => maxValue; set
+         if (MaxValue <= 1)
          {
-            this.RaiseAndSetIfChanged(ref maxValue, value);
-            if (MaxValue <= 1)
-            {
-               TickFrequency = SmallChange = LargeChange = SuperSmallTick;
-            }
-            else if (MaxValue < 20)
-            {
-               TickFrequency = SmallChange = LargeChange = SmallTick;
-            }
-            else
-            {
-               TickFrequency = SmallChange = LargeChange = Tick;
-            }
+            TickFrequency = SmallChange = LargeChange = SuperSmallTick;
+         }
+         else if (MaxValue < 20)
+         {
+            TickFrequency = SmallChange = LargeChange = SmallTick;
+         }
+         else
+         {
+            TickFrequency = SmallChange = LargeChange = Tick;
          }
       }
-
-      public double TickFrequency { get => tickFrequency; set => this.RaiseAndSetIfChanged(ref tickFrequency, value); }
-      public double SmallChange { get => smallChange; set => this.RaiseAndSetIfChanged(ref smallChange, value); }
-      public double LargeChange { get => largeChange; set => this.RaiseAndSetIfChanged(ref largeChange, value); }
-
       public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco) 
          => new ControlSliderViewModel().SetToPOCO(poco);
       public ControlSliderViewModel SetToPOCO(POCOs.ControlSlider poco)
