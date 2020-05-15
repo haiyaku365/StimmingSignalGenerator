@@ -16,6 +16,7 @@ namespace StimmingSignalGenerator.FileService
    {
       public static async Task SavePresetAsync(this Preset preset)
       {
+         saveFileDialog.Directory = PresetPath;
          saveFileDialog.InitialFileName = GetNextFileName();
          var savePath = await saveFileDialog.ShowAsync(Window);
          if (savePath == null) return;
@@ -28,6 +29,7 @@ namespace StimmingSignalGenerator.FileService
 
       public static async Task<Preset> LoadPresetAsync()
       {
+         openFileDialog.Directory = PresetPath;
          var loadPath = await openFileDialog.ShowAsync(Window);
          if (loadPath.Length == 0) return null;
          using (FileStream fs = File.OpenRead(loadPath[0]))
@@ -39,18 +41,21 @@ namespace StimmingSignalGenerator.FileService
       private static readonly Regex defaultFileRegex = new Regex(@"(?:Preset)(\d*)(?:.json)$");
       private static string GetNextFileName()
       {
-         var numStr =
-            Directory.EnumerateFiles(PresetPath)
-            .Select(x => defaultFileRegex.Match(x).Groups[1].Value)
-            .OrderBy(x => x).LastOrDefault();
-         if (int.TryParse(numStr, out int num))
+         int maxNum;
+         try
          {
-            return $"Preset{num + 1}.json";
+            maxNum =
+               Directory.EnumerateFiles(PresetPath).DefaultIfEmpty("0")
+                  .Max(x => int.TryParse(defaultFileRegex.Match(x).Groups[1].Value, out int num) ? num : 0);
          }
-         else
+         catch (DirectoryNotFoundException)
          {
-            return $"Preset{1}.json";
+            Directory.CreateDirectory(PresetPath);
+            maxNum = 0;
          }
+         catch (Exception) { throw; }
+
+         return $"Preset{maxNum + 1}.json";
       }
 
       private static readonly List<FileDialogFilter> fileDialogFilters =
@@ -60,14 +65,12 @@ namespace StimmingSignalGenerator.FileService
       private static readonly SaveFileDialog saveFileDialog =
          new SaveFileDialog
          {
-            Directory = PresetPath,
             DefaultExtension = ".json",
             Filters = fileDialogFilters
          };
       private static readonly OpenFileDialog openFileDialog =
          new OpenFileDialog
          {
-            Directory = PresetPath,
             AllowMultiple = false,
             Filters = fileDialogFilters
          };
