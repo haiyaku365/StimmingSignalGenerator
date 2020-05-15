@@ -10,7 +10,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    {
       public AppState AppState { get; }
       public double Value { get => _value; set => this.RaiseAndSetIfChanged(ref _value, value); }
-      public double MinValue { get => minValue; set => this.RaiseAndSetIfChanged(ref minValue, value); }
+      public double MinValue
+      {
+         get => minValue; set
+         {
+            this.RaiseAndSetIfChanged(ref minValue, value);
+            AdjustStepChange();
+         }
+      }
       public double MaxValue
       {
          get => maxValue; set
@@ -22,7 +29,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public double TickFrequency { get => tickFrequency; set => this.RaiseAndSetIfChanged(ref tickFrequency, value); }
       public double SmallChange { get => smallChange; set => this.RaiseAndSetIfChanged(ref smallChange, value); }
       public double LargeChange { get => largeChange; set => this.RaiseAndSetIfChanged(ref largeChange, value); }
-      
+
       public const double BasicSignalFreqMin = 300;
       public const double Tick = 1;
       public const double SmallTick = 0.01;
@@ -55,11 +62,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private double largeChange;
       private void AdjustStepChange()
       {
-         if (MaxValue <= 1)
+         var span = MaxValue - MinValue;
+         if (span <= 1)
          {
             TickFrequency = SmallChange = LargeChange = SuperSmallTick;
          }
-         else if (MaxValue < 20)
+         else if (span <= 100)
          {
             TickFrequency = SmallChange = LargeChange = SmallTick;
          }
@@ -68,7 +76,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             TickFrequency = SmallChange = LargeChange = Tick;
          }
       }
-      public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco) 
+      public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco)
          => new ControlSliderViewModel().SetToPOCO(poco);
       public ControlSliderViewModel SetToPOCO(POCOs.ControlSlider poco)
       {
