@@ -2,6 +2,8 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>haiyaku@tuta.io</Authors>
+    <Version>0.1.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="**\*.xaml.cs">

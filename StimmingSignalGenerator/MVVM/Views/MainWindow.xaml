@@ -13,7 +13,7 @@
         x:Class="StimmingSignalGenerator.MVVM.Views.MainWindow"
         d:DataContext="vm:MainWindowViewModel"
         Width="800"
-        Title="StimmingSignalGenerator">
+        Title="{Binding Title}">
     <DockPanel Margin="10">
       <DockPanel DockPanel.Dock="Top" Margin="0 5">
         <ComboBox DockPanel.Dock="Left"

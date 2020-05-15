@@ -16,8 +16,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    class MainWindowViewModel : ViewModelBase, IDisposable
    {
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
-      public PresetViewModel PresetViewModel { get;  }
-      private AppState AppState { get; }
+      public PresetViewModel PresetViewModel { get; }
+      public AppState AppState { get; }
+      public string Title => $"Stimming Signal Generator {AppState.Version}";
 
       public MainWindowViewModel()
       {
@@ -41,7 +42,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       }
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
-
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)
       {
