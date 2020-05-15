@@ -18,6 +18,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
       public PresetViewModel PresetViewModel { get;  }
       private AppState AppState { get; }
+
       public MainWindowViewModel()
       {
          AppState = Locator.Current.GetService<AppState>();
@@ -26,6 +27,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          AudioPlayerViewModel =
             new AudioPlayerViewModel(PresetViewModel.FinalSample)
             .DisposeWith(Disposables);
+      }
+
+      public void OpenGitHubPage()
+      {
+         System.Diagnostics.Process.Start(
+            new System.Diagnostics.ProcessStartInfo()
+            {
+               FileName = "https://github.com/haiyaku365/StimmingSignalGenerator",
+               UseShellExecute = true
+            }
+            );
       }
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
