@@ -1,4 +1,4 @@
 # StimmingSignalGenerator
 
 #### screenshot
-![Window](c18d087f.PNG)
+![Window](v0.1.0.0.PNG)

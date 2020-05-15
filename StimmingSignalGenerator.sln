@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{605873EF-3
 	ProjectSection(SolutionItems) = preProject
 		docs\c18d087f.PNG = docs\c18d087f.PNG
 		docs\README.md = docs\README.md
+		docs\v0.1.0.0.PNG = docs\v0.1.0.0.PNG
 	EndProjectSection
 EndProject
 Global
