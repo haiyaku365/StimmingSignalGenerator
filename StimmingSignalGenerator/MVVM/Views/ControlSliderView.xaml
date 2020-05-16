@@ -2,8 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:StimmingSignalGenerator.MVVM.Controls;assembly=StimmingSignalGenerator"
-             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="30"
+             
+             xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
+
+             mc:Ignorable="d" d:DesignWidth="500"
+             d:DataContext="{x:Static vm:DesignData.ControlSliderViewModel}"
              x:Class="StimmingSignalGenerator.MVVM.Views.ControlSliderView">
   <Grid>
     <Grid.Styles>
@@ -19,27 +22,27 @@
     </Grid.ColumnDefinitions>
     <!-- Disable max min editing to prevent value clip and jump when playing -->
     <!-- Disable max min editing can be remove if avalonia implement UpdateSourceTrigger=LostFocus -->
-    <NumericUpDown Grid.Column="0" ShowButtonSpinner="False" 
+    <NumericUpDown Grid.Column="0" ShowButtonSpinner="False"
                    IsEnabled="{Binding !AppState.IsPlaying}"
                    Increment="{Binding LargeChange}"
                    Value="{Binding MinValue,Mode=TwoWay}" />
-    <NumericUpDown Grid.Column="1" ShowButtonSpinner="False" 
-                   Increment="{Binding LargeChange}" 
+    <NumericUpDown Grid.Column="1" ShowButtonSpinner="False"
+                   Increment="{Binding LargeChange}"
                    Minimum="{Binding MinValue, Mode=OneWay}"
                    Maximum="{Binding MaxValue, Mode=OneWay}"
                    Value="{Binding Value,Mode=TwoWay}" />
-    <NumericUpDown Grid.Column="2" ShowButtonSpinner="False" 
+    <NumericUpDown Grid.Column="2" ShowButtonSpinner="False"
                    IsEnabled="{Binding !AppState.IsPlaying}"
                    Increment="{Binding LargeChange}"
                    Value="{Binding MaxValue,Mode=TwoWay}" />
-    
+
     <Slider Grid.Column="3"
-            Minimum="{Binding MinValue, Mode=OneWay}" 
+            Minimum="{Binding MinValue, Mode=OneWay}"
             Maximum="{Binding MaxValue, Mode=OneWay}"
-            TickFrequency="{Binding TickFrequency}" 
-            SmallChange="{Binding SmallChange}" 
-            LargeChange="{Binding LargeChange}" 
-            IsSnapToTickEnabled="True" 
+            TickFrequency="{Binding TickFrequency}"
+            SmallChange="{Binding SmallChange}"
+            LargeChange="{Binding LargeChange}"
+            IsSnapToTickEnabled="True"
             Value="{Binding Value,Mode=TwoWay}" />
   </Grid>
 </UserControl>

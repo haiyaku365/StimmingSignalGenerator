@@ -5,7 +5,7 @@ using ReactiveUI;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-    class ViewModelBase : ReactiveObject
+    public class ViewModelBase : ReactiveObject
     {
     }
 }

@@ -8,6 +8,10 @@
              
              mc:Ignorable="d"
              x:Class="StimmingSignalGenerator.MVVM.Views.PlotView">
+  <Design.DataContext>
+    <Binding Source="{x:Static vm:DesignData.MonoPlotViewModel}" />
+    <!--<Binding Source="{x:Static vm:DesignData.StereoPlotViewModel}" />-->
+  </Design.DataContext>
   <Expander IsExpanded="{Binding AppState.IsPlotEnable}" Header="Plot">
     <DockPanel>
       <!-- Mono -->

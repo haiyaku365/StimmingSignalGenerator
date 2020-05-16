@@ -11,7 +11,7 @@ namespace StimmingSignalGenerator.Generators
    /// <summary>
    /// Generate signal from multiple BasicSignal
    /// </summary>
-   class MultiSignal : ISampleProvider
+   public class MultiSignal : ISampleProvider
    {
       public WaveFormat WaveFormat { get; }
 

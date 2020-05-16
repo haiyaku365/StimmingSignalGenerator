@@ -25,7 +25,7 @@ namespace StimmingSignalGenerator.Generators
    /// _waveOutGene.Init(wg);
    /// _waveOutGene.Play();
    /// </remarks>
-   class BasicSignal : ISampleProvider
+   public class BasicSignal : ISampleProvider
    {
 
       // Random Number for the White Noise & Pink Noise Generator

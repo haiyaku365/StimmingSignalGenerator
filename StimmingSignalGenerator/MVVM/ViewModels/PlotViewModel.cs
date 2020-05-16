@@ -10,7 +10,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   class PlotViewModel : ViewModelBase, IDisposable
+   public class PlotViewModel : ViewModelBase, IDisposable
    {
       public AppState AppState { get; }
       public List<PlotSampleViewModel> SignalPlotVMs { get; }

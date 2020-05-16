@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.POCOs
 {
-   class ControlSlider
+   public class ControlSlider
    {
       public double Value { get; set; }
       public double Min { get; set; }

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.POCOs
 {
-   class BasicSignal
+   public class BasicSignal
    {
       public BasicSignalType Type { get; set; }
       public ControlSlider Frequency { get; set; }

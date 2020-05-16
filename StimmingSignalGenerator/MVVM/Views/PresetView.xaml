@@ -9,8 +9,12 @@
              xmlns:p="clr-namespace:StimmingSignalGenerator.Generators;assembly=StimmingSignalGenerator"
              
              mc:Ignorable="d"
-             
+             d:DesignWidth="1000" d:DesignHeight="1000"
              x:Class="StimmingSignalGenerator.MVVM.Views.PresetView">
+  <Design.DataContext>
+    <Binding Source="{x:Static vm:DesignData.MonoPresetViewModel}" />
+    <!--<Binding Source="{x:Static vm:DesignData.StereoPresetViewModel}" />-->
+  </Design.DataContext>
   <DockPanel>
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5">
       <Button Content="Save" Command="{Binding SavePresetCommand}" />

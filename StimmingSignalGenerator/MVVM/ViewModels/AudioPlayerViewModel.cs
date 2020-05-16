@@ -12,7 +12,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   class AudioPlayerViewModel : ViewModelBase, IDisposable
+   public class AudioPlayerViewModel : ViewModelBase, IDisposable
    {
       public MMDevice[] AudioDevices => audioPlayer.AudioDevices;
       public MMDevice AudioDevice

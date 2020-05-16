@@ -4,8 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              
              xmlns:oxy="clr-namespace:OxyPlot.Avalonia;assembly=OxyPlot.Avalonia"
-             
+             xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
+
              mc:Ignorable="d"
+             d:DataContext="{x:Static vm:DesignData.PlotSampleViewModel}"
+             d:DesignWidth="800" d:DesignHeight="150"
              x:Class="StimmingSignalGenerator.MVVM.Views.PlotSampleView">
-  <oxy:PlotView Model="{Binding PlotModel}" Height="120" />
+  <oxy:PlotView Model="{Binding PlotModel}" Height="120" MinWidth="300" />
 </UserControl>

@@ -4,8 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              
              xmlns:h="clr-namespace:StimmingSignalGenerator.MVVM.UiHelper;assembly=StimmingSignalGenerator"
+             xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
              
              mc:Ignorable="d"
+             d:DataContext="{x:Static vm:DesignData.AudioPlayerViewModel}"
+             
              x:Class="StimmingSignalGenerator.MVVM.Views.AudioPlayerView">
   <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
     <ComboBox Items="{Binding AudioDevices}" SelectedItem="{Binding AudioDevice}">

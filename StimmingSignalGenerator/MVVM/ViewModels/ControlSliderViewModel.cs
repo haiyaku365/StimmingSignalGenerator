@@ -6,7 +6,7 @@ using Splat;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   class ControlSliderViewModel : ViewModelBase
+   public class ControlSliderViewModel : ViewModelBase
    {
       public AppState AppState { get; }
       public double Value { get => _value; set => this.RaiseAndSetIfChanged(ref _value, value); }

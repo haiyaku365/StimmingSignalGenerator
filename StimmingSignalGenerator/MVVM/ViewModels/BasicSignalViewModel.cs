@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   class BasicSignalViewModel : ViewModelBase, IDisposable
+   public class BasicSignalViewModel : ViewModelBase, IDisposable
    {
       public int Id { get; internal set; }
       private string name = "SignalGenerator";

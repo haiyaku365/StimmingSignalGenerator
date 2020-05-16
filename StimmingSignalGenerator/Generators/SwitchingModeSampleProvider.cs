@@ -6,7 +6,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.Generators
 {
-   class SwitchingModeSampleProvider : ISampleProvider
+   public class SwitchingModeSampleProvider : ISampleProvider
    {
       public WaveFormat WaveFormat { get; }
       public GeneratorModeType GeneratorMode { get; set; }

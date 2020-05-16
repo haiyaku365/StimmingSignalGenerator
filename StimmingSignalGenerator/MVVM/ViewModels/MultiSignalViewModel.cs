@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   class MultiSignalViewModel : ViewModelBase, IDisposable
+   public class MultiSignalViewModel : ViewModelBase, IDisposable
    {
       private string name = "MultiSignal";
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
