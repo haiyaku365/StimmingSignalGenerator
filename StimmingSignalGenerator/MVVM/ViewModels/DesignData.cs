@@ -1,5 +1,6 @@
 ﻿using Splat;
 using StimmingSignalGenerator.Generators;
+using StimmingSignalGenerator.MVVM.UiHelper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,7 +58,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       static PresetViewModel CreatePresetViewModel(GeneratorModeType generatorModeType)
       {
          Locator.CurrentMutable.RegisterConstant(CreateAppState(generatorModeType));
-         return new PresetViewModel();
+         return new PresetViewModel { Name = "Preset1" };
       }
 
       public static MainWindowViewModel MonoMainWindowViewModel => CreateMainWindowViewModel(GeneratorModeType.Mono);

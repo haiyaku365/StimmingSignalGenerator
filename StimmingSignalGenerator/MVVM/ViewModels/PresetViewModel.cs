@@ -18,6 +18,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    public class PresetViewModel : ViewModelBase, IDisposable
    {
       public AppState AppState { get; }
+      public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
       public List<MultiSignalViewModel> MultiSignalVMs { get => multiSignalVMs; private set => this.RaiseAndSetIfChanged(ref multiSignalVMs, value); }
       public PlotViewModel PlotViewModel { get => plotViewModel; private set => this.RaiseAndSetIfChanged(ref plotViewModel, value); }
       public List<ControlSliderViewModel> VolVMs { get; }
@@ -28,6 +29,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private PlotViewModel plotViewModel;
       private List<MultiSignalViewModel> multiSignalVMs;
+      private string name;
       public PresetViewModel()
       {
          AppState = Locator.Current.GetService<AppState>();
@@ -154,6 +156,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
          return new POCOs.Preset
          {
+            Name = Name,
             MultiSignals = signalPocos.ToList(),
             Volumes = volPocos.ToList()
          };
@@ -169,6 +172,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          foreach (var vm in MultiSignalVMs) { vm.Dispose(); }
          PlotViewModel?.Dispose();
          //Load to vm
+         Name = poco.Name;
          SetupSwitchingModeSignal(poco.MultiSignals.Select(x => MultiSignalViewModel.FromPOCO(x)).ToArray());
          SetVolumesFromPOCOs(poco.Volumes?.ToArray());
       }

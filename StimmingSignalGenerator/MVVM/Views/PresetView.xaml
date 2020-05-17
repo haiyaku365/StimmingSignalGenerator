@@ -17,6 +17,7 @@
   </Design.DataContext>
   <DockPanel>
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5">
+      <TextBlock Text="{Binding Name}" />
       <Button Content="Save" Command="{Binding SavePresetCommand}" />
       <Button Content="Load" Command="{Binding LoadPresetCommand}" />
     </StackPanel>

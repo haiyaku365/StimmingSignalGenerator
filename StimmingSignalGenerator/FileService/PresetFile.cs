@@ -17,7 +17,7 @@ namespace StimmingSignalGenerator.FileService
       public static async Task SavePresetAsync(this Preset preset)
       {
          saveFileDialog.Directory = PresetPath;
-         saveFileDialog.InitialFileName = GetNextFileName();
+         saveFileDialog.InitialFileName = string.IsNullOrWhiteSpace(preset.Name) ? GetNextFileName() : preset.Name;
          var savePath = await saveFileDialog.ShowAsync(Window);
          if (savePath == null) return;
          File.Delete(savePath);
@@ -34,7 +34,9 @@ namespace StimmingSignalGenerator.FileService
          if (loadPath.Length == 0) return null;
          using (FileStream fs = File.OpenRead(loadPath[0]))
          {
-            return await JsonSerializer.DeserializeAsync<Preset>(fs);
+            var poco = await JsonSerializer.DeserializeAsync<Preset>(fs);
+            poco.Name = Path.GetFileNameWithoutExtension(loadPath[0]);
+            return poco;
          }
       }
 
