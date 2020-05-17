@@ -3,7 +3,8 @@ using DynamicData;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
 using StimmingSignalGenerator.Generators;
-using StimmingSignalGenerator.Helper;
+using StimmingSignalGenerator.MVVM.UiHelper;
+using StimmingSignalGenerator.MVVM.ViewModels.Interface;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,9 +18,11 @@ using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   public class BasicSignalViewModel : ViewModelBase, IDisposable
+   public class BasicSignalViewModel : ViewModelBase, ISourceCacheViewModel, IDisposable
    {
       public int Id { get; internal set; }
+      int ISourceCacheViewModel.Id { get => Id; set => Id = value; }
+
       private string name = "SignalGenerator";
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
       public BasicSignal BasicSignal { get; }
@@ -296,6 +299,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
+
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)
       {

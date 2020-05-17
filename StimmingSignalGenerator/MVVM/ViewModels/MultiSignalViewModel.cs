@@ -4,6 +4,7 @@ using NAudio.Wave.SampleProviders;
 using ReactiveUI;
 using StimmingSignalGenerator.Generators;
 using StimmingSignalGenerator.Helper;
+using StimmingSignalGenerator.MVVM.UiHelper;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
