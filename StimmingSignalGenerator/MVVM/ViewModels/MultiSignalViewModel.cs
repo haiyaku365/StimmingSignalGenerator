@@ -17,6 +17,10 @@ using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
+   public class DesignMultiSignalViewModel : DesignViewModelBase
+   {
+      public static MultiSignalViewModel Data => new MultiSignalViewModel();
+   }
    public class MultiSignalViewModel : ViewModelBase, IDisposable
    {
       private string name = "MultiSignal";

@@ -15,6 +15,16 @@ using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
+   public class DesignPresetViewModel : DesignViewModelBase
+   {
+      public static PresetViewModel MonoData => CreatePresetViewModel(GeneratorModeType.Mono);
+      public static PresetViewModel StereoData => CreatePresetViewModel(GeneratorModeType.Stereo);
+      static PresetViewModel CreatePresetViewModel(GeneratorModeType generatorModeType)
+      {
+         PrepareAppState(generatorModeType);
+         return new PresetViewModel { Name = "Preset1" };
+      }
+   }
    public class PresetViewModel : ViewModelBase, IDisposable
    {
       public AppState AppState { get; }

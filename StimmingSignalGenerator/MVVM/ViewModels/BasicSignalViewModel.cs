@@ -18,6 +18,19 @@ using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
+   public class DesignBasicSignalViewModel : DesignViewModelBase
+   {
+      public static BasicSignalViewModel Data =>
+         new BasicSignalViewModel
+         {
+            Name = $"Signal{random.Next(0, 100)}",
+            SignalType = GetRandomEnum<BasicSignalType>(),
+            Frequency = random.Next(300, 7000),
+            Volume = random.NextDouble(),
+            ZeroCrossingPosition = random.NextDouble(),
+            IsExpanded = true
+         };
+   }
    public class BasicSignalViewModel : ViewModelBase, ISourceCacheViewModel, IDisposable
    {
       public int Id { get; internal set; }

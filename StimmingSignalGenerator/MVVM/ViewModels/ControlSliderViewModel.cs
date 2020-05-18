@@ -6,6 +6,25 @@ using Splat;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
+   public class DesignControlSliderViewModel : DesignViewModelBase
+   {
+      public static ControlSliderViewModel Data
+      {
+         get
+         {
+            var isFreq = RandomBool(50);
+            var min = isFreq ? random.Next(0, 1000) : 0;
+            var max = isFreq ? random.Next(5000, 7000) : 1;
+            var value = isFreq ? random.Next(min, max) : random.NextDouble();
+            return new ControlSliderViewModel()
+            {
+               MinValue = min,
+               MaxValue = max,
+               Value = value
+            };
+         }
+      }
+   }
    public class ControlSliderViewModel : ViewModelBase
    {
       public AppState AppState { get; }

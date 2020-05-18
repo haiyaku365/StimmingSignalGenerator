@@ -10,6 +10,16 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
+   public class DesignPlotViewModel : DesignViewModelBase
+   {
+      public static PlotViewModel MonoData => CreatePlotViewModel(GeneratorModeType.Mono);
+      public static PlotViewModel StereoData => CreatePlotViewModel(GeneratorModeType.Stereo);
+      static PlotViewModel CreatePlotViewModel(GeneratorModeType generatorModeType)
+      {
+         PrepareAppState(generatorModeType);
+         return new PlotViewModel(Enumerable.Repeat(new MultiSignalViewModel(), 3).ToList());
+      }
+   }
    public class PlotViewModel : ViewModelBase, IDisposable
    {
       public AppState AppState { get; }

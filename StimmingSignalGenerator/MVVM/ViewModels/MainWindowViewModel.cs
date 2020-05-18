@@ -13,6 +13,16 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
+   public class DesignMainWindowViewModel : DesignViewModelBase
+   {
+      public static MainWindowViewModel MonoData => CreateMainWindowViewModel(GeneratorModeType.Mono);
+      public static MainWindowViewModel StereoData => CreateMainWindowViewModel(GeneratorModeType.Stereo);
+      static MainWindowViewModel CreateMainWindowViewModel(GeneratorModeType generatorModeType)
+      {
+         PrepareAppState(generatorModeType);
+         return new MainWindowViewModel();
+      }
+   }
    public class MainWindowViewModel : ViewModelBase, IDisposable
    {
       public AudioPlayerViewModel AudioPlayerViewModel { get; }

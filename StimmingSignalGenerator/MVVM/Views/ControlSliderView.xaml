@@ -6,7 +6,7 @@
              xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
 
              mc:Ignorable="d" d:DesignWidth="500"
-             d:DataContext="{x:Static vm:DesignData.ControlSliderViewModel}"
+             d:DataContext="{x:Static vm:DesignControlSliderViewModel.Data}"
              x:Class="StimmingSignalGenerator.MVVM.Views.ControlSliderView">
   <Grid>
     <Grid.Styles>

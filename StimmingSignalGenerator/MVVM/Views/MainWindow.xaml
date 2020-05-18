@@ -16,8 +16,8 @@
         Width="800"
         Title="{Binding Title}">
   <Design.DataContext>
-    <Binding Source="{x:Static vm:DesignData.MonoMainWindowViewModel}" />
-    <!--<Binding Source="{x:Static vm:DesignData.StereoMainWindowViewModel}" />-->
+    <Binding Source="{x:Static vm:DesignMainWindowViewModel.MonoData}" />
+    <!--<Binding Source="{x:Static vm:DesignMainWindowViewModel.StereoData}" />-->
   </Design.DataContext>
   <DockPanel Margin="10">
     <DockPanel DockPanel.Dock="Top" Margin="0 5">

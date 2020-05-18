@@ -12,8 +12,8 @@
              d:DesignWidth="1000" d:DesignHeight="1000"
              x:Class="StimmingSignalGenerator.MVVM.Views.PresetView">
   <Design.DataContext>
-    <Binding Source="{x:Static vm:DesignData.MonoPresetViewModel}" />
-    <!--<Binding Source="{x:Static vm:DesignData.StereoPresetViewModel}" />-->
+    <Binding Source="{x:Static vm:DesignPresetViewModel.MonoData}" />
+    <!--<Binding Source="{x:Static vm:DesignPresetViewModel.StereoData}" />-->
   </Design.DataContext>
   <DockPanel>
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5">

@@ -12,6 +12,10 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
+   public class DesignAudioPlayerViewModel : DesignViewModelBase
+   {
+      public static AudioPlayerViewModel Data => new AudioPlayerViewModel(new BasicSignal());
+   }
    public class AudioPlayerViewModel : ViewModelBase, IDisposable
    {
       public MMDevice[] AudioDevices => audioPlayer.AudioDevices;

@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
 
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             d:DataContext="{x:Static vm:DesignData.MultiSignalViewModel}"
+             d:DataContext="{x:Static vm:DesignMultiSignalViewModel.Data}"
              x:Class="StimmingSignalGenerator.MVVM.Views.MultiSignalView">
   <Expander>
     <!-- Style -->

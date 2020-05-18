@@ -9,6 +9,11 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
+   public class DesignPlotSampleViewModel : DesignViewModelBase
+   {
+      public static PlotSampleViewModel Data => 
+         new PlotSampleViewModel(new PlotSampleProvider(new BasicSignal()));
+   }
    public class PlotSampleViewModel : ViewModelBase, IDisposable
    {
       public PlotModel PlotModel { get; }

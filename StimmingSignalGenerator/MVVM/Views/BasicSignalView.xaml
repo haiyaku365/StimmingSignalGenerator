@@ -9,7 +9,7 @@
              xmlns:p="clr-namespace:StimmingSignalGenerator.Generators;assembly=StimmingSignalGenerator"
              
              mc:Ignorable="d" d:DesignWidth="400"
-             d:DataContext="{x:Static vm:DesignData.BasicSignalViewModel}"
+             d:DataContext="{x:Static vm:DesignBasicSignalViewModel.Data}"
              x:Class="StimmingSignalGenerator.MVVM.Views.BasicSignalView"
              
              Margin="5">
