@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.POCOs
 {
-   public class Preset
+   public class Track
    {
       [JsonIgnore] public string Name { get; set; }
       public List<MultiSignal> MultiSignals { get; set; }

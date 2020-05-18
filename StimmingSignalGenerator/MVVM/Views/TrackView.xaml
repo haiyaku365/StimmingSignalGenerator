@@ -10,16 +10,16 @@
              
              mc:Ignorable="d"
              d:DesignWidth="1000" d:DesignHeight="1000"
-             x:Class="StimmingSignalGenerator.MVVM.Views.PresetView">
+             x:Class="StimmingSignalGenerator.MVVM.Views.TrackView">
   <Design.DataContext>
-    <Binding Source="{x:Static vm:DesignPresetViewModel.MonoData}" />
-    <!--<Binding Source="{x:Static vm:DesignPresetViewModel.StereoData}" />-->
+    <Binding Source="{x:Static vm:DesignTrackViewModel.MonoData}" />
+    <!--<Binding Source="{x:Static vm:DesignTrackViewModel.StereoData}" />-->
   </Design.DataContext>
   <DockPanel>
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5">
       <TextBlock Text="{Binding Name}" />
-      <Button Content="Save" Command="{Binding SavePresetCommand}" />
-      <Button Content="Load" Command="{Binding LoadPresetCommand}" />
+      <Button Content="Save" Command="{Binding SaveTrackCommand}" />
+      <Button Content="Load" Command="{Binding LoadTrackCommand}" />
     </StackPanel>
     <v:PlotView DockPanel.Dock="Top" DataContext="{Binding PlotViewModel}" />
     <DockPanel DockPanel.Dock="Top">

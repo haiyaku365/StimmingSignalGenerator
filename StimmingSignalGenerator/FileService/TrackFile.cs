@@ -12,52 +12,52 @@ using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.FileService
 {
-   static class PresetFile
+   static class TrackFile
    {
-      public static async Task SavePresetAsync(this Preset preset)
+      public static async Task SaveTrackAsync(this Track track)
       {
-         saveFileDialog.Directory = PresetPath;
-         saveFileDialog.InitialFileName = string.IsNullOrWhiteSpace(preset.Name) ? GetNextFileName() : preset.Name;
+         saveFileDialog.Directory = TrackPath;
+         saveFileDialog.InitialFileName = string.IsNullOrWhiteSpace(track.Name) ? GetNextFileName() : track.Name;
          var savePath = await saveFileDialog.ShowAsync(Window);
          if (savePath == null) return;
          File.Delete(savePath);
          using (FileStream fs = File.OpenWrite(savePath))
          {
-            await JsonSerializer.SerializeAsync(fs, preset, new JsonSerializerOptions { WriteIndented = true });
+            await JsonSerializer.SerializeAsync(fs, track, new JsonSerializerOptions { WriteIndented = true });
          };
       }
 
-      public static async Task<Preset> LoadPresetAsync()
+      public static async Task<Track> LoadTrackAsync()
       {
-         openFileDialog.Directory = PresetPath;
+         openFileDialog.Directory = TrackPath;
          var loadPath = await openFileDialog.ShowAsync(Window);
          if (loadPath.Length == 0) return null;
          using (FileStream fs = File.OpenRead(loadPath[0]))
          {
-            var poco = await JsonSerializer.DeserializeAsync<Preset>(fs);
+            var poco = await JsonSerializer.DeserializeAsync<Track>(fs);
             poco.Name = Path.GetFileNameWithoutExtension(loadPath[0]);
             return poco;
          }
       }
 
-      private static readonly Regex defaultFileRegex = new Regex(@"(?:Preset)(\d*)(?:.json)$");
+      private static readonly Regex defaultFileRegex = new Regex(@"(?:Track)(\d*)(?:.json)$");
       private static string GetNextFileName()
       {
          int maxNum;
          try
          {
             maxNum =
-               Directory.EnumerateFiles(PresetPath).DefaultIfEmpty("0")
+               Directory.EnumerateFiles(TrackPath).DefaultIfEmpty("0")
                   .Max(x => int.TryParse(defaultFileRegex.Match(x).Groups[1].Value, out int num) ? num : 0);
          }
          catch (DirectoryNotFoundException)
          {
-            Directory.CreateDirectory(PresetPath);
+            Directory.CreateDirectory(TrackPath);
             maxNum = 0;
          }
          catch (Exception) { throw; }
 
-         return $"Preset{maxNum + 1}.json";
+         return $"Track{maxNum + 1}.json";
       }
 
       private static readonly List<FileDialogFilter> fileDialogFilters =
@@ -80,7 +80,7 @@ namespace StimmingSignalGenerator.FileService
       private static Window _window;
       private static Window Window => _window ??= Locator.Current.GetService<Window>();
 
-      private const string PresetLocation = "Preset";
-      private static readonly string PresetPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PresetLocation);
+      private const string TrackLocation = "Track";
+      private static readonly string TrackPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TrackLocation);
    }
 }

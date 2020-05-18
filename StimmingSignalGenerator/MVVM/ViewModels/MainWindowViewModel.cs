@@ -26,17 +26,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    public class MainWindowViewModel : ViewModelBase, IDisposable
    {
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
-      public PresetViewModel PresetViewModel { get; }
+      public TrackViewModel TrackViewModel { get; }
       public AppState AppState { get; }
       public string Title => $"Stimming Signal Generator {AppState.Version}";
 
       public MainWindowViewModel()
       {
          AppState = Locator.Current.GetService<AppState>();
-         PresetViewModel = new PresetViewModel();
+         TrackViewModel = new TrackViewModel();
 
          AudioPlayerViewModel =
-            new AudioPlayerViewModel(PresetViewModel.FinalSample)
+            new AudioPlayerViewModel(TrackViewModel.FinalSample)
             .DisposeWith(Disposables);
       }
 

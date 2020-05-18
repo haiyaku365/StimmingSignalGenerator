@@ -15,17 +15,17 @@ using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
-   public class DesignPresetViewModel : DesignViewModelBase
+   public class DesignTrackViewModel : DesignViewModelBase
    {
-      public static PresetViewModel MonoData => CreatePresetViewModel(GeneratorModeType.Mono);
-      public static PresetViewModel StereoData => CreatePresetViewModel(GeneratorModeType.Stereo);
-      static PresetViewModel CreatePresetViewModel(GeneratorModeType generatorModeType)
+      public static TrackViewModel MonoData => CreateTrackViewModel(GeneratorModeType.Mono);
+      public static TrackViewModel StereoData => CreateTrackViewModel(GeneratorModeType.Stereo);
+      static TrackViewModel CreateTrackViewModel(GeneratorModeType generatorModeType)
       {
          PrepareAppState(generatorModeType);
-         return new PresetViewModel { Name = "Preset1" };
+         return new TrackViewModel { Name = "Track1" };
       }
    }
-   public class PresetViewModel : ViewModelBase, IDisposable
+   public class TrackViewModel : ViewModelBase, IDisposable
    {
       public AppState AppState { get; }
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
@@ -34,18 +34,18 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public List<ControlSliderViewModel> VolVMs { get; }
       public SwitchingModeSampleProvider FinalSample { get; }
 
-      public ReactiveCommand<Unit, Unit> SavePresetCommand { get; }
-      public ReactiveCommand<Unit, Unit> LoadPresetCommand { get; }
+      public ReactiveCommand<Unit, Unit> SaveTrackCommand { get; }
+      public ReactiveCommand<Unit, Unit> LoadTrackCommand { get; }
 
       private PlotViewModel plotViewModel;
       private List<MultiSignalViewModel> multiSignalVMs;
       private string name;
-      public PresetViewModel()
+      public TrackViewModel()
       {
          AppState = Locator.Current.GetService<AppState>();
 
-         SavePresetCommand = ReactiveCommand.CreateFromTask(SaveAsync).DisposeWith(Disposables);
-         LoadPresetCommand = ReactiveCommand.CreateFromTask(LoadAsync).DisposeWith(Disposables);
+         SaveTrackCommand = ReactiveCommand.CreateFromTask(SaveAsync).DisposeWith(Disposables);
+         LoadTrackCommand = ReactiveCommand.CreateFromTask(LoadAsync).DisposeWith(Disposables);
 
          FinalSample = new SwitchingModeSampleProvider();
 
@@ -71,11 +71,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe(m => FinalSample.MonoLeftVolume = (float)m)
             .DisposeWith(Disposables);
          VolVMs[1].WhenAnyValue(vm => vm.Value)
-           .Subscribe(m => FinalSample.MonoRightVolume = (float)m)
-           .DisposeWith(Disposables);
+            .Subscribe(m => FinalSample.MonoRightVolume = (float)m)
+            .DisposeWith(Disposables);
          VolVMs[2].WhenAnyValue(vm => vm.Value)
-           .Subscribe(m => FinalSample.StereoVolume = (float)m)
-           .DisposeWith(Disposables);
+            .Subscribe(m => FinalSample.StereoVolume = (float)m)
+            .DisposeWith(Disposables);
 
       }
 
@@ -115,7 +115,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                break;
             default:
                //somthing wrong
-               throw new ApplicationException("somthing wrong in PresetViewModel.SetupMultiSignal(params MultiSignalViewModel[] multiSignalVMs)");
+               throw new ApplicationException("somthing wrong in TrackViewModel.SetupMultiSignal(params MultiSignalViewModel[] multiSignalVMs)");
          }
          PlotViewModel = new PlotViewModel(MultiSignalVMs);
          FinalSample.MonoSampleProvider = PlotViewModel.SampleSignal.Take(1).Single();
@@ -143,11 +143,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                break;
             default:
                //somthing wrong
-               throw new ApplicationException("somthing wrong in PresetViewModel.SetVolumesFromPOCOs(POCOs.ControlSlider[] pocoVols)");
+               throw new ApplicationException("somthing wrong in TrackViewModel.SetVolumesFromPOCOs(POCOs.ControlSlider[] pocoVols)");
          }
       }
 
-      public POCOs.Preset ToPOCO()
+      public POCOs.Track ToPOCO()
       {
          IEnumerable<POCOs.MultiSignal> signalPocos;
          IEnumerable<POCOs.ControlSlider> volPocos;
@@ -164,7 +164,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             default:
                throw new ApplicationException("Bad GeneratorMode");
          }
-         return new POCOs.Preset
+         return new POCOs.Track
          {
             Name = Name,
             MultiSignals = signalPocos.ToList(),
@@ -172,11 +172,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          };
       }
 
-      async Task SaveAsync() => await this.ToPOCO().SavePresetAsync();
+      async Task SaveAsync() => await this.ToPOCO().SaveTrackAsync();
 
       async Task LoadAsync()
       {
-         var poco = await PresetFile.LoadPresetAsync();
+         var poco = await TrackFile.LoadTrackAsync();
          if (poco == null) return;
          //Clean old stuff
          foreach (var vm in MultiSignalVMs) { vm.Dispose(); }
