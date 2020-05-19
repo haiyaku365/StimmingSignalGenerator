@@ -1,8 +1,10 @@
 ﻿using Avalonia;
+using NAudio.Wave;
 using ReactiveUI;
 using Splat;
 using StimmingSignalGenerator.FileService;
 using StimmingSignalGenerator.Generators;
+using StimmingSignalGenerator.MVVM.ViewModels.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,21 +27,26 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return new TrackViewModel { Name = "Track1" };
       }
    }
-   public class TrackViewModel : ViewModelBase, IDisposable
+   public class TrackViewModel : ViewModelBase, ISourceCacheViewModel, IDisposable
    {
       public AppState AppState { get; }
+      public int Id { get; internal set; }
+      int ISourceCacheViewModel.Id { get => Id; set => Id = value; }
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
+      public double TimeSpanSecond { get => timeSpanSecond; set => this.RaiseAndSetIfChanged(ref timeSpanSecond, value); }
       public List<MultiSignalViewModel> MultiSignalVMs { get => multiSignalVMs; private set => this.RaiseAndSetIfChanged(ref multiSignalVMs, value); }
       public PlotViewModel PlotViewModel { get => plotViewModel; private set => this.RaiseAndSetIfChanged(ref plotViewModel, value); }
       public List<ControlSliderViewModel> VolVMs { get; }
-      public SwitchingModeSampleProvider FinalSample { get; }
+      public ISampleProvider FinalSample => sample;
 
       public ReactiveCommand<Unit, Unit> SaveTrackCommand { get; }
       public ReactiveCommand<Unit, Unit> LoadTrackCommand { get; }
 
+      readonly SwitchingModeSampleProvider sample;
       private PlotViewModel plotViewModel;
       private List<MultiSignalViewModel> multiSignalVMs;
       private string name;
+      private double timeSpanSecond = 0;
       public TrackViewModel()
       {
          AppState = Locator.Current.GetService<AppState>();
@@ -47,7 +54,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          SaveTrackCommand = ReactiveCommand.CreateFromTask(SaveAsync).DisposeWith(Disposables);
          LoadTrackCommand = ReactiveCommand.CreateFromTask(LoadAsync).DisposeWith(Disposables);
 
-         FinalSample = new SwitchingModeSampleProvider();
+         sample = new SwitchingModeSampleProvider();
 
          VolVMs = new List<ControlSliderViewModel>(3)
          {
@@ -64,19 +71,18 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          AppState.WhenAnyValue(x => x.GeneratorMode)
             .Subscribe(x =>
             {
-               FinalSample.GeneratorMode = x;
+               sample.GeneratorMode = x;
             })
             .DisposeWith(Disposables);
          VolVMs[0].WhenAnyValue(vm => vm.Value)
-            .Subscribe(m => FinalSample.MonoLeftVolume = (float)m)
+            .Subscribe(m => sample.MonoLeftVolume = (float)m)
             .DisposeWith(Disposables);
          VolVMs[1].WhenAnyValue(vm => vm.Value)
-            .Subscribe(m => FinalSample.MonoRightVolume = (float)m)
+            .Subscribe(m => sample.MonoRightVolume = (float)m)
             .DisposeWith(Disposables);
          VolVMs[2].WhenAnyValue(vm => vm.Value)
-            .Subscribe(m => FinalSample.StereoVolume = (float)m)
+            .Subscribe(m => sample.StereoVolume = (float)m)
             .DisposeWith(Disposables);
-
       }
 
       private void SetupSwitchingModeSignal(params MultiSignalViewModel[] multiSignalVMs)
@@ -118,8 +124,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                throw new ApplicationException("somthing wrong in TrackViewModel.SetupMultiSignal(params MultiSignalViewModel[] multiSignalVMs)");
          }
          PlotViewModel = new PlotViewModel(MultiSignalVMs);
-         FinalSample.MonoSampleProvider = PlotViewModel.SampleSignal.Take(1).Single();
-         FinalSample.StereoSampleProviders = PlotViewModel.SampleSignal.Skip(1);
+         sample.MonoSampleProvider = PlotViewModel.SampleSignal.Take(1).Single();
+         sample.StereoSampleProviders = PlotViewModel.SampleSignal.Skip(1);
       }
 
       private void SetVolumesFromPOCOs(POCOs.ControlSlider[] pocoVols)
@@ -220,4 +226,3 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       }
    }
 }
-

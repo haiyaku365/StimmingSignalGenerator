@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             
+             xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
+             xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
+             
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             d:DataContext="{x:Static vm:DesignPlaylistViewModel.Data}"
+             
+             x:Class="StimmingSignalGenerator.MVVM.Views.PlaylistView">
+  <DockPanel>
+    <DockPanel DockPanel.Dock="Left">
+      <Button DockPanel.Dock="Bottom" Background="#4dff4d" Height="30" 
+              Content="+Track" Command="{Binding AddNewTrack}" />
+      <ListBox DockPanel.Dock="Top" Margin="2" Items="{ Binding TrackVMs }" 
+               SelectedItem="{Binding SelectedTrackVM}" SelectionMode="Single" >
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Border BorderBrush="Gray" Background="Transparent"
+                    BorderThickness="1" Margin="0 0 0 -1">
+              <DockPanel>
+                <Button DockPanel.Dock="Right" Width="30" Height="30"
+                        Background="#ff4d4d" Content="X"
+                        Command="{Binding $parent[UserControl].DataContext.RemoveTrack}"
+                        CommandParameter="{Binding }" />
+
+                <TextBlock DockPanel.Dock="Left" Text="{Binding Name}" />
+                <TextBlock DockPanel.Dock="Left" Text="Duration:" />
+                <NumericUpDown DockPanel.Dock="Left" Value="{Binding TimeSpanSecond}" Increment="1" Minimum="0" />
+              </DockPanel>
+            </Border>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+    <DockPanel DockPanel.Dock="Right">
+      <v:TrackView DataContext="{Binding SelectedTrackVM}" />
+    </DockPanel>
+  </DockPanel>
+</UserControl>

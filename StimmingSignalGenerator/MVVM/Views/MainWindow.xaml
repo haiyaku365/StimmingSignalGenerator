@@ -37,6 +37,6 @@
                          VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
     </DockPanel>
 
-    <v:TrackView DockPanel.Dock="Top" DataContext="{Binding TrackViewModel}" />
+    <v:PlaylistView DockPanel.Dock="Top" DataContext="{Binding PlaylistViewModel}" />
   </DockPanel>
 </Window>
