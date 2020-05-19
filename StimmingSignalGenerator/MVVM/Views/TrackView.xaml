@@ -16,12 +16,11 @@
     <!--<Binding Source="{x:Static vm:DesignTrackViewModel.StereoData}" />-->
   </Design.DataContext>
   <DockPanel>
-    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5">
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5" Margin="0 0 0 5">
       <TextBlock Text="{Binding Name}" />
       <Button Content="Save" Command="{Binding SaveTrackCommand}" />
       <Button Content="Load" Command="{Binding LoadTrackCommand}" />
     </StackPanel>
-    <v:PlotView DockPanel.Dock="Top" DataContext="{Binding PlotViewModel}" />
     <DockPanel DockPanel.Dock="Top">
       <!-- Mono -->
       <Border DockPanel.Dock="Top" IsVisible="{Binding !AppState.GeneratorMode}"

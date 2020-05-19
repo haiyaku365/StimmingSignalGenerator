@@ -7,8 +7,11 @@
              xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
 
              mc:Ignorable="d"
-             d:DataContext="{x:Static vm:DesignPlotSampleViewModel.Data}"
              d:DesignWidth="800" d:DesignHeight="150"
              x:Class="StimmingSignalGenerator.MVVM.Views.PlotSampleView">
+  <Design.DataContext>
+    <Binding Source="{x:Static vm:DesignPlotSampleViewModel.MonoData}" />
+    <!--<Binding Source="{x:Static vm:DesignPlotSampleViewModel.StereoData}" />-->
+  </Design.DataContext>
   <oxy:PlotView Model="{Binding PlotModel}" Height="120" MinWidth="300" />
 </UserControl>

@@ -35,7 +35,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
       public double TimeSpanSecond { get => timeSpanSecond; set => this.RaiseAndSetIfChanged(ref timeSpanSecond, value); }
       public List<MultiSignalViewModel> MultiSignalVMs { get => multiSignalVMs; private set => this.RaiseAndSetIfChanged(ref multiSignalVMs, value); }
-      public PlotViewModel PlotViewModel { get => plotViewModel; private set => this.RaiseAndSetIfChanged(ref plotViewModel, value); }
       public List<ControlSliderViewModel> VolVMs { get; }
       public ISampleProvider FinalSample => sample;
 
@@ -43,7 +42,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReactiveCommand<Unit, Unit> LoadTrackCommand { get; }
 
       readonly SwitchingModeSampleProvider sample;
-      private PlotViewModel plotViewModel;
       private List<MultiSignalViewModel> multiSignalVMs;
       private string name;
       private double timeSpanSecond = 0;
@@ -123,9 +121,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                //somthing wrong
                throw new ApplicationException("somthing wrong in TrackViewModel.SetupMultiSignal(params MultiSignalViewModel[] multiSignalVMs)");
          }
-         PlotViewModel = new PlotViewModel(MultiSignalVMs);
-         sample.MonoSampleProvider = PlotViewModel.SampleSignal.Take(1).Single();
-         sample.StereoSampleProviders = PlotViewModel.SampleSignal.Skip(1);
+         sample.MonoSampleProvider = MultiSignalVMs.Take(1).Single().SampleSignal;
+         sample.StereoSampleProviders = MultiSignalVMs.Skip(1).Select(x => x.SampleSignal);
       }
 
       private void SetVolumesFromPOCOs(POCOs.ControlSlider[] pocoVols)
@@ -186,7 +183,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          if (poco == null) return;
          //Clean old stuff
          foreach (var vm in MultiSignalVMs) { vm.Dispose(); }
-         PlotViewModel?.Dispose();
          //Load to vm
          Name = poco.Name;
          SetupSwitchingModeSignal(poco.MultiSignals.Select(x => MultiSignalViewModel.FromPOCO(x)).ToArray());

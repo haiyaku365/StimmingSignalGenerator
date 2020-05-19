@@ -13,7 +13,7 @@
         x:Class="StimmingSignalGenerator.MVVM.Views.MainWindow"
         
         Design.Height="1000"
-        Width="800"
+        Width="900"
         Title="{Binding Title}">
   <Design.DataContext>
     <Binding Source="{x:Static vm:DesignMainWindowViewModel.MonoData}" />

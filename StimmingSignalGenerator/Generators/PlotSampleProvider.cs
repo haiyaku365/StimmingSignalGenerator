@@ -11,9 +11,9 @@ using System.Threading;
 
 namespace StimmingSignalGenerator.Generators
 {
-   public class PlotSampleProvider : ISingleSignalInputSampleProvider
+   public class PlotSampleProvider : ISampleProvider
    {
-      public ISampleProvider InputSample { get; set; }
+      public ISampleProvider InputSample { get; }
       public PlotModel PlotModel { get; }
       public int PointLimit { get; }
       public bool IsEnable { get; set; }
@@ -25,19 +25,29 @@ namespace StimmingSignalGenerator.Generators
             if (isHighDefinition != value)
             {
                isHighDefinition = value;
-               if (isHighDefinition)
-                  lineSeries.Decimator = null;
-               else
-                  lineSeries.Decimator = Decimator.Decimate;
+               for (int i = 0; i < lineSeries.Length; i++)
+               {
+                  if (isHighDefinition)
+                  {
+                     lineSeries[i].Decimator = null;
+                     lineSeries[i].MinimumSegmentLength = 2;
+                  }
+                  else
+                  {
+                     lineSeries[i].Decimator = Decimator.Decimate;
+                     lineSeries[i].MinimumSegmentLength = 5;
+                  }
+               }
             }
          }
       }
       public WaveFormat WaveFormat => InputSample.WaveFormat;
 
       private bool isHighDefinition;
-      private readonly LineSeries lineSeries = new LineSeries();
+      private readonly LineSeries[] lineSeries;
+      private readonly int lineCount;
       private readonly SynchronizationContext synchronizationContext;
-
+      private static readonly Random rand = new Random();
       public PlotSampleProvider(
          ISampleProvider inputSample)
          : this(inputSample, SynchronizationContext.Current) { }
@@ -47,9 +57,22 @@ namespace StimmingSignalGenerator.Generators
       SynchronizationContext synchronizationContext)
       {
          InputSample = inputSample;
+         lineCount = inputSample.WaveFormat.Channels;
+         lineSeries = new LineSeries[lineCount];
+         Array.ForEach(lineSeries, x => x = new LineSeries());
+         lineSeries[0] = new LineSeries() { Color = OxyColor.FromArgb(180, 0, 0, 0), MinimumSegmentLength = 5 };
+         if (lineCount > 1)
+         {
+            lineSeries[1] = new LineSeries() { Color = OxyColor.FromArgb(180, 255, 0, 0), MinimumSegmentLength = 5 };
+            for (int i = 2; i < lineCount; i++)
+            {
+               var (r, g, b) = Helper.ColorHelper.HsvToRgb(rand.Next(0, 360), 1, 1);
+               lineSeries[i] = new LineSeries() { Color = OxyColor.FromArgb(180, r, g, b), MinimumSegmentLength = 5 };
+            }
+         }
 
          PlotModel = new PlotModel();
-         PointLimit = WaveFormat.SampleRate / 4;
+         PointLimit = WaveFormat.SampleRate / 8;
          PlotModel.Axes.Add(
            new LinearAxis
            {
@@ -72,33 +95,43 @@ namespace StimmingSignalGenerator.Generators
               AbsoluteMaximum = PointLimit
            });
 
-         lineSeries.Decimator = Decimator.Decimate;
          this.synchronizationContext = synchronizationContext;
-
-         PlotModel.Series.Add(lineSeries);
+         for (int i = 0; i < lineCount; i++)
+         {
+            lineSeries[i].Decimator = Decimator.Decimate;
+            PlotModel.Series.Add(lineSeries[i]);
+         }
       }
 
       int xIdx;
       public int Read(float[] buffer, int offset, int count)
       {
          var read = InputSample.Read(buffer, offset, count);
+         var countPerLine = count / lineCount;
          if (!IsEnable) return read;
 
-         if (lineSeries.Points.Count > PointLimit)
+         for (int c = 0; c < lineCount; c++)
          {
-            //shift out old data
-            var oldPoints = lineSeries.Points.Skip(read).ToArray();
-            lineSeries.Points.Clear();
-            for (int i = 0; i < oldPoints.Length; i++)
+            if (lineSeries[c].Points.Count > PointLimit)
             {
-               lineSeries.Points.Add(new DataPoint(i, oldPoints[i].Y));
+               //shift out old data
+               var oldPoints = lineSeries[c].Points.Skip(countPerLine).ToArray();
+               lineSeries[c].Points.Clear();
+               for (int i = 0; i < oldPoints.Length; i++)
+               {
+                  lineSeries[c].Points.Add(new DataPoint(i, oldPoints[i].Y));
+               }
+               xIdx = lineSeries[c].Points.Count;
             }
-            xIdx = lineSeries.Points.Count;
          }
+
          //insert new data
-         for (int i = 0; i < read; i++)
+         for (int i = 0; i < countPerLine; i++)
          {
-            lineSeries.Points.Add(new DataPoint(xIdx + i, buffer[i]));
+            for (int c = 0; c < lineCount; c++)
+            {
+               lineSeries[c].Points.Add(new DataPoint(xIdx + i, buffer[i * lineCount + c]));
+            }
          }
          xIdx += read;
          synchronizationContext.Post(_ => PlotModel.InvalidatePlot(true), null);

@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using NAudio.Utils;
+using NAudio.Wave;
 using OxyPlot;
 using ReactiveUI;
 using StimmingSignalGenerator.Generators;
@@ -11,8 +12,27 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    public class DesignPlotSampleViewModel : DesignViewModelBase
    {
-      public static PlotSampleViewModel Data => 
-         new PlotSampleViewModel(new PlotSampleProvider(new BasicSignal()));
+      public static PlotSampleViewModel MonoData => CreatePlotSampleViewModel(GeneratorModeType.Mono);
+      public static PlotSampleViewModel StereoData => CreatePlotSampleViewModel(GeneratorModeType.Stereo);
+      private static PlotSampleViewModel CreatePlotSampleViewModel(GeneratorModeType generatorModeType)
+      {
+         PrepareAppState(generatorModeType);
+         ISampleProvider signal = new BasicSignal();
+         if (generatorModeType == GeneratorModeType.Stereo)
+         {
+            signal = signal.ToStereo(1, 0.5f);
+         }
+         var plotSignal = new PlotSampleProvider(signal);
+         var plotVM = new PlotSampleViewModel(plotSignal);
+         plotVM.IsPlotEnable = true;
+
+         var count = Constants.DefaultSampleRate / 8 * signal.WaveFormat.Channels;
+         float[] buffer = Array.Empty<float>();
+         buffer = BufferHelpers.Ensure(buffer, count);
+         plotVM.SampleSignal.Read(buffer, 0, count);
+
+         return plotVM;
+      }
    }
    public class PlotSampleViewModel : ViewModelBase, IDisposable
    {

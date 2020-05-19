@@ -11,10 +11,13 @@
              
              x:Class="StimmingSignalGenerator.MVVM.Views.PlaylistView">
   <DockPanel>
+    <Expander DockPanel.Dock="Top" IsExpanded="{Binding AppState.IsPlotEnable}" Header="Plot">
+      <v:PlotSampleView DataContext="{Binding PlotSampleViewModel}" />
+    </Expander>
     <DockPanel DockPanel.Dock="Left">
-      <Button DockPanel.Dock="Bottom" Background="#4dff4d" Height="30" 
+      <Button DockPanel.Dock="Bottom" Background="#4dff4d" Height="30"
               Content="+Track" Command="{Binding AddNewTrack}" />
-      <ListBox DockPanel.Dock="Top" Margin="2" Items="{ Binding TrackVMs }" 
+      <ListBox DockPanel.Dock="Top" Margin="2" Items="{ Binding TrackVMs }"
                SelectedItem="{Binding SelectedTrackVM}" SelectionMode="Single" >
         <ListBox.ItemTemplate>
           <DataTemplate>

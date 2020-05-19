@@ -1,7 +1,9 @@
 ﻿using DynamicData;
+using NAudio.Utils;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
+using Splat;
 using StimmingSignalGenerator.Generators;
 using StimmingSignalGenerator.MVVM.UiHelper;
 using System;
@@ -25,6 +27,15 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             vm.AddNewTrack();
             vm.AddNewTrack();
             vm.AddNewTrack();
+
+            vm.TrackVMs[0].TimeSpanSecond = 1;
+
+            var count = Constants.DefaultSampleRate / 4;
+            float[] buffer = Array.Empty<float>();
+            buffer = BufferHelpers.Ensure(buffer, count);
+
+            vm.FinalSample.Read(buffer, 0, count);
+
             return vm;
          }
       }
@@ -42,27 +53,32 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          get => selectedTrackVM;
          set => this.RaiseAndSetIfChanged(ref selectedTrackVM, value);
       }
+      public PlotSampleViewModel PlotSampleViewModel { get; }
+      public ISampleProvider FinalSample => PlotSampleViewModel.SampleSignal;
+      public AppState AppState { get; }
 
       private TrackViewModel selectedTrackVM;
       private string name;
-      public TimingSwitchSampleProvider FinalSample { get; }
+      private readonly TimingSwitchSampleProvider timingSwitchSampleProvider;
       public PlaylistViewModel()
       {
+         AppState = Locator.Current.GetService<AppState>();
+
          TrackVMsSourceCache =
             new SourceCache<TrackViewModel, int>(x => x.Id)
             .DisposeWith(Disposables);
          TrackVMsSourceCache.Connect()
             .OnItemAdded(vm =>
             {
-               FinalSample.AddSample(vm.FinalSample, TimeSpan.FromSeconds(vm.TimeSpanSecond));
+               timingSwitchSampleProvider.AddSample(vm.FinalSample, TimeSpan.FromSeconds(vm.TimeSpanSecond));
                vm
                .WhenAnyValue(x => x.TimeSpanSecond)
-               .Subscribe(x => FinalSample.UpdateTimeSpan(vm.FinalSample, TimeSpan.FromSeconds(x)))
+               .Subscribe(x => timingSwitchSampleProvider.UpdateTimeSpan(vm.FinalSample, TimeSpan.FromSeconds(x)))
                .DisposeWith(Disposables);
             })
             .OnItemRemoved(vm =>
             {
-               FinalSample.RemoveSample(vm.FinalSample);
+               timingSwitchSampleProvider.RemoveSample(vm.FinalSample);
                vm.Dispose();
             })
             .ObserveOn(RxApp.MainThreadScheduler) // Make sure this is only right before the Bind()
@@ -70,7 +86,19 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe()
             .DisposeWith(Disposables);
 
-         FinalSample = new TimingSwitchSampleProvider();
+         timingSwitchSampleProvider = new TimingSwitchSampleProvider();
+         PlotSampleViewModel = 
+            new PlotSampleViewModel(new PlotSampleProvider(timingSwitchSampleProvider))
+            .DisposeWith(Disposables);
+
+         AppState
+            .WhenAnyValue(x => x.IsHDPlot)
+            .Subscribe(x => PlotSampleViewModel.IsHighDefinition = x)
+            .DisposeWith(Disposables);
+         AppState
+            .WhenAnyValue(x => x.IsPlotEnable)
+            .Subscribe(x => PlotSampleViewModel.IsPlotEnable = x)
+            .DisposeWith(Disposables);
       }
 
       public void AddNewTrack()
