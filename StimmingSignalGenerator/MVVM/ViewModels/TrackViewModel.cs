@@ -23,8 +23,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public static TrackViewModel StereoData => CreateTrackViewModel(GeneratorModeType.Stereo);
       static TrackViewModel CreateTrackViewModel(GeneratorModeType generatorModeType)
       {
-         PrepareAppState(generatorModeType);
-         return new TrackViewModel { Name = "Track1" };
+         PrepareAppState();
+         return new TrackViewModel { Name = "Track1", GeneratorMode = generatorModeType };
       }
    }
    public class TrackViewModel : ViewModelBase, ISourceCacheViewModel, IDisposable
@@ -36,6 +36,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public double TimeSpanSecond { get => timeSpanSecond; set => this.RaiseAndSetIfChanged(ref timeSpanSecond, value); }
       public List<MultiSignalViewModel> MultiSignalVMs { get => multiSignalVMs; private set => this.RaiseAndSetIfChanged(ref multiSignalVMs, value); }
       public List<ControlSliderViewModel> VolVMs { get; }
+      public GeneratorModeType GeneratorMode { get => generatorMode; set => this.RaiseAndSetIfChanged(ref generatorMode, value); }
+
       public ISampleProvider FinalSample => sample;
 
       public ReactiveCommand<Unit, Unit> SaveTrackCommand { get; }
@@ -43,6 +45,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       readonly SwitchingModeSampleProvider sample;
       private List<MultiSignalViewModel> multiSignalVMs;
+      private GeneratorModeType generatorMode;
       private string name;
       private double timeSpanSecond = 0;
       public TrackViewModel()
@@ -66,7 +69,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             new MultiSignalViewModel(),
             new MultiSignalViewModel());
 
-         AppState.WhenAnyValue(x => x.GeneratorMode)
+         this.WhenAnyValue(x => x.GeneratorMode)
             .Subscribe(x =>
             {
                sample.GeneratorMode = x;
@@ -90,7 +93,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             case 1:
                //mono
-               AppState.GeneratorMode = GeneratorModeType.Mono;
+               GeneratorMode = GeneratorModeType.Mono;
                MultiSignalVMs = new List<MultiSignalViewModel>(3)
                {
                   multiSignalVMs[0].DisposeWith(Disposables),
@@ -100,7 +103,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                break;
             case 2:
                //stereo
-               AppState.GeneratorMode = GeneratorModeType.Stereo;
+               GeneratorMode = GeneratorModeType.Stereo;
                MultiSignalVMs = new List<MultiSignalViewModel>(3)
                {
                   new MultiSignalViewModel().DisposeWith(Disposables),
@@ -154,7 +157,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          IEnumerable<POCOs.MultiSignal> signalPocos;
          IEnumerable<POCOs.ControlSlider> volPocos;
-         switch (AppState.GeneratorMode)
+         switch (GeneratorMode)
          {
             case GeneratorModeType.Mono:
                signalPocos = MultiSignalVMs.Take(1).Select(vm => vm.ToPOCO());

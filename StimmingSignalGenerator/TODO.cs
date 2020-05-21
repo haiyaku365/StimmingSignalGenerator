@@ -5,7 +5,7 @@
 //TODO default playlist to load when app init
 //-TODO playlist
 //-TODO move plot to playlist
-//TODO move mono,stereo setting to track level
+//-TODO move mono,stereo setting to track level
 //TODO playlist force change track
 //TODO move save load to playlist
 //TODO copy paste track

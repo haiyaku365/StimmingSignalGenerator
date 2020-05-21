@@ -3,11 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         
-        xmlns:helper="clr-namespace:StimmingSignalGenerator.MVVM.UiHelper;assembly=StimmingSignalGenerator"
         xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
         xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
-        xmlns:p="clr-namespace:StimmingSignalGenerator.Generators;assembly=StimmingSignalGenerator"
-        xmlns:oxy="clr-namespace:OxyPlot.Avalonia;assembly=OxyPlot.Avalonia"
         
         mc:Ignorable="d"
         x:Class="StimmingSignalGenerator.MVVM.Views.MainWindow"
@@ -21,9 +18,6 @@
   </Design.DataContext>
   <DockPanel Margin="10">
     <DockPanel DockPanel.Dock="Top" Margin="0 5">
-      <ComboBox DockPanel.Dock="Left"
-                Items="{Binding Source={helper:EnumBindingSource {x:Type p:GeneratorModeType}}}"
-                SelectedItem="{Binding AppState.GeneratorMode}"/>
       <ToggleButton DockPanel.Dock="Left" Margin="5 0"
                     Content="HD Plot" IsChecked="{Binding AppState.IsHDPlot}" />
 

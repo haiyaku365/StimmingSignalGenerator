@@ -9,7 +9,6 @@ namespace StimmingSignalGenerator
 {
    public class AppState : ReactiveObject
    {
-      public GeneratorModeType GeneratorMode { get => generatorMode; set => this.RaiseAndSetIfChanged(ref generatorMode, value); }
       public bool IsHDPlot { get => isHDPlot; set => this.RaiseAndSetIfChanged(ref isHDPlot, value); }
       public bool IsPlotEnable { get => isPlotEnable; set => this.RaiseAndSetIfChanged(ref isPlotEnable, value); }
       public bool IsPlaying { get => isPlaying; set => this.RaiseAndSetIfChanged(ref isPlaying, value); }
@@ -18,7 +17,6 @@ namespace StimmingSignalGenerator
          .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
          .InformationalVersion;
 
-      private GeneratorModeType generatorMode;
       private bool isHDPlot;
       private bool isPlotEnable;
       private bool isPlaying;

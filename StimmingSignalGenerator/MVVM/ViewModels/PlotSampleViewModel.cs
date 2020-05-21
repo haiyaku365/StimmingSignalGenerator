@@ -16,7 +16,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public static PlotSampleViewModel StereoData => CreatePlotSampleViewModel(GeneratorModeType.Stereo);
       private static PlotSampleViewModel CreatePlotSampleViewModel(GeneratorModeType generatorModeType)
       {
-         PrepareAppState(generatorModeType);
+         PrepareAppState();
          ISampleProvider signal = new BasicSignal();
          if (generatorModeType == GeneratorModeType.Stereo)
          {

@@ -19,8 +19,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public static MainWindowViewModel StereoData => CreateMainWindowViewModel(GeneratorModeType.Stereo);
       static MainWindowViewModel CreateMainWindowViewModel(GeneratorModeType generatorModeType)
       {
-         PrepareAppState(generatorModeType);
-         return new MainWindowViewModel();
+         PrepareAppState();
+         var mainWindowVM = new MainWindowViewModel();
+         mainWindowVM.PlaylistViewModel.TrackVMs[0].GeneratorMode = generatorModeType;
+         return mainWindowVM;
       }
    }
    public class MainWindowViewModel : ViewModelBase, IDisposable

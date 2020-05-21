@@ -18,12 +18,14 @@
   <DockPanel>
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5" Margin="0 0 0 5">
       <TextBlock Text="{Binding Name}" />
+      <ComboBox Items="{Binding Source={helper:EnumBindingSource {x:Type p:GeneratorModeType}}}"
+                SelectedItem="{Binding GeneratorMode}"/>
       <Button Content="Save" Command="{Binding SaveTrackCommand}" />
       <Button Content="Load" Command="{Binding LoadTrackCommand}" />
     </StackPanel>
     <DockPanel DockPanel.Dock="Top">
       <!-- Mono -->
-      <Border DockPanel.Dock="Top" IsVisible="{Binding !AppState.GeneratorMode}"
+      <Border DockPanel.Dock="Top" IsVisible="{Binding !GeneratorMode}"
               BorderBrush="Goldenrod" BorderThickness="1" CornerRadius="2">
         <DockPanel Margin="5" >
           <Grid DockPanel.Dock="Top">
@@ -39,7 +41,7 @@
       </Border>
 
       <!-- stereo -->
-      <DockPanel DockPanel.Dock="Top" IsVisible="{Binding !!AppState.GeneratorMode}">
+      <DockPanel DockPanel.Dock="Top" IsVisible="{Binding !!GeneratorMode}">
         <v:ControlSliderView DockPanel.Dock="Top" Margin="5 3" DataContext="{Binding VolVMs[2]}"/>
         <Grid DockPanel.Dock="Top">
           <Grid.ColumnDefinitions>

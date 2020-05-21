@@ -29,6 +29,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             vm.AddNewTrack();
 
             vm.TrackVMs[0].TimeSpanSecond = 1;
+            vm.TrackVMs[1].GeneratorMode = GeneratorModeType.Stereo;
 
             var count = Constants.DefaultSampleRate / 4;
             float[] buffer = Array.Empty<float>();
