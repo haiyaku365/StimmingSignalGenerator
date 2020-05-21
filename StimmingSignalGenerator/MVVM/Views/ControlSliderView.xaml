@@ -15,10 +15,10 @@
       </Style>
     </Grid.Styles>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="40"></ColumnDefinition>
-      <ColumnDefinition Width="50"></ColumnDefinition>
-      <ColumnDefinition Width="50"></ColumnDefinition>
-      <ColumnDefinition Width="*"></ColumnDefinition>
+      <ColumnDefinition SharedSizeGroup="ControlSliderSharedSizeGroup0" Width="auto"/>
+      <ColumnDefinition SharedSizeGroup="ControlSliderSharedSizeGroup1" Width="auto"/>
+      <ColumnDefinition SharedSizeGroup="ControlSliderSharedSizeGroup2" Width="auto"/>
+      <ColumnDefinition />
     </Grid.ColumnDefinitions>
     <!-- Disable max min editing to prevent value clip and jump when playing -->
     <!-- Disable max min editing can be remove if avalonia implement UpdateSourceTrigger=LostFocus -->
@@ -30,6 +30,7 @@
                    Increment="{Binding LargeChange}"
                    Minimum="{Binding MinValue, Mode=OneWay}"
                    Maximum="{Binding MaxValue, Mode=OneWay}"
+                   FormatString="{Binding NumericUpDownTextFormat}"
                    Value="{Binding Value,Mode=TwoWay}" />
     <NumericUpDown Grid.Column="2" ShowButtonSpinner="False"
                    IsEnabled="{Binding !AppState.IsPlaying}"

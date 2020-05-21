@@ -40,10 +40,10 @@
     </Expander.Header>
 
     <!-- Content -->
-    <Grid>
+    <Grid Grid.IsSharedSizeScope="True">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="35" />
-        <ColumnDefinition Width="*" />
+        <ColumnDefinition />
       </Grid.ColumnDefinitions>
       <Grid.RowDefinitions>
         <RowDefinition />

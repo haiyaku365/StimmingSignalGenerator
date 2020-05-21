@@ -28,12 +28,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    public class ControlSliderViewModel : ViewModelBase
    {
       public AppState AppState { get; }
-      public double Value { get => _value; set => this.RaiseAndSetIfChanged(ref _value, value); }
+      public double Value { get => _value; set => this.RaiseAndSetIfChanged(ref _value, Math.Round(value, 4)); }
       public double MinValue
       {
          get => minValue; set
          {
-            this.RaiseAndSetIfChanged(ref minValue, value);
+            this.RaiseAndSetIfChanged(ref minValue, Math.Round(value, 4));
             AdjustStepChange();
          }
       }
@@ -41,18 +41,22 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          get => maxValue; set
          {
-            this.RaiseAndSetIfChanged(ref maxValue, value);
+            this.RaiseAndSetIfChanged(ref maxValue, Math.Round(value, 4));
             AdjustStepChange();
          }
       }
       public double TickFrequency { get => tickFrequency; set => this.RaiseAndSetIfChanged(ref tickFrequency, value); }
       public double SmallChange { get => smallChange; set => this.RaiseAndSetIfChanged(ref smallChange, value); }
       public double LargeChange { get => largeChange; set => this.RaiseAndSetIfChanged(ref largeChange, value); }
+      public string NumericUpDownTextFormat { get => numericUpDownTextFormat; set => this.RaiseAndSetIfChanged(ref numericUpDownTextFormat, value); }
 
       public const double BasicSignalFreqMin = 300;
       public const double Tick = 1;
       public const double SmallTick = 0.01;
       public const double SuperSmallTick = 0.0001;
+      public const string TextFormat = "{0:N0}";
+      public const string SmallTickTextFormat = "{0:N2}";
+      public const string SuperSmallTickTextFormat = "{0:N4}";
       public static ControlSliderViewModel BasicSignalFreq =>
          new ControlSliderViewModel(440, BasicSignalFreqMin, 8000, Tick, Tick, Tick);
       public static ControlSliderViewModel ModulationSignalFreq =>
@@ -79,20 +83,27 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private double tickFrequency;
       private double smallChange;
       private double largeChange;
+      private string numericUpDownTextFormat;
+
       private void AdjustStepChange()
       {
          var span = MaxValue - MinValue;
          if (span <= 1)
          {
             TickFrequency = SmallChange = LargeChange = SuperSmallTick;
+            NumericUpDownTextFormat = SuperSmallTickTextFormat;
          }
          else if (span <= 100)
          {
             TickFrequency = SmallChange = LargeChange = SmallTick;
+            NumericUpDownTextFormat = SmallTickTextFormat;
+
          }
          else
          {
             TickFrequency = SmallChange = LargeChange = Tick;
+            NumericUpDownTextFormat = TextFormat;
+
          }
       }
       public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco)
