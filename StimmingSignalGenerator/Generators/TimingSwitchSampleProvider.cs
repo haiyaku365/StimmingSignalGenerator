@@ -4,6 +4,8 @@ using NAudio.Wave.SampleProviders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Text;
 
 namespace StimmingSignalGenerator.Generators
@@ -14,7 +16,11 @@ namespace StimmingSignalGenerator.Generators
    public class TimingSwitchSampleProvider : ISampleProvider
    {
       public WaveFormat WaveFormat { get; }
-
+      public event EventHandler<SampleProviderChangedEventArgs> OnSampleProviderChanged;
+      public IObservable<EventPattern<SampleProviderChangedEventArgs>> ObservableOnSampleProviderChanged
+         => Observable.FromEventPattern<SampleProviderChangedEventArgs>(
+               h => OnSampleProviderChanged += h,
+               h => OnSampleProviderChanged -= h);
       public TimingSwitchSampleProvider()
       {
          WaveFormat = Constants.DefaultStereoWaveFormat;
@@ -26,7 +32,7 @@ namespace StimmingSignalGenerator.Generators
          lock (timeSpanSampleProviders)
          {
             timeSpanSampleProviders.Add(new TimeSpanSampleProvider { SampleProvider = sampleProvider, TimeSpan = timeSpan });
-            currentSamplePosition = 0;
+            restartState();
          }
       }
 
@@ -36,7 +42,7 @@ namespace StimmingSignalGenerator.Generators
          {
             var timeSpanSample = timeSpanSampleProviders.SingleOrDefault(x => x.SampleProvider == sampleProvider);
             if (timeSpanSample != null) timeSpanSample.TimeSpan = newTimeSpan;
-            currentSamplePosition = 0;
+            restartState();
          }
       }
 
@@ -46,26 +52,25 @@ namespace StimmingSignalGenerator.Generators
          {
             var timeSpanSample = timeSpanSampleProviders.SingleOrDefault(x => x.SampleProvider == sampleProvider);
             if (timeSpanSample != null) timeSpanSampleProviders.Remove(timeSpanSample);
-            currentSamplePosition = 0;
+            restartState();
          }
       }
 
       public int Read(float[] buffer, int offset, int count)
       {
-         if (timeSpanSampleProviders == null || timeSpanSampleProviders.Sum(x => x.SampleSpan) == 0)
-         {
-            Array.Fill(buffer, 0, offset, count);
-            return count;
-         }
-         int read = 0;
-         int sampleSpanEndPosition = 0, sampleIdx = 0;
-         int sampleToReadRemain = count;
          lock (timeSpanSampleProviders)
          {
+            if (timeSpanSampleProviders == null || timeSpanSampleProviders.Sum(x => x.SampleSpan) == 0)
+            {
+               Array.Fill(buffer, 0, offset, count);
+               return count;
+            }
+            int read = 0;
+            int sampleToReadRemain = count;
+
             while (sampleToReadRemain > 0)
             {
-               sampleSpanEndPosition += timeSpanSampleProviders[sampleIdx].SampleSpan;
-               if (sampleSpanEndPosition >= currentSamplePosition)// found position to read
+               if (sampleSpanEndPosition > currentSamplePosition)// found position to read
                {
                   // calc read count
                   // read only until span end position
@@ -79,23 +84,39 @@ namespace StimmingSignalGenerator.Generators
                   currentSamplePosition += sampleToRead;
                   sampleToReadRemain -= sampleToRead;
 
-                  sampleIdx++; //go read next sample if still need to fill buffer
-
-                  if (sampleIdx >= timeSpanSampleProviders.Count && // if sampleIdx overflow
-                     currentSamplePosition >= sampleSpanEndPosition) // and already read to the end
-                  {  // then loop to first sample
-                     currentSamplePosition = 0;
-                     sampleSpanEndPosition = 0;
-                     sampleIdx = 0;
-                  }
+                  InvokeSampleProviderChanged();
                }
                else
                {
+                  var oldSampleIdx = sampleIdx;
                   sampleIdx++;// position not found. move to next sample.
+                  if (sampleIdx >= timeSpanSampleProviders.Count && // if sampleIdx overflow
+                                       currentSamplePosition >= sampleSpanEndPosition) // and already read to the end
+                  {  // then loop to first sample
+                     restartState();
+                     sampleIdx++;
+                  }
+                  sampleSpanEndPosition += timeSpanSampleProviders[sampleIdx].SampleSpan;
                }
             }
+            return read;
          }
-         return read;
+      }
+      public class SampleProviderChangedEventArgs : EventArgs
+      {
+         public static SampleProviderChangedEventArgs Create(ISampleProvider sampleProvider)
+            => new SampleProviderChangedEventArgs { SampleProvider = sampleProvider };
+         public ISampleProvider SampleProvider { get; set; }
+      }
+      private int lastInvokeSampleIdx = -1;
+      private void InvokeSampleProviderChanged()
+      {
+         if (lastInvokeSampleIdx != sampleIdx) // only raise event once per sampleIdx change
+         {
+            OnSampleProviderChanged?.Invoke(this,
+               SampleProviderChangedEventArgs.Create(timeSpanSampleProviders[sampleIdx].SampleProvider));
+            lastInvokeSampleIdx = sampleIdx;
+         }
       }
       private class TimeSpanSampleProvider
       {
@@ -104,9 +125,15 @@ namespace StimmingSignalGenerator.Generators
          public int SampleSpan => WaveHelper.TimeSpanToSamples(TimeSpan, SampleProvider.WaveFormat);
       }
       private List<TimeSpanSampleProvider> timeSpanSampleProviders;
-      private int currentSamplePosition;
+      private int currentSamplePosition = 0, sampleSpanEndPosition = 0, sampleIdx = -1;
+      private void restartState()
+      {
+         sampleSpanEndPosition = currentSamplePosition = 0;
+         sampleIdx = -1;
+      }
       private int TimeSpanToSamples(TimeSpan time) => WaveHelper.TimeSpanToSamples(time, WaveFormat);
       private TimeSpan SamplesToTimeSpan(int samples) => WaveHelper.SamplesToTimeSpan(samples, WaveFormat);
+
    }
 
    public static class WaveHelper

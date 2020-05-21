@@ -6,7 +6,8 @@
 //-TODO playlist
 //-TODO move plot to playlist
 //-TODO move mono,stereo setting to track level
-//TODO playlist force change track
+//-TODO playlist force change track
+//TODO playlist track order editing
 //TODO move save load to playlist
 //TODO copy paste track
 

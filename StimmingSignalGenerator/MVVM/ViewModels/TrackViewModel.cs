@@ -33,7 +33,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public int Id { get; internal set; }
       int ISourceCacheViewModel.Id { get => Id; set => Id = value; }
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
-      public double TimeSpanSecond { get => timeSpanSecond; set => this.RaiseAndSetIfChanged(ref timeSpanSecond, value); }
+      public bool IsPlaying { get => isPlaying; set => this.RaiseAndSetIfChanged(ref isPlaying, value); }
+
+      public double TimeSpanSecond { get => timeSpanSecond; set => this.RaiseAndSetIfChanged(ref timeSpanSecond, Math.Round(value, 2)); }
       public List<MultiSignalViewModel> MultiSignalVMs { get => multiSignalVMs; private set => this.RaiseAndSetIfChanged(ref multiSignalVMs, value); }
       public List<ControlSliderViewModel> VolVMs { get; }
       public GeneratorModeType GeneratorMode { get => generatorMode; set => this.RaiseAndSetIfChanged(ref generatorMode, value); }
@@ -47,6 +49,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private List<MultiSignalViewModel> multiSignalVMs;
       private GeneratorModeType generatorMode;
       private string name;
+      private bool isPlaying;
       private double timeSpanSecond = 0;
       public TrackViewModel()
       {

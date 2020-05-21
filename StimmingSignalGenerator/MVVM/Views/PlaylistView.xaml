@@ -11,28 +11,51 @@
              
              x:Class="StimmingSignalGenerator.MVVM.Views.PlaylistView">
   <DockPanel>
-    <Expander DockPanel.Dock="Top" IsExpanded="{Binding AppState.IsPlotEnable}" Header="Plot">
+    <Expander DockPanel.Dock="Top" Margin="0 0 0 2"
+              IsExpanded="{Binding AppState.IsPlotEnable}" Header="Plot">
       <v:PlotSampleView DataContext="{Binding PlotSampleViewModel}" />
     </Expander>
-    <DockPanel DockPanel.Dock="Left">
+    <DockPanel DockPanel.Dock="Left" Margin="0 0 2 0">
       <Button DockPanel.Dock="Bottom" Background="#4dff4d" Height="30"
               Content="+Track" Command="{Binding AddNewTrack}" />
-      <ListBox DockPanel.Dock="Top" Margin="2" Items="{ Binding TrackVMs }"
-               SelectedItem="{Binding SelectedTrackVM}" SelectionMode="Single" >
+      <ToggleButton DockPanel.Dock="Top"
+                    Content="Auto track changing"
+                    IsChecked="{Binding IsAutoTrackChanging}" />
+      <ListBox DockPanel.Dock="Top" Margin="0 2"
+               Items="{ Binding TrackVMs }" SelectedItem="{Binding SelectedTrackVM}"
+               SelectionMode="Single" Grid.IsSharedSizeScope="True">
         <ListBox.ItemTemplate>
           <DataTemplate>
             <Border BorderBrush="Gray" Background="Transparent"
-                    BorderThickness="1" Margin="0 0 0 -1">
-              <DockPanel>
-                <Button DockPanel.Dock="Right" Width="30" Height="30"
+                    BorderThickness="1" Margin="-2 -1 -2 0">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition SharedSizeGroup="0"/>
+                  <ColumnDefinition SharedSizeGroup="1"/>
+                  <ColumnDefinition SharedSizeGroup="2"/>
+                  <ColumnDefinition SharedSizeGroup="3"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" IsVisible="{Binding IsPlaying}"
+                           Margin="0 0 5 0" VerticalAlignment="Center"
+                           Text=">"/>
+                <TextBlock Grid.Column="1"
+                           Margin="0 0 5 0" VerticalAlignment="Center"
+                           Text="{Binding Name}"/>
+                <NumericUpDown Grid.Column="2" IsVisible="{Binding $parent[UserControl].DataContext.IsAutoTrackChanging}"
+                               ToolTip.Tip="Duration (second)"
+                               Increment="0.1" Minimum="0" Maximum="86400" AllowSpin="True"
+                               Value="{Binding TimeSpanSecond}" FormatString="{}{0:N1}"/>
+                <Button Grid.Column="2" IsVisible="{Binding !$parent[UserControl].DataContext.IsAutoTrackChanging}"
+                        Content="Play track" 
+                        Command="{Binding $parent[UserControl].DataContext.SwitchPlayingTrack}" 
+                        CommandParameter="{Binding }"
+                        />
+                <Button Grid.Column="3"
+                        Width="30" Height="30" Margin="2 0"
                         Background="#ff4d4d" Content="X"
                         Command="{Binding $parent[UserControl].DataContext.RemoveTrack}"
                         CommandParameter="{Binding }" />
-
-                <TextBlock DockPanel.Dock="Left" Text="{Binding Name}" />
-                <TextBlock DockPanel.Dock="Left" Text="Duration:" />
-                <NumericUpDown DockPanel.Dock="Left" Value="{Binding TimeSpanSecond}" Increment="1" Minimum="0" />
-              </DockPanel>
+              </Grid>
             </Border>
           </DataTemplate>
         </ListBox.ItemTemplate>
