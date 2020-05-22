@@ -199,6 +199,26 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          vm.TimeSpanSecond = poco.TimeSpanSecond;
          return vm;
       }
+      public async Task CopyToClipboard()
+      {
+         var poco = this.ToPOCO();
+         var json = JsonSerializer.Serialize(poco, new JsonSerializerOptions { WriteIndented = true });
+         await Avalonia.Application.Current.Clipboard.SetTextAsync(json);
+      }
+      public static async Task<TrackViewModel> PasteFromClipboard()
+      {
+         var json = await Avalonia.Application.Current.Clipboard.GetTextAsync();
+         if (string.IsNullOrWhiteSpace(json)) return null;
+         try
+         {
+            var poco = JsonSerializer.Deserialize<POCOs.Track>(json);
+            return TrackViewModel.FromPOCO(poco);
+         }
+         catch (JsonException)
+         {
+            return null;
+         }
+      }
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
       private bool disposedValue;

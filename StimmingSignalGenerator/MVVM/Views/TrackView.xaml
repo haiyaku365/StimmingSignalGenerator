@@ -17,7 +17,13 @@
   </Design.DataContext>
   <DockPanel>
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5" Margin="0 0 0 5">
-      <TextBlock Text="{Binding Name}" />
+      <TextBlock Text="{Binding Name}">
+        <TextBlock.ContextMenu>
+          <ContextMenu>
+            <MenuItem Icon="📋" Header="Copy to clipboard" Command="{Binding CopyToClipboard}" />
+          </ContextMenu>
+        </TextBlock.ContextMenu>
+      </TextBlock>
       <ComboBox Items="{Binding Source={helper:EnumBindingSource {x:Type p:GeneratorModeType}}}"
                 SelectedItem="{Binding GeneratorMode}"/>
     </StackPanel>

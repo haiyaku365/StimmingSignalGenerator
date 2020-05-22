@@ -138,6 +138,15 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables)
          );
       }
+      public async Task AddTrackFromClipboard()
+      {
+         var vm = await TrackViewModel.PasteFromClipboard();
+         if (vm == null) return;
+         vm
+            .SetNameAndId("Track", TrackVMsSourceCache)
+            .DisposeWith(Disposables);
+         TrackVMsSourceCache.AddOrUpdate(vm);
+      }
 
       public void RemoveTrack(TrackViewModel trackVM)
       {

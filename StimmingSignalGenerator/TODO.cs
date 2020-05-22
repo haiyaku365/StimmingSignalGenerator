@@ -9,7 +9,7 @@
 //-TODO playlist force change track
 //TODO playlist track order editing
 //-TODO move save load to playlist
-//TODO copy paste track
+//-TODO copy paste track
 //TODO copy paste ControlSlider
 //TODO rename track
 

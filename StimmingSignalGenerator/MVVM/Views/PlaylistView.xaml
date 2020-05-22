@@ -17,7 +17,13 @@
     </Expander>
     <DockPanel DockPanel.Dock="Left" Margin="0 0 2 0">
       <Button DockPanel.Dock="Bottom" Background="#4dff4d" Height="30"
-              Content="+Track" Command="{Binding AddNewTrack}" />
+              Content="+Track" Command="{Binding AddNewTrack}" >
+        <Button.ContextMenu>
+          <ContextMenu>
+            <MenuItem Icon="📋" Header="Add from clipboard" Command="{Binding AddTrackFromClipboard}" />
+          </ContextMenu>
+        </Button.ContextMenu>
+      </Button>
       <StackPanel DockPanel.Dock="Top" Margin="0 0 0 2" Spacing="5" Orientation="Horizontal">
         <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
         <Button Content="Save" Command="{Binding SaveAsync}" />
@@ -33,6 +39,11 @@
           <DataTemplate>
             <Border BorderBrush="Gray" Background="Transparent"
                     BorderThickness="1" Margin="-2 -1 -2 0">
+              <Border.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Icon="📋" Header="Copy to clipboard" Command="{Binding CopyToClipboard}" />
+                </ContextMenu>
+              </Border.ContextMenu>
               <Grid>
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition SharedSizeGroup="0" />
