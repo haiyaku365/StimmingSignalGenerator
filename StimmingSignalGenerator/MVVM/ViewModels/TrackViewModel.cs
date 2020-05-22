@@ -14,6 +14,7 @@ using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using StimmingSignalGenerator.Helper;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
@@ -212,6 +213,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          try
          {
             var poco = JsonSerializer.Deserialize<POCOs.Track>(json);
+            if (typeof(POCOs.Track).GetProperties().All(x => x.GetValue(poco).IsNullOrDefault())) return null;
             return TrackViewModel.FromPOCO(poco);
          }
          catch (JsonException)

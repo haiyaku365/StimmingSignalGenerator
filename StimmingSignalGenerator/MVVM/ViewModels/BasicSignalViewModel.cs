@@ -3,6 +3,7 @@ using DynamicData;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
 using StimmingSignalGenerator.Generators;
+using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.MVVM.UiHelper;
 using StimmingSignalGenerator.MVVM.ViewModels.Interface;
 using System;
@@ -289,6 +290,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          try
          {
             var poco = JsonSerializer.Deserialize<POCOs.BasicSignal>(json);
+            if (typeof(POCOs.BasicSignal).GetProperties().All(x => x.GetValue(poco).IsNullOrDefault())) return null;
             return BasicSignalViewModel.FromPOCO(poco);
          }
          catch (JsonException)

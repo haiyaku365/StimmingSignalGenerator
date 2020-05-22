@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ReactiveUI;
 using Splat;
+using StimmingSignalGenerator.Helper;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
@@ -121,6 +123,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          try
          {
             var poco = JsonSerializer.Deserialize<POCOs.ControlSlider>(json);
+            if (typeof(POCOs.ControlSlider).GetProperties().All(x => x.GetValue(poco).IsNullOrDefault())) return;
             SetToPOCO(poco);
          }
          catch (JsonException)
@@ -128,6 +131,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             return;
          }
       }
+
       public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco)
          => new ControlSliderViewModel().SetToPOCO(poco);
       public ControlSliderViewModel SetToPOCO(POCOs.ControlSlider poco)
