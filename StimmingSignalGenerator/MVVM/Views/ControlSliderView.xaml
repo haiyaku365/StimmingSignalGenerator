@@ -24,7 +24,8 @@
     <!-- Disable max min editing can be remove if avalonia implement UpdateSourceTrigger=LostFocus -->
     <NumericUpDown Grid.Column="0" ShowButtonSpinner="False"
                    IsEnabled="{Binding !AppState.IsPlaying}"
-                   Increment="{Binding LargeChange}"
+                   Increment="1"
+                   FormatString="{}{0:N0}"
                    Value="{Binding MinValue,Mode=TwoWay}" />
     <NumericUpDown Grid.Column="1" ShowButtonSpinner="False"
                    Increment="{Binding LargeChange}"
@@ -34,7 +35,8 @@
                    Value="{Binding Value,Mode=TwoWay}" />
     <NumericUpDown Grid.Column="2" ShowButtonSpinner="False"
                    IsEnabled="{Binding !AppState.IsPlaying}"
-                   Increment="{Binding LargeChange}"
+                   Increment="1"
+                   FormatString="{}{0:N0}"
                    Value="{Binding MaxValue,Mode=TwoWay}" />
 
     <Slider Grid.Column="3"

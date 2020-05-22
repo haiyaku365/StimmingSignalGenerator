@@ -24,6 +24,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             PrepareAppState();
             var vm = new PlaylistViewModel();
+            vm.Name = "Design playlist";
             vm.AddNewTrack();
             vm.AddNewTrack();
             vm.AddNewTrack();
@@ -60,7 +61,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private TrackViewModel selectedTrackVM;
       private TrackViewModel playingTrackVM;
       private bool isAutoTrackChanging;
-      private string name;
+      private string name = "Playlist";
       private readonly SwitchingSampleProvider switchingSampleProvider;
       private readonly TimingSwitchSampleProvider timingSwitchSampleProvider;
       public PlaylistViewModel()

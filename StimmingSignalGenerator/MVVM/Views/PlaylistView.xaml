@@ -18,6 +18,9 @@
     <DockPanel DockPanel.Dock="Left" Margin="0 0 2 0">
       <Button DockPanel.Dock="Bottom" Background="#4dff4d" Height="30"
               Content="+Track" Command="{Binding AddNewTrack}" />
+      <StackPanel DockPanel.Dock="Top" Margin="0 0 0 2" Spacing="3" Orientation="Horizontal">
+        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+      </StackPanel>
       <ToggleButton DockPanel.Dock="Top"
                     Content="Auto track changing"
                     IsChecked="{Binding IsAutoTrackChanging}" />
@@ -30,10 +33,11 @@
                     BorderThickness="1" Margin="-2 -1 -2 0">
               <Grid>
                 <Grid.ColumnDefinitions>
-                  <ColumnDefinition SharedSizeGroup="0"/>
-                  <ColumnDefinition SharedSizeGroup="1"/>
-                  <ColumnDefinition SharedSizeGroup="2"/>
-                  <ColumnDefinition SharedSizeGroup="3"/>
+                  <ColumnDefinition SharedSizeGroup="0" />
+                  <ColumnDefinition SharedSizeGroup="1" />
+                  <ColumnDefinition  />
+                  <ColumnDefinition SharedSizeGroup="3" />
+                  <ColumnDefinition SharedSizeGroup="4" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" IsVisible="{Binding IsPlaying}"
                            Margin="0 0 5 0" VerticalAlignment="Center"
@@ -41,16 +45,16 @@
                 <TextBlock Grid.Column="1"
                            Margin="0 0 5 0" VerticalAlignment="Center"
                            Text="{Binding Name}"/>
-                <NumericUpDown Grid.Column="2" IsVisible="{Binding $parent[UserControl].DataContext.IsAutoTrackChanging}"
+                <NumericUpDown Grid.Column="3" IsVisible="{Binding $parent[UserControl].DataContext.IsAutoTrackChanging}"
                                ToolTip.Tip="Duration (second)"
                                Increment="0.1" Minimum="0" Maximum="86400" AllowSpin="True"
                                Value="{Binding TimeSpanSecond}" FormatString="{}{0:N1}"/>
-                <Button Grid.Column="2" IsVisible="{Binding !$parent[UserControl].DataContext.IsAutoTrackChanging}"
+                <Button Grid.Column="3" IsVisible="{Binding !$parent[UserControl].DataContext.IsAutoTrackChanging}"
                         Content="Play track" 
                         Command="{Binding $parent[UserControl].DataContext.SwitchPlayingTrack}" 
                         CommandParameter="{Binding }"
                         />
-                <Button Grid.Column="3"
+                <Button Grid.Column="4"
                         Width="30" Height="30" Margin="2 0"
                         Background="#ff4d4d" Content="X"
                         Command="{Binding $parent[UserControl].DataContext.RemoveTrack}"
