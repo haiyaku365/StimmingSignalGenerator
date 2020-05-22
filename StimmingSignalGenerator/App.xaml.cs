@@ -1,12 +1,14 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Serilog;
 using Splat;
 using StimmingSignalGenerator.MVVM.ViewModels;
 using StimmingSignalGenerator.MVVM.Views;
 using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator
 {
@@ -19,6 +21,8 @@ namespace StimmingSignalGenerator
 
       public override void OnFrameworkInitializationCompleted()
       {
+         UnhandledExceptionLogging();
+
          if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
          {
             desktop.MainWindow = new MainWindow()
@@ -39,6 +43,49 @@ namespace StimmingSignalGenerator
 
          base.OnFrameworkInitializationCompleted();
       }
+
+      private void UnhandledExceptionLogging()
+      {
+         var exceptionLog = new LoggerConfiguration()
+                   .WriteTo.File("ErrorLog.txt", rollingInterval: RollingInterval.Day)
+                   .CreateLogger();
+
+         Observable.FromEventPattern<UnobservedTaskExceptionEventArgs>
+            (h => TaskScheduler.UnobservedTaskException += h,
+            h => TaskScheduler.UnobservedTaskException -= h)
+            .Subscribe(x =>
+            {
+               if (!x.EventArgs.Observed)
+               {
+                  exceptionLog.Error(
+                           x.EventArgs.Exception,
+                           $"Error:Unobserved Exception from TaskScheduler.");
+                  x.EventArgs.SetObserved();
+               }
+            })
+            .DisposeWith(Disposables);
+
+         Observable.FromEventPattern<UnhandledExceptionEventHandler, UnhandledExceptionEventArgs>
+            (h => AppDomain.CurrentDomain.UnhandledException += h,
+            h => AppDomain.CurrentDomain.UnhandledException -= h)
+            .Subscribe(x =>
+            {
+               if (x.EventArgs.IsTerminating)
+               {
+                  exceptionLog.Fatal(
+                        (Exception)x.EventArgs.ExceptionObject,
+                        $"Fetal:Unhandle Exception runtime terminating.");
+               }
+               else
+               {
+                  exceptionLog.Error(
+                        (Exception)x.EventArgs.ExceptionObject,
+                        $"Error:Unhandle Exception.");
+               }
+            })
+            .DisposeWith(Disposables);
+      }
+
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
    }
 }
