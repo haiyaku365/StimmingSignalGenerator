@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using ReactiveUI;
 using Splat;
 
@@ -104,6 +106,26 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             TickFrequency = SmallChange = LargeChange = Tick;
             NumericUpDownTextFormat = TextFormat;
 
+         }
+      }
+      public async Task CopyToClipboard()
+      {
+         var poco = this.ToPOCO();
+         var json = JsonSerializer.Serialize(poco, new JsonSerializerOptions { WriteIndented = true });
+         await Avalonia.Application.Current.Clipboard.SetTextAsync(json);
+      }
+      public async Task PasteValueFromClipboard()
+      {
+         var json = await Avalonia.Application.Current.Clipboard.GetTextAsync();
+         if (string.IsNullOrWhiteSpace(json)) return;
+         try
+         {
+            var poco = JsonSerializer.Deserialize<POCOs.ControlSlider>(json);
+            SetToPOCO(poco);
+         }
+         catch (JsonException)
+         {
+            return;
          }
       }
       public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco)

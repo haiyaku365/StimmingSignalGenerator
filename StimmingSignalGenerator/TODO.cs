@@ -10,7 +10,7 @@
 //TODO playlist track order editing
 //-TODO move save load to playlist
 //-TODO copy paste track
-//TODO copy paste ControlSlider
+//-TODO copy paste ControlSlider
 //TODO rename track
 
 //TODO UpdateSourceTrigger=LostFocus in ControlSlider (wait for avalonia implement https://github.com/AvaloniaUI/Avalonia/issues/3754)

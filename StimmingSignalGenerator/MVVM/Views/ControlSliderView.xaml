@@ -9,6 +9,12 @@
              d:DataContext="{x:Static vm:DesignControlSliderViewModel.Data}"
              x:Class="StimmingSignalGenerator.MVVM.Views.ControlSliderView">
   <Grid>
+    <Grid.ContextMenu>
+      <ContextMenu>
+        <MenuItem Icon="📋" Header="Copy control slider" Command="{Binding CopyToClipboard}" />
+        <MenuItem Icon="📋" Header="Paste control slider" Command="{Binding PasteValueFromClipboard}" />
+      </ContextMenu>
+    </Grid.ContextMenu>
     <Grid.Styles>
       <Style Selector="NumericUpDown">
         <Setter Property="Background" Value="Transparent"/>
