@@ -8,11 +8,12 @@
 //-TODO move mono,stereo setting to track level
 //-TODO playlist force change track
 //TODO playlist track order editing
-//TODO move save load to playlist
+//-TODO move save load to playlist
 //TODO copy paste track
+//TODO copy paste ControlSlider
+//TODO rename track
 
 //TODO UpdateSourceTrigger=LostFocus in ControlSlider (wait for avalonia implement https://github.com/AvaloniaUI/Avalonia/issues/3754)
-
 
 //-TODO Waveform visualization (OxyPlot)
 //-TODO Exp with faster way to plot or optimize oxyplot(use Decimator to reduce datapoint)

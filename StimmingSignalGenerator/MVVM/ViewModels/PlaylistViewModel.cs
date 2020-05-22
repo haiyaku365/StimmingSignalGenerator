@@ -4,15 +4,18 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
 using Splat;
+using StimmingSignalGenerator.FileService;
 using StimmingSignalGenerator.Generators;
 using StimmingSignalGenerator.MVVM.UiHelper;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
@@ -61,7 +64,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private TrackViewModel selectedTrackVM;
       private TrackViewModel playingTrackVM;
       private bool isAutoTrackChanging;
-      private string name = "Playlist";
+      private string name;
       private readonly SwitchingSampleProvider switchingSampleProvider;
       private readonly TimingSwitchSampleProvider timingSwitchSampleProvider;
       public PlaylistViewModel()
@@ -82,6 +85,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             })
             .OnItemRemoved(vm =>
             {
+               if (vm.IsPlaying && !IsAutoTrackChanging)
+                  SwitchPlayingTrack(null);
                timingSwitchSampleProvider.RemoveSample(vm.FinalSample);
                vm.Dispose();
             })
@@ -108,7 +113,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             })
             .DisposeWith(Disposables);
          timingSwitchSampleProvider.ObservableOnSampleProviderChanged
-            .Subscribe(x => UpdateIsPlaying(TrackVMs.FirstOrDefault(vm => vm.FinalSample == x.EventArgs.SampleProvider)))
+            .Subscribe(x => UpdateIsPlaying(TrackVMsSourceCache.Items.FirstOrDefault(vm => vm.FinalSample == x.EventArgs.SampleProvider)))
             .DisposeWith(Disposables);
          AppState
             .WhenAnyValue(x => x.IsHDPlot)
@@ -139,10 +144,36 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          TrackVMsSourceCache.Remove(trackVM);
       }
 
+      public POCOs.Playlist ToPOCO()
+      {
+         return new POCOs.Playlist
+         {
+            Name = Name,
+            Tracks = TrackVMsSourceCache.Items.Select(x => x.ToPOCO()).ToList()
+         };
+      }
+      public async Task SaveAsync() => await this.ToPOCO().SaveAsync();
+
+      public async Task LoadAsync()
+      {
+         var poco = await PlaylistFile.LoadAsync();
+         if (poco == null) return;
+         //Clean old stuff
+         TrackVMsSourceCache.Clear();
+         //Load to vm
+         Name = poco.Name;
+         for (int i = 0; i < poco.Tracks.Count; i++)
+         {
+            var trackVM = TrackViewModel.FromPOCO(poco.Tracks[i]);
+            trackVM.Id = i;
+            TrackVMsSourceCache.AddOrUpdate(trackVM);
+         }
+      }
+
       private void UpdateIsPlaying(TrackViewModel trackViewModel)
       {
          if (trackViewModel == null) return;
-         foreach (var trackVM in TrackVMs) { trackVM.IsPlaying = false; }
+         foreach (var trackVM in TrackVMsSourceCache.Items) { trackVM.IsPlaying = false; }
          trackViewModel.IsPlaying = true;
       }
 

@@ -18,8 +18,10 @@
     <DockPanel DockPanel.Dock="Left" Margin="0 0 2 0">
       <Button DockPanel.Dock="Bottom" Background="#4dff4d" Height="30"
               Content="+Track" Command="{Binding AddNewTrack}" />
-      <StackPanel DockPanel.Dock="Top" Margin="0 0 0 2" Spacing="3" Orientation="Horizontal">
+      <StackPanel DockPanel.Dock="Top" Margin="0 0 0 2" Spacing="5" Orientation="Horizontal">
         <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+        <Button Content="Save" Command="{Binding SaveAsync}" />
+        <Button Content="Load" Command="{Binding LoadAsync}" />
       </StackPanel>
       <ToggleButton DockPanel.Dock="Top"
                     Content="Auto track changing"
@@ -50,8 +52,8 @@
                                Increment="0.1" Minimum="0" Maximum="86400" AllowSpin="True"
                                Value="{Binding TimeSpanSecond}" FormatString="{}{0:N1}"/>
                 <Button Grid.Column="3" IsVisible="{Binding !$parent[UserControl].DataContext.IsAutoTrackChanging}"
-                        Content="Play track" 
-                        Command="{Binding $parent[UserControl].DataContext.SwitchPlayingTrack}" 
+                        Content="Play track"
+                        Command="{Binding $parent[UserControl].DataContext.SwitchPlayingTrack}"
                         CommandParameter="{Binding }"
                         />
                 <Button Grid.Column="4"

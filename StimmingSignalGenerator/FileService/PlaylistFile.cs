@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Splat;
+using StimmingSignalGenerator.MVVM.ViewModels;
 using StimmingSignalGenerator.POCOs;
 using System;
 using System.Collections.Generic;
@@ -12,52 +13,43 @@ using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.FileService
 {
-   static class TrackFile
+   static class PlaylistFile
    {
-      public static async Task SaveTrackAsync(this Track track)
+      public static async Task SaveAsync(this Playlist playlist)
       {
-         saveFileDialog.Directory = TrackPath;
-         saveFileDialog.InitialFileName = string.IsNullOrWhiteSpace(track.Name) ? GetNextFileName() : track.Name;
+         CreatePlaylistDir();
+         saveFileDialog.Directory = PlaylistPath;
+         saveFileDialog.InitialFileName = string.IsNullOrWhiteSpace(playlist.Name) ? GetNextFileName() : playlist.Name;
          var savePath = await saveFileDialog.ShowAsync(Window);
          if (savePath == null) return;
          File.Delete(savePath);
          using (FileStream fs = File.OpenWrite(savePath))
          {
-            await JsonSerializer.SerializeAsync(fs, track, new JsonSerializerOptions { WriteIndented = true });
+            await JsonSerializer.SerializeAsync(fs, playlist, new JsonSerializerOptions { WriteIndented = true });
          };
       }
 
-      public static async Task<Track> LoadTrackAsync()
+      public static async Task<Playlist> LoadAsync()
       {
-         openFileDialog.Directory = TrackPath;
+         CreatePlaylistDir();
+         openFileDialog.Directory = PlaylistPath;
          var loadPath = await openFileDialog.ShowAsync(Window);
          if (loadPath.Length == 0) return null;
          using (FileStream fs = File.OpenRead(loadPath[0]))
          {
-            var poco = await JsonSerializer.DeserializeAsync<Track>(fs);
+            var poco = await JsonSerializer.DeserializeAsync<Playlist>(fs);
             poco.Name = Path.GetFileNameWithoutExtension(loadPath[0]);
             return poco;
          }
       }
 
-      private static readonly Regex defaultFileRegex = new Regex(@"(?:Track)(\d*)(?:.json)$");
+      private static readonly Regex defaultFileRegex = new Regex(@"(?:Playlist)(\d*)(?:.json)$");
       private static string GetNextFileName()
       {
-         int maxNum;
-         try
-         {
-            maxNum =
-               Directory.EnumerateFiles(TrackPath).DefaultIfEmpty("0")
+         int maxNum =
+               Directory.EnumerateFiles(PlaylistPath).DefaultIfEmpty("0")
                   .Max(x => int.TryParse(defaultFileRegex.Match(x).Groups[1].Value, out int num) ? num : 0);
-         }
-         catch (DirectoryNotFoundException)
-         {
-            Directory.CreateDirectory(TrackPath);
-            maxNum = 0;
-         }
-         catch (Exception) { throw; }
-
-         return $"Track{maxNum + 1}.json";
+         return $"Playlist{maxNum + 1}.json";
       }
 
       private static readonly List<FileDialogFilter> fileDialogFilters =
@@ -80,7 +72,9 @@ namespace StimmingSignalGenerator.FileService
       private static Window _window;
       private static Window Window => _window ??= Locator.Current.GetService<Window>();
 
-      private const string TrackLocation = "Track";
-      private static readonly string TrackPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TrackLocation);
+      private static void CreatePlaylistDir() => Directory.CreateDirectory(PlaylistPath);
+
+      private const string PlaylistLocation = "Playlist";
+      private static readonly string PlaylistPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PlaylistLocation);
    }
 }

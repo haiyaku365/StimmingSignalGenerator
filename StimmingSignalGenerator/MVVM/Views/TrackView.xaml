@@ -20,8 +20,6 @@
       <TextBlock Text="{Binding Name}" />
       <ComboBox Items="{Binding Source={helper:EnumBindingSource {x:Type p:GeneratorModeType}}}"
                 SelectedItem="{Binding GeneratorMode}"/>
-      <Button Content="Save" Command="{Binding SaveTrackCommand}" />
-      <Button Content="Load" Command="{Binding LoadTrackCommand}" />
     </StackPanel>
     <DockPanel DockPanel.Dock="Top">
       <!-- Mono -->
