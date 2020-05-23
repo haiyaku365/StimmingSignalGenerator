@@ -11,8 +11,10 @@
   <Grid>
     <Grid.ContextMenu>
       <ContextMenu>
-        <MenuItem Icon="📋" Header="Copy control slider" Command="{Binding CopyToClipboard}" />
-        <MenuItem Icon="📋" Header="Paste control slider" Command="{Binding PasteValueFromClipboard}" />
+        <MenuItem Header="Copy control slider" Classes="Copy"
+                  Command="{Binding CopyToClipboard}" />
+        <MenuItem Header="Paste control slider" Classes="Paste"
+                  Command="{Binding PasteValueFromClipboard}" />
       </ContextMenu>
     </Grid.ContextMenu>
     <Grid.Styles>

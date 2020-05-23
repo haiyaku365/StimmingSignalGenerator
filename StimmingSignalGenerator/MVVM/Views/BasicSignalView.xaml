@@ -21,7 +21,8 @@
           <Setter.Value>
             <Template>
               <ContextMenu>
-                <MenuItem Icon="📋" Header="Copy to clipboard" Command="{Binding CopyToClipboard}" />
+                <MenuItem Header="Copy to clipboard" Classes="Copy" 
+                          Command="{Binding CopyToClipboard}" />
               </ContextMenu>
             </Template>
           </Setter.Value>
@@ -78,7 +79,7 @@
                           Items="{Binding AMSignalVMs }">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                  <Border BorderBrush="#3399ff"  Background="{Binding BGColor}"
+                  <Border BorderBrush="#3399ff" Background="{Binding BGColor}"
                           BorderThickness="1" CornerRadius="2" Margin="2">
                     <Grid>
                       <Grid.ColumnDefinitions>
@@ -86,9 +87,8 @@
                         <ColumnDefinition Width="30"/>
                       </Grid.ColumnDefinitions>
                       <v:BasicSignalView Grid.Column="0" DataContext="{Binding}"/>
-                      <Button Grid.Column="1"  Width="30" Height="30"
-                              VerticalAlignment="Top" HorizontalAlignment="Right"
-                              Background="#ff4d4d" Content="X"
+                      <Button Grid.Column="1"  Classes="Red Remove"
+                              VerticalAlignment="Top" Margin="0 3 3 0"
                               Command="{Binding $parent[UserControl].DataContext.RemoveAMCommand}"
                               CommandParameter="{Binding}"/>
                     </Grid>
@@ -96,13 +96,13 @@
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <Button DockPanel.Dock="Top" HorizontalAlignment="Left"
+            <Button DockPanel.Dock="Top" HorizontalAlignment="Left" Classes="Green"
                     Width="{Binding $parent.Width,Mode=OneWay}" Height="30" Margin="2"
-                    Background="#4dff4d" Content="+AM"
-                    Command="{Binding AddAMCommand}" >
+                    Content="+AM" Command="{Binding AddAMCommand}" >
               <Button.ContextMenu>
                 <ContextMenu>
-                  <MenuItem Icon="📋" Header="Add from clipboard" Command="{Binding AddAMFromClipboardCommand}" />
+                  <MenuItem Header="Add from clipboard" Classes="Paste" 
+                            Command="{Binding AddAMFromClipboardCommand}" />
                 </ContextMenu>
               </Button.ContextMenu>
             </Button>
@@ -115,7 +115,7 @@
                           Items="{Binding FMSignalVMs }">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                  <Border BorderBrush="#3399ff"  Background="{Binding BGColor}"
+                  <Border BorderBrush="#3399ff" Background="{Binding BGColor}"
                           BorderThickness="1" CornerRadius="2" Margin="2">
                     <Grid>
                       <Grid.ColumnDefinitions>
@@ -123,9 +123,8 @@
                         <ColumnDefinition Width="30"/>
                       </Grid.ColumnDefinitions>
                       <v:BasicSignalView Grid.Column="0" DataContext="{Binding}"/>
-                      <Button Grid.Column="1"  Width="30" Height="30"
-                              VerticalAlignment="Top" HorizontalAlignment="Right"
-                              Background="#ff4d4d" Content="X"
+                      <Button Grid.Column="1" Classes="Red Remove"
+                              VerticalAlignment="Top" Margin="0 3 3 0"
                               Command="{Binding $parent[UserControl].DataContext.RemoveFMCommand}"
                               CommandParameter="{Binding}"/>
                     </Grid>
@@ -133,13 +132,13 @@
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <Button DockPanel.Dock="Top" HorizontalAlignment="Left"
+            <Button DockPanel.Dock="Top" HorizontalAlignment="Left" Classes="Green"
                         Width="{Binding $parent.Width,Mode=OneWay}" Height="30" Margin="2"
-                        Background="#4dff4d" Content="+FM"
-                        Command="{Binding AddFMCommand}">
+                        Content="+FM" Command="{Binding AddFMCommand}">
               <Button.ContextMenu>
                 <ContextMenu>
-                  <MenuItem Icon="📋" Header="Add from clipboard" Command="{Binding AddFMFromClipboardCommand}" />
+                  <MenuItem Header="Add from clipboard" Classes="Paste"
+                            Command="{Binding AddFMFromClipboardCommand}"/>
                 </ContextMenu>
               </Button.ContextMenu>
             </Button>

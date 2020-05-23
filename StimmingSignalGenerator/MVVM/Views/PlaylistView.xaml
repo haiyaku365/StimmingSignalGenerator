@@ -16,11 +16,12 @@
       <v:PlotSampleView DataContext="{Binding PlotSampleViewModel}" />
     </Expander>
     <DockPanel DockPanel.Dock="Left" Margin="0 0 2 0">
-      <Button DockPanel.Dock="Bottom" Background="#4dff4d" Height="30"
+      <Button DockPanel.Dock="Bottom" Classes="Green" Height="30"
               Content="+Track" Command="{Binding AddNewTrack}" >
         <Button.ContextMenu>
           <ContextMenu>
-            <MenuItem Icon="📋" Header="Add from clipboard" Command="{Binding AddTrackFromClipboard}" />
+            <MenuItem Header="Add from clipboard" Classes="Paste"
+                      Command="{Binding AddTrackFromClipboard}" />
           </ContextMenu>
         </Button.ContextMenu>
       </Button>
@@ -41,7 +42,8 @@
                     BorderThickness="1" Margin="-2 -1 -2 0">
               <Border.ContextMenu>
                 <ContextMenu>
-                  <MenuItem Icon="📋" Header="Copy to clipboard" Command="{Binding CopyToClipboard}" />
+                  <MenuItem Header="Copy to clipboard" Classes="Copy"
+                            Command="{Binding CopyToClipboard}" />
                 </ContextMenu>
               </Border.ContextMenu>
               <Grid>
@@ -63,13 +65,18 @@
                                Increment="0.1" Minimum="0" Maximum="86400" AllowSpin="True"
                                Value="{Binding TimeSpanSecond}" FormatString="{}{0:N1}"/>
                 <Button Grid.Column="3" IsVisible="{Binding !$parent[UserControl].DataContext.IsAutoTrackChanging}"
-                        Content="Play track"
+                        Background="Transparent" BorderThickness="0"
                         Command="{Binding $parent[UserControl].DataContext.SwitchPlayingTrack}"
                         CommandParameter="{Binding }"
-                        />
-                <Button Grid.Column="4"
-                        Width="30" Height="30" Margin="2 0"
-                        Background="#ff4d4d" Content="X"
+                        ToolTip.Tip="Play track">
+                  <Button.Content>
+                    <Viewbox Height="24">
+                      <Image Source="/Assets/Icons/play.png" />
+                    </Viewbox>
+                  </Button.Content>
+                </Button>
+                <Button Grid.Column="4" Classes="Red Remove"
+                        Margin="2 0"
                         Command="{Binding $parent[UserControl].DataContext.RemoveTrack}"
                         CommandParameter="{Binding }" />
               </Grid>
@@ -78,7 +85,7 @@
         </ListBox.ItemTemplate>
       </ListBox>
     </DockPanel>
-    <DockPanel DockPanel.Dock="Right" 
+    <DockPanel DockPanel.Dock="Right"
                IsVisible="{Binding SelectedTrackVM, Converter={x:Static ObjectConverters.IsNotNull}}">
       <v:TrackView DataContext="{Binding SelectedTrackVM}" />
     </DockPanel>

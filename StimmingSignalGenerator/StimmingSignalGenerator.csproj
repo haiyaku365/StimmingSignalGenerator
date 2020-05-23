@@ -12,7 +12,7 @@
     <AvaloniaResource Include="**\*.xaml">
       <SubType>Designer</SubType>
     </AvaloniaResource>
-    <AvaloniaResource Include="Assets\*" />
+    <AvaloniaResource Include="Assets\**" />
     <!-- This is for cleaning deleted file when compile error -->
     <!--<AvaloniaResource Remove="**\<<RemovedFile.xaml>>" />-->
   </ItemGroup>
