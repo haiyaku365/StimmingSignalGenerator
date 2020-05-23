@@ -47,6 +47,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          foreach (var signal in poco.BasicSignals)
          {
             BasicSignalViewModel.FromPOCO(signal)
+               .SetNameAndId(BasicSignalVMName, multiSignalVM.BasicSignalVMsSourceCache)
                .AddTo(multiSignalVM.BasicSignalVMsSourceCache);
          }
          return multiSignalVM;

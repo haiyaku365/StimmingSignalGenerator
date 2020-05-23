@@ -37,7 +37,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public int Id { get; internal set; }
       int ISourceCacheViewModel.Id { get => Id; set => Id = value; }
 
-      private string name = "SignalGenerator";
+      private string name;
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
       public BasicSignal BasicSignal { get; }
       public ControlSliderViewModel FreqControlSliderViewModel { get; }
