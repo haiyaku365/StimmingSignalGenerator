@@ -181,8 +181,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private void UpdateIsPlaying(TrackViewModel trackViewModel)
       {
-         if (trackViewModel == null) return;
          foreach (var trackVM in TrackVMsSourceCache.Items) { trackVM.IsPlaying = false; }
+         if (trackViewModel == null) return;
          trackViewModel.IsPlaying = true;
       }
 

@@ -46,7 +46,7 @@
               </Border.ContextMenu>
               <Grid>
                 <Grid.ColumnDefinitions>
-                  <ColumnDefinition SharedSizeGroup="0" />
+                  <ColumnDefinition SharedSizeGroup="0" MinWidth="15"/>
                   <ColumnDefinition SharedSizeGroup="1" />
                   <ColumnDefinition  />
                   <ColumnDefinition SharedSizeGroup="3" />
@@ -78,7 +78,8 @@
         </ListBox.ItemTemplate>
       </ListBox>
     </DockPanel>
-    <DockPanel DockPanel.Dock="Right">
+    <DockPanel DockPanel.Dock="Right" 
+               IsVisible="{Binding SelectedTrackVM, Converter={x:Static ObjectConverters.IsNotNull}}">
       <v:TrackView DataContext="{Binding SelectedTrackVM}" />
     </DockPanel>
   </DockPanel>
