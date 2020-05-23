@@ -12,6 +12,7 @@
 //-TODO copy paste track
 //-TODO copy paste ControlSlider
 //TODO rename track
+//TODO copy, paste, playing icon
 
 //TODO UpdateSourceTrigger=LostFocus in ControlSlider (wait for avalonia implement https://github.com/AvaloniaUI/Avalonia/issues/3754)
 

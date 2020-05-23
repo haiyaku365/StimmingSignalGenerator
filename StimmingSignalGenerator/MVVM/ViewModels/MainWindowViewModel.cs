@@ -43,15 +43,19 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
       }
 
-      public void OpenGitHubPage()
+      public static void OpenGitHubPage() => OpenUrl("https://github.com/haiyaku365/StimmingSignalGenerator");
+      public static void OpenGitHubReleasesPage() => OpenUrl("https://github.com/haiyaku365/StimmingSignalGenerator/releases");
+      public static void OpenGitHubIssuesPage() => OpenUrl("https://github.com/haiyaku365/StimmingSignalGenerator/issues");
+
+      private static void OpenUrl(string url)
       {
          System.Diagnostics.Process.Start(
-            new System.Diagnostics.ProcessStartInfo()
-            {
-               FileName = "https://github.com/haiyaku365/StimmingSignalGenerator",
-               UseShellExecute = true
-            }
-            );
+                     new System.Diagnostics.ProcessStartInfo()
+                     {
+                        FileName = url,
+                        UseShellExecute = true
+                     }
+                     );
       }
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();

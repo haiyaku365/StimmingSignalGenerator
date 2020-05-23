@@ -26,6 +26,12 @@
               Command="{Binding OpenGitHubPage}"
               ToolTip.Tip="Open GitHub page">
         <Image Source="../../Assets/GitHub-Mark-32px.png" Height="16" Margin="-3"/>
+        <Button.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="Open GitHub releases page" Command="{Binding OpenGitHubReleasesPage}" />
+            <MenuItem Header="Open GitHub issues page" Command="{Binding OpenGitHubIssuesPage}" />
+          </ContextMenu>
+        </Button.ContextMenu>
       </Button>
       <v:AudioPlayerView DockPanel.Dock="Right" DataContext="{Binding AudioPlayerViewModel}"
                          VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
