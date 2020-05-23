@@ -17,16 +17,19 @@
   </Design.DataContext>
   <DockPanel>
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5" Margin="0 0 0 5">
-      <TextBlock Text="{Binding Name}">
-        <TextBlock.ContextMenu>
+      <ComboBox Items="{Binding Source={helper:EnumBindingSource {x:Type p:GeneratorModeType}}}"
+                SelectedItem="{Binding GeneratorMode}"/>
+      <DockPanel>
+        <DockPanel.ContextMenu>
           <ContextMenu>
             <MenuItem Header="Copy to clipboard" Classes="Copy"
                       Command="{Binding CopyToClipboard}" />
           </ContextMenu>
-        </TextBlock.ContextMenu>
-      </TextBlock>
-      <ComboBox Items="{Binding Source={helper:EnumBindingSource {x:Type p:GeneratorModeType}}}"
-                SelectedItem="{Binding GeneratorMode}"/>
+        </DockPanel.ContextMenu>
+        <TextBlock Margin="5 0" VerticalAlignment="Center"
+                   Text="{Binding Name}" IsVisible="{Binding !$parent.IsPointerOver}" />
+        <TextBox Text="{Binding Name}" IsVisible="{Binding $parent.IsPointerOver}" />
+      </DockPanel>
     </StackPanel>
     <DockPanel DockPanel.Dock="Top">
       <!-- Mono -->
