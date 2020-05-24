@@ -4,9 +4,8 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels.Interface
 {
-   public interface ISourceCacheViewModel
+   interface INamable
    {
-      public int Id { get; internal set; }
-      public string Name { get; set; }
+      string Name { get; set; }
    }
 }

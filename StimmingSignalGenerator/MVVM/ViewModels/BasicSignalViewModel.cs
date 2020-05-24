@@ -32,11 +32,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             IsExpanded = true
          };
    }
-   public class BasicSignalViewModel : ViewModelBase, ISourceCacheViewModel, IDisposable
+   public class BasicSignalViewModel : ViewModelBase, INamable, IDisposable
    {
-      public int Id { get; internal set; }
-      int ISourceCacheViewModel.Id { get => Id; set => Id = value; }
-
       private string name;
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
       public BasicSignal BasicSignal { get; }
@@ -94,7 +91,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private readonly ReadOnlyObservableCollection<BasicSignalViewModel> amSignalVMs;
       public ReadOnlyObservableCollection<BasicSignalViewModel> AMSignalVMs => amSignalVMs;
-      private SourceCache<BasicSignalViewModel, int> AMSignalVMsSourceCache { get; }
+      private SourceList<BasicSignalViewModel> AMSignalVMsSourceList { get; }
       public ReactiveCommand<Unit, Unit> AddAMCommand { get; }
       public ReactiveCommand<Unit, Unit> AddAMFromClipboardCommand { get; }
       public ReactiveCommand<BasicSignalViewModel, Unit> RemoveAMCommand { get; }
@@ -102,7 +99,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private readonly ReadOnlyObservableCollection<BasicSignalViewModel> fmSignalVMs;
       public ReadOnlyObservableCollection<BasicSignalViewModel> FMSignalVMs => fmSignalVMs;
-      private SourceCache<BasicSignalViewModel, int> FMSignalVMsSourceCache { get; }
+      private SourceList<BasicSignalViewModel> FMSignalVMsSourceList { get; }
       public ReactiveCommand<Unit, Unit> AddFMCommand { get; }
       public ReactiveCommand<Unit, Unit> AddFMFromClipboardCommand { get; }
       public ReactiveCommand<BasicSignalViewModel, Unit> RemoveFMCommand { get; }
@@ -121,12 +118,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          foreach (var am in poco.AMSignals)
          {
-            var amVM = FromPOCO(am).SetNameAndId(AMName, basicSignalVM.AMSignalVMsSourceCache);
+            var amVM = FromPOCO(am).SetName(AMName, basicSignalVM.AMSignalVMsSourceList);
             basicSignalVM.AddAM(amVM);
          }
          foreach (var fm in poco.FMSignals)
          {
-            var fmVM = FromPOCO(fm).SetNameAndId(FMName, basicSignalVM.FMSignalVMsSourceCache);
+            var fmVM = FromPOCO(fm).SetName(FMName, basicSignalVM.FMSignalVMsSourceList);
             basicSignalVM.AddFM(fmVM);
          }
 
@@ -185,10 +182,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          SignalType = BasicSignalType.Sin;
 
-         AMSignalVMsSourceCache =
-            new SourceCache<BasicSignalViewModel, int>(x => x.Id)
+         AMSignalVMsSourceList =
+            new SourceList<BasicSignalViewModel>()
             .DisposeWith(Disposables);
-         AMSignalVMsSourceCache.Connect()
+         AMSignalVMsSourceList.Connect()
             .OnItemAdded(vm => BasicSignal.AddAMSignal(vm.BasicSignal))
             .OnItemRemoved(vm =>
             {
@@ -206,14 +203,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .CreateFromTask(AddAMFromClipboard)
             .DisposeWith(Disposables);
          RemoveAMCommand = ReactiveCommand.Create<BasicSignalViewModel>(
-            vm => AMSignalVMsSourceCache.Remove(vm))
+            vm => AMSignalVMsSourceList.Remove(vm))
             .DisposeWith(Disposables);
 
 
-         FMSignalVMsSourceCache =
-            new SourceCache<BasicSignalViewModel, int>(x => x.Id)
+         FMSignalVMsSourceList =
+            new SourceList<BasicSignalViewModel>()
             .DisposeWith(Disposables);
-         FMSignalVMsSourceCache.Connect()
+         FMSignalVMsSourceList.Connect()
             .OnItemAdded(vm => BasicSignal.AddFMSignal(vm.BasicSignal))
             .OnItemRemoved(vm =>
             {
@@ -231,7 +228,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .CreateFromTask(AddFMFromClipboard)
             .DisposeWith(Disposables);
          RemoveFMCommand = ReactiveCommand.Create<BasicSignalViewModel>(
-            vm => FMSignalVMsSourceCache.Remove(vm))
+            vm => FMSignalVMsSourceList.Remove(vm))
             .DisposeWith(Disposables);
 
          // HACK Expander IsExpanded is set somewhere from internal avalonia uncontrollable
@@ -252,20 +249,20 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
       }
 
-      private Task AddAMFromClipboard() => AMSignalVMsSourceCache.AddFromClipboard(AMName);
+      private Task AddAMFromClipboard() => AMSignalVMsSourceList.AddFromClipboard(AMName);
       private void AddAM() => AddAM(CreateAMVM());
-      private void AddAM(BasicSignalViewModel vm) => vm.AddTo(AMSignalVMsSourceCache);
+      private void AddAM(BasicSignalViewModel vm) => AMSignalVMsSourceList.Add(vm);
 
-      private Task AddFMFromClipboard() => FMSignalVMsSourceCache.AddFromClipboard(FMName);
+      private Task AddFMFromClipboard() => FMSignalVMsSourceList.AddFromClipboard(FMName);
       private void AddFM() => AddFM(CreateFMVM());
-      private void AddFM(BasicSignalViewModel vm) => vm.AddTo(FMSignalVMsSourceCache);
+      private void AddFM(BasicSignalViewModel vm) => FMSignalVMsSourceList.Add(vm);
 
       private const string AMName = "AMSignal";
       private const string FMName = "FMSignal";
 
       private BasicSignalViewModel CreateAMVM() =>
             new BasicSignalViewModel(ControlSliderViewModel.ModulationSignalFreq) { Volume = 0 }
-            .SetNameAndId(AMName, AMSignalVMsSourceCache)
+            .SetName(AMName, AMSignalVMsSourceList)
          .DisposeWith(Disposables);
 
       private BasicSignalViewModel CreateFMVM() =>
@@ -273,7 +270,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                ControlSliderViewModel.ModulationSignalFreq,
                new ControlSliderViewModel(0, 0, 100, 1, 1, 5))
             { Volume = 0 }
-            .SetNameAndId(FMName, FMSignalVMsSourceCache)
+            .SetName(FMName, FMSignalVMsSourceList)
          .DisposeWith(Disposables);
 
       public async Task CopyToClipboard()

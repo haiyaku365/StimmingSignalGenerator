@@ -28,7 +28,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return new TrackViewModel { Name = "Track1", GeneratorMode = generatorModeType };
       }
    }
-   public class TrackViewModel : ViewModelBase, IDisposable
+   public class TrackViewModel : ViewModelBase, INamable, IDisposable
    {
       public AppState AppState { get; }
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }

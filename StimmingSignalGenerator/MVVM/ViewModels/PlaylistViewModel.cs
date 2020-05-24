@@ -147,7 +147,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public void AddNewTrack()
       {
          TrackVMsSourceList.Add(
-            new TrackViewModel() { Name = GetNextName() }
+            new TrackViewModel().SetName(TrackVMName, TrackVMsSourceList)
             .DisposeWith(Disposables)
          );
       }
@@ -155,23 +155,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          var vm = await TrackViewModel.PasteFromClipboard();
          if (vm == null) return;
-         vm.Name = GetNextName();
-         vm.DisposeWith(Disposables);
-         TrackVMsSourceList.Add(vm);
+         TrackVMsSourceList.Add(
+            vm.SetName(TrackVMName, TrackVMsSourceList).DisposeWith(Disposables)
+         );
       }
 
-      private readonly Regex nameRegex = new Regex(@"(?:Track)(\d*)$");
-      private string GetNextName()
-      {
-         int maxNum = 0;
-         if (TrackVMsSourceList.Items.Count() > 0)
-         {
-            maxNum = TrackVMsSourceList.Items
-                     .Max(x => int.TryParse(nameRegex.Match(x.Name).Groups[1].Value, out int num) ? num : 0);
-         }
-         return $"Track{maxNum + 1}";
-      }
-
+      private const string TrackVMName = "Track";
       public void RemoveTrack(TrackViewModel trackVM)
       {
          TrackVMsSourceList.Remove(trackVM);
@@ -198,8 +187,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          for (int i = 0; i < poco.Tracks.Count; i++)
          {
             var trackVM = TrackViewModel.FromPOCO(poco.Tracks[i]);
-            trackVM.Name = GetNextName();
-            TrackVMsSourceList.Add(trackVM);
+            TrackVMsSourceList.Add(trackVM.SetName(TrackVMName, TrackVMsSourceList));
          }
       }
 

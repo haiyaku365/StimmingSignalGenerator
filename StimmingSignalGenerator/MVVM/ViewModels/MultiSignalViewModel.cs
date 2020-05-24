@@ -32,7 +32,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private readonly ReadOnlyObservableCollection<BasicSignalViewModel> basicSignalVMs;
       public ReadOnlyObservableCollection<BasicSignalViewModel> BasicSignalVMs => basicSignalVMs;
-      private SourceCache<BasicSignalViewModel, int> BasicSignalVMsSourceCache { get; }
+      private SourceList<BasicSignalViewModel> BasicSignalVMsSourceList { get; }
       public ISampleProvider SampleSignal => multiSignal;
 
       private readonly MultiSignal multiSignal;
@@ -46,9 +46,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          foreach (var signal in poco.BasicSignals)
          {
-            BasicSignalViewModel.FromPOCO(signal)
-               .SetNameAndId(BasicSignalVMName, multiSignalVM.BasicSignalVMsSourceCache)
-               .AddTo(multiSignalVM.BasicSignalVMsSourceCache);
+            multiSignalVM.BasicSignalVMsSourceList.Add(
+               BasicSignalViewModel.FromPOCO(signal)
+                  .SetName(BasicSignalVMName, multiSignalVM.BasicSignalVMsSourceList)
+            );
          }
          return multiSignalVM;
       }
@@ -68,12 +69,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       }
       public MultiSignalViewModel(MultiSignal multiSignal)
       {
-         BasicSignalVMsSourceCache =
-            new SourceCache<BasicSignalViewModel, int>(x => x.Id)
-            .DisposeWith(Disposables);
+         BasicSignalVMsSourceList = new SourceList<BasicSignalViewModel>().DisposeWith(Disposables);
          this.multiSignal = multiSignal;
 
-         BasicSignalVMsSourceCache.Connect()
+         BasicSignalVMsSourceList.Connect()
             .OnItemAdded(vm => multiSignal.AddSignal(vm.BasicSignal))
             .OnItemRemoved(vm =>
             {
@@ -115,17 +114,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
 
-      private void AddVM() => CreateVM().AddTo(BasicSignalVMsSourceCache);
-      private Task AddVMFromClipboard() => BasicSignalVMsSourceCache.AddFromClipboard(BasicSignalVMName);
+      private void AddVM() => BasicSignalVMsSourceList.Add(CreateVM());
+      private Task AddVMFromClipboard() => BasicSignalVMsSourceList.AddFromClipboard(BasicSignalVMName);
       public void RemoveVM(BasicSignalViewModel vm)
       {
-         BasicSignalVMsSourceCache.Remove(vm);
+         BasicSignalVMsSourceList.Remove(vm);
       }
 
       private const string BasicSignalVMName = "Signal";
       private BasicSignalViewModel CreateVM(double volume = 0) =>
             new BasicSignalViewModel { Volume = volume }
-            .SetNameAndId(BasicSignalVMName, BasicSignalVMsSourceCache)
+            .SetName(BasicSignalVMName, BasicSignalVMsSourceList)
          .DisposeWith(Disposables);
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();

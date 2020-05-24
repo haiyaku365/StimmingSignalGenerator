@@ -6,11 +6,11 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
 {
    static class BasicSignalViewModelHelper
    {
-      public static async Task AddFromClipboard(this SourceCache<BasicSignalViewModel, int> sourceCache, string namePrefix)
+      public static async Task AddFromClipboard(this SourceList<BasicSignalViewModel> sourceList, string namePrefix)
       {
          var vm = await BasicSignalViewModel.PasteFromClipboard();
          if (vm == null) return;
-         vm.SetNameAndId(namePrefix, sourceCache).AddTo(sourceCache);
+         sourceList.Add(vm.SetName(namePrefix, sourceList));
       }
    }
 }
