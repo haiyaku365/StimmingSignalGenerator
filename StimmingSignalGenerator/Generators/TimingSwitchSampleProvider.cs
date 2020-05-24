@@ -36,6 +36,16 @@ namespace StimmingSignalGenerator.Generators
          }
       }
 
+      public void MoveSample(int oldIndex, int newIndex)
+      {
+         lock (timeSpanSampleProviders)
+         {
+            var item = timeSpanSampleProviders[oldIndex];
+            timeSpanSampleProviders.RemoveAt(oldIndex);
+            timeSpanSampleProviders.Insert(newIndex, item);
+         }
+      }
+
       public void UpdateTimeSpan(ISampleProvider sampleProvider, TimeSpan newTimeSpan)
       {
          lock (timeSpanSampleProviders)

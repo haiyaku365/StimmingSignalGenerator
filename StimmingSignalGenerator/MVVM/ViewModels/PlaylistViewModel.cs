@@ -15,6 +15,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
@@ -51,7 +52,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private readonly ReadOnlyObservableCollection<TrackViewModel> trackVMs;
       public ReadOnlyObservableCollection<TrackViewModel> TrackVMs => trackVMs;
-      private SourceCache<TrackViewModel, int> TrackVMsSourceCache { get; }
+      private SourceList<TrackViewModel> TrackVMsSourceList { get; }
 
       public TrackViewModel SelectedTrackVM { get => selectedTrackVM; set => this.RaiseAndSetIfChanged(ref selectedTrackVM, value); }
       public TrackViewModel PlayingTrackVM { get => playingTrackVM; set => this.RaiseAndSetIfChanged(ref playingTrackVM, value); }
@@ -71,10 +72,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          AppState = Locator.Current.GetService<AppState>();
 
-         TrackVMsSourceCache =
-            new SourceCache<TrackViewModel, int>(x => x.Id)
-            .DisposeWith(Disposables);
-         TrackVMsSourceCache.Connect()
+         TrackVMsSourceList = new SourceList<TrackViewModel>().DisposeWith(Disposables);
+         TrackVMsSourceList.Connect()
             .OnItemAdded(vm =>
             {
                timingSwitchSampleProvider.AddSample(vm.FinalSample, TimeSpan.FromSeconds(vm.TimeSpanSecond));
@@ -115,13 +114,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          this.WhenAnyValue(x => x.SelectedTrackVM)
             .Subscribe(x =>
             {
-               foreach (var vm in TrackVMsSourceCache.Items) { vm.IsSelected = false; }
+               foreach (var vm in TrackVMsSourceList.Items) { vm.IsSelected = false; }
                if (x == null) return;
                x.IsSelected = true;
             })
             .DisposeWith(Disposables);
          timingSwitchSampleProvider.ObservableOnSampleProviderChanged
-            .Subscribe(x => UpdateIsPlaying(TrackVMsSourceCache.Items.FirstOrDefault(vm => vm.FinalSample == x.EventArgs.SampleProvider)))
+            .Subscribe(x => UpdateIsPlaying(TrackVMsSourceList.Items.FirstOrDefault(vm => vm.FinalSample == x.EventArgs.SampleProvider)))
             .DisposeWith(Disposables);
          AppState
             .WhenAnyValue(x => x.IsHDPlot)
@@ -141,20 +140,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public void MoveTrack(int fromIdx, int toIdx)
       {
          if (fromIdx == toIdx) return;
-         var list = new List<TrackViewModel>(TrackVMsSourceCache.Items);
-         var moveItem = list[fromIdx];
-         list.RemoveAt(fromIdx);
-         list.Insert(toIdx, moveItem);
-
-         TrackVMsSourceCache.Clear();
-         TrackVMsSourceCache.AddOrUpdate(list);
+         TrackVMsSourceList.Move(fromIdx, toIdx);
+         timingSwitchSampleProvider.MoveSample(fromIdx, toIdx);
       }
 
       public void AddNewTrack()
       {
-         TrackVMsSourceCache.AddOrUpdate(
-            new TrackViewModel()
-            .SetNameAndId("Track", TrackVMsSourceCache)
+         TrackVMsSourceList.Add(
+            new TrackViewModel() { Name = GetNextName() }
             .DisposeWith(Disposables)
          );
       }
@@ -162,15 +155,26 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          var vm = await TrackViewModel.PasteFromClipboard();
          if (vm == null) return;
-         vm
-            .SetNameAndId("Track", TrackVMsSourceCache)
-            .DisposeWith(Disposables);
-         TrackVMsSourceCache.AddOrUpdate(vm);
+         vm.Name = GetNextName();
+         vm.DisposeWith(Disposables);
+         TrackVMsSourceList.Add(vm);
+      }
+
+      private readonly Regex nameRegex = new Regex(@"(?:Track)(\d*)$");
+      private string GetNextName()
+      {
+         int maxNum = 0;
+         if (TrackVMsSourceList.Items.Count() > 0)
+         {
+            maxNum = TrackVMsSourceList.Items
+                     .Max(x => int.TryParse(nameRegex.Match(x.Name).Groups[1].Value, out int num) ? num : 0);
+         }
+         return $"Track{maxNum + 1}";
       }
 
       public void RemoveTrack(TrackViewModel trackVM)
       {
-         TrackVMsSourceCache.Remove(trackVM);
+         TrackVMsSourceList.Remove(trackVM);
       }
 
       public POCOs.Playlist ToPOCO()
@@ -178,7 +182,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return new POCOs.Playlist
          {
             Name = Name,
-            Tracks = TrackVMsSourceCache.Items.Select(x => x.ToPOCO()).ToList()
+            Tracks = TrackVMsSourceList.Items.Select(x => x.ToPOCO()).ToList()
          };
       }
       public async Task SaveAsync() => await this.ToPOCO().SaveAsync();
@@ -188,20 +192,20 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          var poco = await PlaylistFile.LoadAsync();
          if (poco == null) return;
          //Clean old stuff
-         TrackVMsSourceCache.Clear();
+         TrackVMsSourceList.Clear();
          //Load to vm
          Name = poco.Name;
          for (int i = 0; i < poco.Tracks.Count; i++)
          {
             var trackVM = TrackViewModel.FromPOCO(poco.Tracks[i]);
-            trackVM.Id = i;
-            TrackVMsSourceCache.AddOrUpdate(trackVM);
+            trackVM.Name = GetNextName();
+            TrackVMsSourceList.Add(trackVM);
          }
       }
 
       private void UpdateIsPlaying(TrackViewModel trackViewModel)
       {
-         foreach (var trackVM in TrackVMsSourceCache.Items) { trackVM.IsPlaying = false; }
+         foreach (var trackVM in TrackVMsSourceList.Items) { trackVM.IsPlaying = false; }
          if (trackViewModel == null) return;
          trackViewModel.IsPlaying = true;
       }
