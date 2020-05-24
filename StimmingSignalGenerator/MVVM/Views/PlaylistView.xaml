@@ -33,13 +33,13 @@
       <ToggleButton DockPanel.Dock="Top"
                     Content="Auto track changing"
                     IsChecked="{Binding IsAutoTrackChanging}" />
-      <ListBox DockPanel.Dock="Top" Margin="0 2"
+      <ListBox DockPanel.Dock="Top" Margin="0 2" Name="TrackList"
                Items="{ Binding TrackVMs }" SelectedItem="{Binding SelectedTrackVM}"
                SelectionMode="Single" Grid.IsSharedSizeScope="True">
         <ListBox.ItemTemplate>
           <DataTemplate>
             <Border BorderBrush="Gray" Background="Transparent"
-                    BorderThickness="1" Margin="-2 -1 -2 0">
+                    BorderThickness="1" Margin="-2 -1 -2 0" DragDrop.AllowDrop="True">
               <Border.ContextMenu>
                 <ContextMenu>
                   <MenuItem Header="Copy to clipboard" Classes="Copy"

@@ -130,6 +130,18 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          PlayingTrackVM = trackVM;
       }
 
+      public void MoveTrack(int fromIdx, int toIdx)
+      {
+         if (fromIdx == toIdx) return;
+         var list = new List<TrackViewModel>(TrackVMsSourceCache.Items);
+         var moveItem = list[fromIdx];
+         list.RemoveAt(fromIdx);
+         list.Insert(toIdx, moveItem);
+
+         TrackVMsSourceCache.Clear();
+         TrackVMsSourceCache.AddOrUpdate(list);
+      }
+
       public void AddNewTrack()
       {
          TrackVMsSourceCache.AddOrUpdate(
