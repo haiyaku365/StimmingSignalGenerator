@@ -10,12 +10,20 @@
              d:DataContext="{x:Static vm:DesignPlaylistViewModel.Data}"
              
              x:Class="StimmingSignalGenerator.MVVM.Views.PlaylistView">
-  <DockPanel>
-    <Expander DockPanel.Dock="Top" Margin="0 0 0 2"
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="auto" />
+      <RowDefinition />
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="auto" />
+      <ColumnDefinition />
+    </Grid.ColumnDefinitions>
+    <Expander Grid.Row="0" Grid.ColumnSpan="2" Margin="0 0 0 2"
               IsExpanded="{Binding AppState.IsPlotEnable}" Header="Plot">
       <v:PlotSampleView DataContext="{Binding PlotSampleViewModel}" />
     </Expander>
-    <DockPanel DockPanel.Dock="Left" Margin="0 0 2 0">
+    <DockPanel Grid.Row="1" Grid.Column="0" Margin="0 0 2 0" Name="TrackListPanel">
       <Button DockPanel.Dock="Bottom" Classes="Green" Height="30"
               Content="+Track" Command="{Binding AddNewTrack}" >
         <Button.ContextMenu>
@@ -85,12 +93,13 @@
         </ListBox.ItemTemplate>
       </ListBox>
     </DockPanel>
-    <ItemsControl DockPanel.Dock="Right" Items="{ Binding TrackVMs }">
+    <ItemsControl Grid.Row="1" Grid.Column="1" Items="{ Binding TrackVMs }">
       <ItemsControl.ItemTemplate>
         <DataTemplate>
-          <v:TrackView DataContext="{Binding }" IsVisible="{Binding IsSelected}" />
+          <v:TrackView Height="{Binding #TrackListPanel.Bounds.Height}" IsVisible="{Binding IsSelected}"
+                       DataContext="{Binding }" />
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
-  </DockPanel>
+  </Grid>
 </UserControl>
