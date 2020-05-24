@@ -85,9 +85,12 @@
         </ListBox.ItemTemplate>
       </ListBox>
     </DockPanel>
-    <DockPanel DockPanel.Dock="Right"
-               IsVisible="{Binding SelectedTrackVM, Converter={x:Static ObjectConverters.IsNotNull}}">
-      <v:TrackView DataContext="{Binding SelectedTrackVM}" />
-    </DockPanel>
+    <ItemsControl DockPanel.Dock="Right" Items="{ Binding TrackVMs }">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <v:TrackView DataContext="{Binding }" IsVisible="{Binding IsSelected}" />
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
   </DockPanel>
 </UserControl>

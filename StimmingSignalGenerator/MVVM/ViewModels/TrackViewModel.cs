@@ -35,6 +35,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       int ISourceCacheViewModel.Id { get => Id; set => Id = value; }
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
       public bool IsPlaying { get => isPlaying; set => this.RaiseAndSetIfChanged(ref isPlaying, value); }
+      public bool IsSelected { get => isSelected; set => this.RaiseAndSetIfChanged(ref isSelected, value); }
 
       public double TimeSpanSecond { get => timeSpanSecond; set => this.RaiseAndSetIfChanged(ref timeSpanSecond, Math.Round(value, 2)); }
       public List<MultiSignalViewModel> MultiSignalVMs { get; }
@@ -47,6 +48,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private GeneratorModeType generatorMode;
       private string name;
       private bool isPlaying;
+      private bool isSelected;
       private double timeSpanSecond = 0;
 
       public TrackViewModel() : this(
