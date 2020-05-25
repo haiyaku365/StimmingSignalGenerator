@@ -106,11 +106,20 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             })
             .DisposeWith(Disposables);
          this.WhenAnyValue(x => x.SelectedTrackVM)
-            .Subscribe(x =>
+            .Subscribe(_ =>
             {
                foreach (var vm in TrackVMsSourceList.Items) { vm.IsSelected = false; }
-               if (x == null) return;
-               x.IsSelected = true;
+               if (SelectedTrackVM == null) return;
+               SelectedTrackVM.IsSelected = true;
+            })
+            .DisposeWith(Disposables);
+         timingSwitchSampleProvider.ObservableOnProgressChanged
+            .Subscribe(x =>
+            {
+               var vm = 
+                  TrackVMsSourceList.Items
+                     .FirstOrDefault(vm => vm.FinalSample == x.EventArgs.SampleProvider);
+               if (vm != null) vm.Progress = x.EventArgs.Progress;
             })
             .DisposeWith(Disposables);
          timingSwitchSampleProvider.ObservableOnSampleProviderChanged

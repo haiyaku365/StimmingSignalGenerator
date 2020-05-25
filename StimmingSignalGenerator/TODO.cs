@@ -5,7 +5,7 @@
 
 //TODO default playlist to load when app init
 //-TODO playlist track order editing
-//TODO progress bar in auto track changing
+//-TODO progress bar in auto track changing
 
 //TODO UpdateSourceTrigger=LostFocus in ControlSlider (wait for avalonia implement https://github.com/AvaloniaUI/Avalonia/issues/3754)
 

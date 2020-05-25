@@ -1,6 +1,4 @@
-﻿using NAudio.Utils;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
+﻿using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +19,13 @@ namespace StimmingSignalGenerator.Generators
          => Observable.FromEventPattern<SampleProviderChangedEventArgs>(
                h => OnSampleProviderChanged += h,
                h => OnSampleProviderChanged -= h);
+
+      public event EventHandler<ProgressChangedEventArgs> OnProgressChanged;
+      public IObservable<EventPattern<ProgressChangedEventArgs>> ObservableOnProgressChanged
+         => Observable.FromEventPattern<ProgressChangedEventArgs>(
+               h => OnProgressChanged += h,
+               h => OnProgressChanged -= h);
+
       public TimingSwitchSampleProvider()
       {
          WaveFormat = Constants.DefaultStereoWaveFormat;
@@ -93,7 +98,12 @@ namespace StimmingSignalGenerator.Generators
                   // update reading status
                   currentSamplePosition += sampleToRead;
                   sampleToReadRemain -= sampleToRead;
-
+                  OnProgressChanged?.Invoke(this,
+                     ProgressChangedEventArgs.Create(
+                        timeSpanSampleProviders[sampleIdx].SampleProvider,
+                        (float)(currentSamplePosition - sampleSpanStartPosition) /
+                        (sampleSpanEndPosition - sampleSpanStartPosition)
+                     ));
                   InvokeSampleProviderChanged();
                }
                else
@@ -106,6 +116,7 @@ namespace StimmingSignalGenerator.Generators
                      restartState();
                      sampleIdx++;
                   }
+                  sampleSpanStartPosition = sampleSpanEndPosition;
                   sampleSpanEndPosition += timeSpanSampleProviders[sampleIdx].SampleSpan;
                }
             }
@@ -118,6 +129,17 @@ namespace StimmingSignalGenerator.Generators
             => new SampleProviderChangedEventArgs { SampleProvider = sampleProvider };
          public ISampleProvider SampleProvider { get; set; }
       }
+      public class ProgressChangedEventArgs : EventArgs
+      {
+         public static ProgressChangedEventArgs Create(ISampleProvider sampleProvider, float progress)
+            => new ProgressChangedEventArgs { SampleProvider = sampleProvider, Progress = progress };
+         public ISampleProvider SampleProvider { get; set; }
+         /// <summary>
+         /// Progress 0 to 1
+         /// </summary>
+         public float Progress { get; set; }
+      }
+
       private int lastInvokeSampleIdx = -1;
       private void InvokeSampleProviderChanged()
       {
@@ -135,7 +157,10 @@ namespace StimmingSignalGenerator.Generators
          public int SampleSpan => WaveHelper.TimeSpanToSamples(TimeSpan, SampleProvider.WaveFormat);
       }
       private List<TimeSpanSampleProvider> timeSpanSampleProviders;
-      private int currentSamplePosition = 0, sampleSpanEndPosition = 0, sampleIdx = -1;
+      private int currentSamplePosition = 0;
+      private int sampleSpanStartPosition = 0;
+      private int sampleSpanEndPosition = 0;
+      private int sampleIdx = -1;
       private void restartState()
       {
          sampleSpanEndPosition = currentSamplePosition = 0;

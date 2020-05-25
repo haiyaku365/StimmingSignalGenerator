@@ -34,7 +34,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
       public bool IsPlaying { get => isPlaying; set => this.RaiseAndSetIfChanged(ref isPlaying, value); }
       public bool IsSelected { get => isSelected; set => this.RaiseAndSetIfChanged(ref isSelected, value); }
-
+      public float Progress { get => progress; set => this.RaiseAndSetIfChanged(ref progress, value); }
       public double TimeSpanSecond { get => timeSpanSecond; set => this.RaiseAndSetIfChanged(ref timeSpanSecond, Math.Round(value, 2)); }
       public List<MultiSignalViewModel> MultiSignalVMs { get; }
       public List<ControlSliderViewModel> VolVMs { get; }
@@ -47,6 +47,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private string name;
       private bool isPlaying;
       private bool isSelected;
+      private float progress;
       private double timeSpanSecond = 0;
 
       public TrackViewModel() : this(
@@ -65,10 +66,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          SetupSwitchingModeSignal(multiSignalVMs);
 
          this.WhenAnyValue(x => x.GeneratorMode)
-            .Subscribe(x =>
+            .Subscribe(_ =>
             {
-               sample.GeneratorMode = x;
+               sample.GeneratorMode = GeneratorMode;
             })
+            .DisposeWith(Disposables);
+         this.WhenAnyValue(x => x.IsPlaying)
+            .Subscribe(_ => { if (!IsPlaying) Progress = 0; })
             .DisposeWith(Disposables);
          VolVMs[0].WhenAnyValue(vm => vm.Value)
             .Subscribe(m => sample.MonoLeftVolume = (float)m)
