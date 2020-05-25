@@ -13,5 +13,17 @@
     <Binding Source="{x:Static vm:DesignPlotSampleViewModel.MonoData}" />
     <!--<Binding Source="{x:Static vm:DesignPlotSampleViewModel.StereoData}" />-->
   </Design.DataContext>
-  <oxy:PlotView Model="{Binding PlotModel}" Height="120" MinWidth="300" />
+  <Border  Margin="0 -20" >
+    <oxy:PlotView Grid.Column="2" Margin="-25 0 1 -25"
+                  Width="{Binding $parent.Bounds.Width}"
+                  Height="{Binding $parent.Bounds.Height}"
+                  Model="{Binding PlotModel}">
+      <!-- use empty template to diable tracker -->
+      <oxy:PlotView.DefaultTrackerTemplate>
+        <ControlTemplate>
+          <Panel />
+        </ControlTemplate>
+      </oxy:PlotView.DefaultTrackerTemplate>
+    </oxy:PlotView>
+  </Border>
 </UserControl>

@@ -28,6 +28,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    public class MainWindowViewModel : ViewModelBase, IDisposable
    {
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
+      public PlotSampleViewModel PlotSampleViewModel { get; }
       public PlaylistViewModel PlaylistViewModel { get; }
       public AppState AppState { get; }
       public string Title => $"Stimming Signal Generator {AppState.Version}";
@@ -37,9 +38,20 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          AppState = Locator.Current.GetService<AppState>();
          PlaylistViewModel = new PlaylistViewModel();
          PlaylistViewModel.AddNewTrack();
+         PlotSampleViewModel =
+            new PlotSampleViewModel(new PlotSampleProvider(PlaylistViewModel.FinalSample))
+            .DisposeWith(Disposables);
 
+         AppState
+            .WhenAnyValue(x => x.IsHDPlot)
+            .Subscribe(x => PlotSampleViewModel.IsHighDefinition = x)
+            .DisposeWith(Disposables);
+         AppState
+            .WhenAnyValue(x => x.IsPlotEnable)
+            .Subscribe(x => PlotSampleViewModel.IsPlotEnable = x)
+            .DisposeWith(Disposables);
          AudioPlayerViewModel =
-            new AudioPlayerViewModel(PlaylistViewModel.FinalSample)
+            new AudioPlayerViewModel(PlotSampleViewModel.SampleSignal)
             .DisposeWith(Disposables);
       }
 

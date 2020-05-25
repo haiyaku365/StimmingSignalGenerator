@@ -57,9 +57,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public TrackViewModel SelectedTrackVM { get => selectedTrackVM; set => this.RaiseAndSetIfChanged(ref selectedTrackVM, value); }
       public TrackViewModel PlayingTrackVM { get => playingTrackVM; set => this.RaiseAndSetIfChanged(ref playingTrackVM, value); }
       public bool IsAutoTrackChanging { get => isAutoTrackChanging; set => this.RaiseAndSetIfChanged(ref isAutoTrackChanging, value); }
-
-      public PlotSampleViewModel PlotSampleViewModel { get; }
-      public ISampleProvider FinalSample => PlotSampleViewModel.SampleSignal;
+      public ISampleProvider FinalSample => switchingSampleProvider;
       public AppState AppState { get; }
 
       private TrackViewModel selectedTrackVM;
@@ -98,10 +96,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          switchingSampleProvider = new SwitchingSampleProvider();
          switchingSampleProvider.SampleProvider = timingSwitchSampleProvider;
 
-         PlotSampleViewModel =
-            new PlotSampleViewModel(new PlotSampleProvider(switchingSampleProvider))
-            .DisposeWith(Disposables);
-
          this.WhenAnyValue(x => x.IsAutoTrackChanging, x => x.PlayingTrackVM)
             .Subscribe(_ =>
             {
@@ -121,14 +115,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
          timingSwitchSampleProvider.ObservableOnSampleProviderChanged
             .Subscribe(x => UpdateIsPlaying(TrackVMsSourceList.Items.FirstOrDefault(vm => vm.FinalSample == x.EventArgs.SampleProvider)))
-            .DisposeWith(Disposables);
-         AppState
-            .WhenAnyValue(x => x.IsHDPlot)
-            .Subscribe(x => PlotSampleViewModel.IsHighDefinition = x)
-            .DisposeWith(Disposables);
-         AppState
-            .WhenAnyValue(x => x.IsPlotEnable)
-            .Subscribe(x => PlotSampleViewModel.IsPlotEnable = x)
             .DisposeWith(Disposables);
       }
 

@@ -17,11 +17,18 @@
     <!--<Binding Source="{x:Static vm:DesignMainWindowViewModel.StereoData}" />-->
   </Design.DataContext>
   <DockPanel Margin="10">
-    <DockPanel DockPanel.Dock="Top" Margin="0 5">
-      <ToggleButton DockPanel.Dock="Left" Margin="5 0"
+    <Grid DockPanel.Dock="Top" Margin="0 5"
+          ColumnDefinitions="auto,auto,auto,*,auto,auto">
+      <ToggleButton Grid.Column="0" Margin="5 0"
                     Content="HD Plot" IsChecked="{Binding AppState.IsHDPlot}" />
-
-      <Menu DockPanel.Dock="Right" Margin="10 0 0 0">
+      <ToggleButton Grid.Column="1" Margin="5 0"
+                    Content="Plot enable" IsChecked="{Binding AppState.IsPlotEnable}" />
+      <v:PlotSampleView Grid.Column="2"
+                        Height="32" Width="200"
+                        DataContext="{Binding PlotSampleViewModel}" />
+      <v:AudioPlayerView Grid.Column="4" DataContext="{Binding AudioPlayerViewModel}"
+                         VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
+      <Menu Grid.Column="5" Margin="10 0 0 0">
         <MenuItem Width="28" Height="28">
           <MenuItem.Header>
             <Viewbox Margin="-3">
@@ -38,16 +45,14 @@
               <Image Source="/Assets/Icons/tag.png" />
             </MenuItem.Icon>
           </MenuItem>
-        <MenuItem Header="Open GitHub issues page" Command="{Binding OpenGitHubIssuesPage}">
+          <MenuItem Header="Open GitHub issues page" Command="{Binding OpenGitHubIssuesPage}">
             <MenuItem.Icon>
               <Image Source="/Assets/Icons/exclamation-circle.png" />
             </MenuItem.Icon>
           </MenuItem>
         </MenuItem>
       </Menu>
-      <v:AudioPlayerView DockPanel.Dock="Right" DataContext="{Binding AudioPlayerViewModel}"
-                         VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
-    </DockPanel>
+    </Grid>
 
     <v:PlaylistView DockPanel.Dock="Top" DataContext="{Binding PlaylistViewModel}" />
   </DockPanel>

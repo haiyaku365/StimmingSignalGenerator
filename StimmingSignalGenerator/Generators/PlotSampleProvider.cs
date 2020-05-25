@@ -25,26 +25,18 @@ namespace StimmingSignalGenerator.Generators
             if (isHighDefinition != value)
             {
                isHighDefinition = value;
-               for (int i = 0; i < lineSeries.Length; i++)
+               foreach (var line in lineSeries)
                {
-                  if (isHighDefinition)
-                  {
-                     lineSeries[i].Decimator = null;
-                     lineSeries[i].MinimumSegmentLength = 2;
-                  }
-                  else
-                  {
-                     lineSeries[i].Decimator = Decimator.Decimate;
-                     lineSeries[i].MinimumSegmentLength = 5;
-                  }
+                  SetLineHD(line, isHighDefinition);
                }
             }
          }
       }
+
       public WaveFormat WaveFormat => InputSample.WaveFormat;
 
       private bool isHighDefinition;
-      private readonly LineSeries[] lineSeries;
+      private readonly AliasedLineSeries[] lineSeries;
       private readonly int lineCount;
       private readonly SynchronizationContext synchronizationContext;
       private static readonly Random rand = new Random();
@@ -58,16 +50,24 @@ namespace StimmingSignalGenerator.Generators
       {
          InputSample = inputSample;
          lineCount = inputSample.WaveFormat.Channels;
-         lineSeries = new LineSeries[lineCount];
-         Array.ForEach(lineSeries, x => x = new LineSeries());
-         lineSeries[0] = new LineSeries() { Color = OxyColor.FromArgb(180, 0, 0, 0), MinimumSegmentLength = 5 };
+         lineSeries = new AliasedLineSeries[lineCount];
+         lineSeries[0] = new AliasedLineSeries()
+         {
+            Color = OxyColor.FromArgb(180, 0, 0, 0)
+         };
          if (lineCount > 1)
          {
-            lineSeries[1] = new LineSeries() { Color = OxyColor.FromArgb(180, 255, 0, 0), MinimumSegmentLength = 5 };
+            lineSeries[1] = new AliasedLineSeries()
+            {
+               Color = OxyColor.FromArgb(180, 255, 0, 0)
+            };
             for (int i = 2; i < lineCount; i++)
             {
                var (r, g, b) = Helper.ColorHelper.HsvToRgb(rand.Next(0, 360), 1, 1);
-               lineSeries[i] = new LineSeries() { Color = OxyColor.FromArgb(180, r, g, b), MinimumSegmentLength = 5 };
+               lineSeries[i] = new AliasedLineSeries()
+               {
+                  Color = OxyColor.FromArgb(180, r, g, b)
+               };
             }
          }
 
@@ -82,6 +82,7 @@ namespace StimmingSignalGenerator.Generators
               AbsoluteMinimum = -1.2,
               AbsoluteMaximum = 1.2,
               IsZoomEnabled = false,
+              TextColor = OxyColor.FromArgb(0, 0, 0, 0),
               ExtraGridlines = new[] { -1d, 1d },
               ExtraGridlineColor = OxyColor.FromAColor(0xa0, OxyColors.Red)
            });
@@ -92,14 +93,16 @@ namespace StimmingSignalGenerator.Generators
               Minimum = 0,
               Maximum = PointLimit,
               AbsoluteMinimum = 0,
-              AbsoluteMaximum = PointLimit
+              AbsoluteMaximum = PointLimit,
+              TextColor = OxyColor.FromArgb(0, 0, 0, 0)
            });
 
          this.synchronizationContext = synchronizationContext;
-         for (int i = 0; i < lineCount; i++)
+
+         foreach (var line in lineSeries)
          {
-            lineSeries[i].Decimator = Decimator.Decimate;
-            PlotModel.Series.Add(lineSeries[i]);
+            SetLineHD(line, IsHighDefinition);
+            PlotModel.Series.Add(line);
          }
       }
 
@@ -137,6 +140,52 @@ namespace StimmingSignalGenerator.Generators
          synchronizationContext.Post(_ => PlotModel.InvalidatePlot(true), null);
 
          return read;
+      }
+      private void SetLineHD(AliasedLineSeries lineSeries, bool isHD)
+      {
+         if (isHD)
+         {
+            lineSeries.Decimator = null;
+            lineSeries.MinimumSegmentLength = 2;
+            lineSeries.Aliased = false;
+         }
+         else
+         {
+            lineSeries.Decimator = Decimator.Decimate;
+            lineSeries.MinimumSegmentLength = 4;
+            lineSeries.Aliased = true;
+         }
+      }
+   }
+
+   // Performance friendly LineSeries
+   //https://github.com/oxyplot/oxyplot/issues/1286
+   public class AliasedLineSeries : LineSeries
+   {
+
+      List<ScreenPoint> outputBuffer = null;
+
+      public bool Aliased { get; set; } = true;
+
+      protected override void RenderLine(IRenderContext rc, OxyRect clippingRect, IList<ScreenPoint> pointsToRender)
+      {
+         var dashArray = this.ActualDashArray;
+
+         if (this.outputBuffer == null)
+         {
+            this.outputBuffer = new List<ScreenPoint>(pointsToRender.Count);
+         }
+
+         rc.DrawClippedLine(clippingRect,
+                            pointsToRender,
+                            this.MinimumSegmentLength * this.MinimumSegmentLength,
+                            this.GetSelectableColor(this.ActualColor),
+                            this.StrokeThickness,
+                            dashArray,
+                            this.LineJoin,
+                            this.Aliased,
+                            this.outputBuffer);
+
       }
    }
 }
