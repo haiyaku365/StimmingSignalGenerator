@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.Views
 {
@@ -42,7 +43,17 @@ namespace StimmingSignalGenerator.MVVM.Views
                         h => container.ContainerControl.PointerPressed -= h,
                         RxApp.MainThreadScheduler)
                      .Subscribe(x => Observable.StartAsync(() =>
-                        DragDrop.DoDragDrop(x.EventArgs, dragData, DragDropEffects.Move)));
+                     {
+                        if (x.EventArgs.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+                        {
+                           return DragDrop.DoDragDrop(x.EventArgs, dragData, DragDropEffects.Move);
+                        }
+                        else
+                        {
+                           x.EventArgs.Handled = false;
+                           return Task.CompletedTask;
+                        }
+                     }));
                   //keep disposable to dispose when item remove
                   trackControlPointerPressedDisposables.Add(
                      (container.ContainerControl, pointerPressedDisposable)
@@ -54,20 +65,20 @@ namespace StimmingSignalGenerator.MVVM.Views
             //when item remove from TrackList
             Observable.FromEventPattern<ItemContainerEventArgs>(
                h => TrackList.ItemContainerGenerator.Dematerialized += h,
-               h => TrackList.ItemContainerGenerator.Dematerialized -= h)
-            .Subscribe(x =>
-            {
-               foreach (var container in x.EventArgs.Containers)
-               {
-                  //do cleanup for TrackList item
-                  var trackControlPointerPressedDisposable =
-                     trackControlPointerPressedDisposables
-                        .FirstOrDefault(x => x.control == container.ContainerControl);
-                  trackControlPointerPressedDisposable.disposable.Dispose();
-                  trackControlPointerPressedDisposables.Remove(trackControlPointerPressedDisposable);
-               }
-            })
-            .DisposeWith(disposables);
+                     h => TrackList.ItemContainerGenerator.Dematerialized -= h)
+                  .Subscribe(x =>
+                  {
+                     foreach (var container in x.EventArgs.Containers)
+                     {
+                        //do cleanup for TrackList item
+                        var trackControlPointerPressedDisposable =
+                           trackControlPointerPressedDisposables
+                              .FirstOrDefault(x => x.control == container.ContainerControl);
+                        trackControlPointerPressedDisposable.disposable.Dispose();
+                        trackControlPointerPressedDisposables.Remove(trackControlPointerPressedDisposable);
+                     }
+                  })
+                  .DisposeWith(disposables);
 
             // Setup DragOver, Drop handler
             this.AddHandler(DragDrop.DragOverEvent, DragOver).DisposeWith(disposables);
