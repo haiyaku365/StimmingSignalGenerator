@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StimmingSignalGenerator", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{605873EF-3522-46ED-8FB5-2841BF723E61}"
 	ProjectSection(SolutionItems) = preProject
-		docs\c18d087f.PNG = docs\c18d087f.PNG
 		docs\README.md = docs\README.md
-		docs\v0.1.0.0.PNG = docs\v0.1.0.0.PNG
+		docs\v0.2.0.0_1.png = docs\v0.2.0.0_1.png
+		docs\v0.2.0.0_2.png = docs\v0.2.0.0_2.png
 	EndProjectSection
 EndProject
 Global

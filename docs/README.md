@@ -1,4 +1,6 @@
 # StimmingSignalGenerator
 
 #### screenshot
-![Window](v0.1.0.0.PNG)
+![Window1](v0.2.0.0_1.png)
+
+![Window2](v0.2.0.0_2.png)
