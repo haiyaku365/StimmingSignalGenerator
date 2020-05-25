@@ -116,7 +116,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          timingSwitchSampleProvider.ObservableOnProgressChanged
             .Subscribe(x =>
             {
-               var vm = 
+               var vm =
                   TrackVMsSourceList.Items
                      .FirstOrDefault(vm => vm.FinalSample == x.EventArgs.SampleProvider);
                if (vm != null) vm.Progress = x.EventArgs.Progress;
@@ -170,10 +170,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          };
       }
       public async Task SaveAsync() => await this.ToPOCO().SaveAsync();
-
-      public async Task LoadAsync()
+      public async Task LoadDefaultAsync() => LoadFromPoco(await PlaylistFile.LoadFirstFileAsync());
+      public async Task LoadAsync() => LoadFromPoco(await PlaylistFile.LoadAsync());
+      private void LoadFromPoco(POCOs.Playlist poco)
       {
-         var poco = await PlaylistFile.LoadAsync();
          if (poco == null) return;
          //Clean old stuff
          TrackVMsSourceList.Clear();

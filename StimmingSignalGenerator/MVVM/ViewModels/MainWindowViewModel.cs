@@ -37,7 +37,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          AppState = Locator.Current.GetService<AppState>();
          PlaylistViewModel = new PlaylistViewModel();
-         PlaylistViewModel.AddNewTrack();
+         Observable.StartAsync(() => PlaylistViewModel.LoadDefaultAsync())
+            .Subscribe()
+            .DisposeWith(Disposables);
+         
          PlotSampleViewModel =
             new PlotSampleViewModel(new PlotSampleProvider(PlaylistViewModel.FinalSample))
             .DisposeWith(Disposables);

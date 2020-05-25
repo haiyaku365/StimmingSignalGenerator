@@ -35,21 +35,38 @@ namespace StimmingSignalGenerator.FileService
          openFileDialog.Directory = PlaylistPath;
          var loadPath = await openFileDialog.ShowAsync(Window);
          if (loadPath.Length == 0) return null;
-         using (FileStream fs = File.OpenRead(loadPath[0]))
+         return await LoadAsync(loadPath[0]);
+      }
+
+      public static async Task<Playlist> LoadFirstFileAsync()
+      {
+         CreatePlaylistDir();
+         var loadPath = 
+            Directory
+               .GetFiles(PlaylistPath, "*.json")
+               .OrderBy(x=>x)
+               .FirstOrDefault();
+         return await LoadAsync(loadPath);
+      }
+
+      public static async Task<Playlist> LoadAsync(string path)
+      {
+         if (!File.Exists(path)) return null;
+         using (FileStream fs = File.OpenRead(path))
          {
             var poco = await JsonSerializer.DeserializeAsync<Playlist>(fs);
-            poco.Name = Path.GetFileNameWithoutExtension(loadPath[0]);
+            poco.Name = Path.GetFileNameWithoutExtension(path);
             return poco;
          }
       }
-
-      private static readonly Regex defaultFileRegex = new Regex(@"(?:Playlist)(\d*)(?:.json)$");
+      private const string PlaylistNamePrefix = "Playlist";
+      private static readonly Regex defaultFileRegex = new Regex(@$"(?:{PlaylistNamePrefix})(\d*)(?:.json)$");
       private static string GetNextFileName()
       {
          int maxNum =
                Directory.EnumerateFiles(PlaylistPath).DefaultIfEmpty("0")
                   .Max(x => int.TryParse(defaultFileRegex.Match(x).Groups[1].Value, out int num) ? num : 0);
-         return $"Playlist{maxNum + 1}.json";
+         return $"{PlaylistNamePrefix}{maxNum + 1}.json";
       }
 
       private static readonly List<FileDialogFilter> fileDialogFilters =
@@ -74,7 +91,7 @@ namespace StimmingSignalGenerator.FileService
 
       private static void CreatePlaylistDir() => Directory.CreateDirectory(PlaylistPath);
 
-      private const string PlaylistLocation = "Playlist";
-      private static readonly string PlaylistPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PlaylistLocation);
+      private const string PlaylistDirectoryName = "Playlists";
+      private static string PlaylistPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PlaylistDirectoryName);
    }
 }
