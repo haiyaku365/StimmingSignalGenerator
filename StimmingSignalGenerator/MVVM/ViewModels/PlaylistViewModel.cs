@@ -182,7 +182,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          for (int i = 0; i < poco.Tracks.Count; i++)
          {
             var trackVM = TrackViewModel.FromPOCO(poco.Tracks[i]);
-            TrackVMsSourceList.Add(trackVM.SetName(TrackVMName, TrackVMsSourceList));
+            if (trackVM.Name == null) trackVM.SetName(TrackVMName, TrackVMsSourceList);
+            TrackVMsSourceList.Add(trackVM);
          }
       }
 
