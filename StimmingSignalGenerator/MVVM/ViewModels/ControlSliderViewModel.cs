@@ -57,10 +57,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public const double BasicSignalFreqMin = 300;
       public const double Tick = 1;
       public const double SmallTick = 0.01;
-      public const double SuperSmallTick = 0.0001;
+      public const double SuperSmallTick = 0.001;
       public const string TextFormat = "{0:N0}";
       public const string SmallTickTextFormat = "{0:N2}";
-      public const string SuperSmallTickTextFormat = "{0:N4}";
+      public const string SuperSmallTickTextFormat = "{0:N3}";
       public static ControlSliderViewModel BasicSignalFreq =>
          new ControlSliderViewModel(440, BasicSignalFreqMin, 8000, Tick, Tick, Tick);
       public static ControlSliderViewModel ModulationSignalFreq =>
