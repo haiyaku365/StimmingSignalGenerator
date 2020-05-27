@@ -1,5 +1,5 @@
 
-//TODO master vol
+//-TODO master vol
 //TODO signal phase shift
 //TODO phase, frequency lock and sync between signal
 

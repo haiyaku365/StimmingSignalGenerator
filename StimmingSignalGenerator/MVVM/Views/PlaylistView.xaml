@@ -12,13 +12,18 @@
              x:Class="StimmingSignalGenerator.MVVM.Views.PlaylistView">
   <Grid>
     <Grid.RowDefinitions>
+      <RowDefinition Height="auto"/>
       <RowDefinition />
     </Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="auto" />
       <ColumnDefinition />
     </Grid.ColumnDefinitions>
-    <DockPanel Grid.Column="0" Margin="0 0 2 0" Name="TrackListPanel">
+    <v:ControlSliderView Grid.Column="1" Grid.Row="0"
+                         VerticalAlignment="Top" Margin="5"
+                         ToolTip.Tip="Master volume"
+                         DataContext="{Binding MasterVolVM}"/>
+    <DockPanel Grid.Column="0" Grid.RowSpan="2" Margin="0 0 2 0">
       <Button DockPanel.Dock="Bottom" Classes="Green" Height="30"
               Content="+Track" Command="{Binding AddNewTrack}" >
         <Button.ContextMenu>
@@ -61,7 +66,7 @@
                   <RowDefinition />
                   <RowDefinition />
                 </Grid.RowDefinitions>
-                <ProgressBar Grid.Row="1" Grid.ColumnSpan="5" 
+                <ProgressBar Grid.Row="1" Grid.ColumnSpan="5"
                              Height="2" MinHeight="0" MinWidth="0"
                              Value="{Binding Progress}" Minimum="0" Maximum="1"/>
                 <TextBlock Grid.Column="0" IsVisible="{Binding IsPlaying}"
@@ -95,11 +100,14 @@
         </ListBox.ItemTemplate>
       </ListBox>
     </DockPanel>
-    <ItemsControl Grid.Column="1" Items="{ Binding TrackVMs }">
+    <ItemsControl Grid.Column="1" Grid.Row="1" Items="{ Binding TrackVMs }">
       <ItemsControl.ItemTemplate>
         <DataTemplate>
-          <v:TrackView Height="{Binding #TrackListPanel.Bounds.Height}" IsVisible="{Binding IsSelected}"
-                       DataContext="{Binding }" />
+          <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="2"
+                  IsVisible="{Binding IsSelected}">
+            <v:TrackView Height="{Binding $parent[ItemsControl].Bounds.Height}"
+                         DataContext="{Binding }" />
+          </Border>
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>

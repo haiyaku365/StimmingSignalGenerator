@@ -35,14 +35,12 @@
       <!-- Mono -->
       <Border DockPanel.Dock="Top" IsVisible="{Binding !GeneratorMode}"
               BorderBrush="Goldenrod" BorderThickness="1" CornerRadius="2">
-        <DockPanel Margin="5" >
-          <Grid DockPanel.Dock="Top">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition/>
-              <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <v:ControlSliderView Grid.Column="0" DataContext="{Binding VolVMs[0]}"/>
-            <v:ControlSliderView Grid.Column="1" DataContext="{Binding VolVMs[1]}"/>
+        <DockPanel Margin="5 3" >
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,*">
+            <v:ControlSliderView Grid.Column="0" ToolTip.Tip="Left channel volume"
+                                 DataContext="{Binding VolVMs[0]}"/>
+            <v:ControlSliderView Grid.Column="1"  ToolTip.Tip="Right channel volume"
+                                 DataContext="{Binding VolVMs[1]}"/>
           </Grid>
           <v:MultiSignalView DockPanel.Dock="Bottom" DataContext="{Binding MultiSignalVMs[0]}"/>
         </DockPanel>
@@ -50,7 +48,8 @@
 
       <!-- stereo -->
       <DockPanel DockPanel.Dock="Top" IsVisible="{Binding !!GeneratorMode}">
-        <v:ControlSliderView DockPanel.Dock="Top" Margin="5 3" DataContext="{Binding VolVMs[2]}"/>
+        <v:ControlSliderView DockPanel.Dock="Top" Margin="5 3" ToolTip.Tip="Both channel volume"
+                             DataContext="{Binding VolVMs[2]}"/>
         <Grid DockPanel.Dock="Top">
           <Grid.ColumnDefinitions>
             <ColumnDefinition />

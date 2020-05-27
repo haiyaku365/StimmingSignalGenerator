@@ -53,19 +53,21 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private readonly ReadOnlyObservableCollection<TrackViewModel> trackVMs;
       public ReadOnlyObservableCollection<TrackViewModel> TrackVMs => trackVMs;
       private SourceList<TrackViewModel> TrackVMsSourceList { get; }
+      public ControlSliderViewModel MasterVolVM { get; }
 
       public TrackViewModel SelectedTrackVM { get => selectedTrackVM; set => this.RaiseAndSetIfChanged(ref selectedTrackVM, value); }
       public TrackViewModel PlayingTrackVM { get => playingTrackVM; set => this.RaiseAndSetIfChanged(ref playingTrackVM, value); }
       public bool IsAutoTrackChanging { get => isAutoTrackChanging; set => this.RaiseAndSetIfChanged(ref isAutoTrackChanging, value); }
-      public ISampleProvider FinalSample => switchingSampleProvider;
+      public ISampleProvider FinalSample => volumeSampleProvider;
       public AppState AppState { get; }
 
       private TrackViewModel selectedTrackVM;
       private TrackViewModel playingTrackVM;
       private bool isAutoTrackChanging;
       private string name;
-      private readonly SwitchingSampleProvider switchingSampleProvider;
       private readonly TimingSwitchSampleProvider timingSwitchSampleProvider;
+      private readonly SwitchingSampleProvider switchingSampleProvider;
+      private readonly VolumeSampleProvider volumeSampleProvider;
       public PlaylistViewModel()
       {
          AppState = Locator.Current.GetService<AppState>();
@@ -92,9 +94,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe()
             .DisposeWith(Disposables);
 
+
          timingSwitchSampleProvider = new TimingSwitchSampleProvider();
-         switchingSampleProvider = new SwitchingSampleProvider();
-         switchingSampleProvider.SampleProvider = timingSwitchSampleProvider;
+         switchingSampleProvider = new SwitchingSampleProvider { SampleProvider = timingSwitchSampleProvider };
+         volumeSampleProvider = new VolumeSampleProvider(switchingSampleProvider);
+
+         MasterVolVM = ControlSliderViewModel.BasicVol;
+         MasterVolVM.WhenAnyValue(vm => vm.Value)
+            .Subscribe(m => volumeSampleProvider.Volume = (float)m);
 
          this.WhenAnyValue(x => x.IsAutoTrackChanging, x => x.PlayingTrackVM)
             .Subscribe(_ =>
