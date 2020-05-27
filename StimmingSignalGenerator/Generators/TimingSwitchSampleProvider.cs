@@ -73,6 +73,7 @@ namespace StimmingSignalGenerator.Generators
 
       public int Read(float[] buffer, int offset, int count)
       {
+         int read = 0;
          lock (timeSpanSampleProviders)
          {
             if (timeSpanSampleProviders == null || timeSpanSampleProviders.Sum(x => x.SampleSpan) == 0)
@@ -80,7 +81,6 @@ namespace StimmingSignalGenerator.Generators
                Array.Fill(buffer, 0, offset, count);
                return count;
             }
-            int read = 0;
             int sampleToReadRemain = count;
 
             while (sampleToReadRemain > 0)
@@ -98,13 +98,15 @@ namespace StimmingSignalGenerator.Generators
                   // update reading status
                   currentSamplePosition += sampleToRead;
                   sampleToReadRemain -= sampleToRead;
-                  OnProgressChanged?.Invoke(this,
-                     ProgressChangedEventArgs.Create(
-                        timeSpanSampleProviders[sampleIdx].SampleProvider,
-                        (float)(currentSamplePosition - sampleSpanStartPosition) /
-                        (sampleSpanEndPosition - sampleSpanStartPosition)
-                     ));
-                  InvokeSampleProviderChanged();
+
+                  float progress =
+                     (float)(currentSamplePosition - sampleSpanStartPosition) /
+                     (sampleSpanEndPosition - sampleSpanStartPosition);
+                  ISampleProvider sampleProvider = timeSpanSampleProviders[sampleIdx].SampleProvider;
+
+                  // Avoid invoke event in lock block to prevent dead lock
+                  QueueInvokeProgressChanged(sampleProvider, progress);
+                  QueueInvokeSampleProviderChanged(sampleProvider);
                }
                else
                {
@@ -120,8 +122,10 @@ namespace StimmingSignalGenerator.Generators
                   sampleSpanEndPosition += timeSpanSampleProviders[sampleIdx].SampleSpan;
                }
             }
-            return read;
          }
+         
+         ProcessInvokeQueue();
+         return read;
       }
       public class SampleProviderChangedEventArgs : EventArgs
       {
@@ -140,16 +144,34 @@ namespace StimmingSignalGenerator.Generators
          public float Progress { get; set; }
       }
 
+      private readonly Queue<Action> eventInvokeQueue = new Queue<Action>();
       private int lastInvokeSampleIdx = -1;
-      private void InvokeSampleProviderChanged()
+      private void QueueInvokeSampleProviderChanged(ISampleProvider sampleProvider)
       {
-         if (lastInvokeSampleIdx != sampleIdx) // only raise event once per sampleIdx change
+         if (lastInvokeSampleIdx != sampleIdx) // only invoke event once per sampleIdx change
          {
-            OnSampleProviderChanged?.Invoke(this,
-               SampleProviderChangedEventArgs.Create(timeSpanSampleProviders[sampleIdx].SampleProvider));
+            eventInvokeQueue.Enqueue(() =>
+               OnSampleProviderChanged?.Invoke(this,
+                  SampleProviderChangedEventArgs.Create(sampleProvider))
+               );
             lastInvokeSampleIdx = sampleIdx;
          }
       }
+      private void QueueInvokeProgressChanged(ISampleProvider sampleProvider, float progress)
+      {
+         eventInvokeQueue.Enqueue(() =>
+            OnProgressChanged?.Invoke(this,
+               ProgressChangedEventArgs.Create(sampleProvider, progress))
+         );
+      }
+      private void ProcessInvokeQueue()
+      {
+         while (eventInvokeQueue.Count > 0)
+         {
+            eventInvokeQueue.Dequeue().Invoke();
+         }
+      }
+
       private class TimeSpanSampleProvider
       {
          public ISampleProvider SampleProvider { get; set; }
