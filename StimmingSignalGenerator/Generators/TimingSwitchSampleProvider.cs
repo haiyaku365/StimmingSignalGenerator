@@ -36,8 +36,7 @@ namespace StimmingSignalGenerator.Generators
       {
          lock (timeSpanSampleProviders)
          {
-            timeSpanSampleProviders.Add(new TimeSpanSampleProvider { SampleProvider = sampleProvider, TimeSpan = timeSpan });
-            restartState();
+            timeSpanSampleProviders.Add(new TimeSpanSampleProvider(sampleProvider, timeSpan));
          }
       }
 
@@ -48,6 +47,15 @@ namespace StimmingSignalGenerator.Generators
             var item = timeSpanSampleProviders[oldIndex];
             timeSpanSampleProviders.RemoveAt(oldIndex);
             timeSpanSampleProviders.Insert(newIndex, item);
+            // Move currentSampleIndex
+            if (currentSampleIndex == oldIndex)
+            {
+               currentSampleIndex = newIndex;
+            }
+            else if (currentSampleIndex == newIndex)
+            {
+               currentSampleIndex = oldIndex;
+            }
          }
       }
 
@@ -55,9 +63,17 @@ namespace StimmingSignalGenerator.Generators
       {
          lock (timeSpanSampleProviders)
          {
-            var timeSpanSample = timeSpanSampleProviders.SingleOrDefault(x => x.SampleProvider == sampleProvider);
-            if (timeSpanSample != null) timeSpanSample.TimeSpan = newTimeSpan;
-            restartState();
+            var timeSpanSample = GetTimeSpanSampleProvider(sampleProvider);
+            if (timeSpanSample == null) return;
+            int oldSampleSpan = timeSpanSample.SampleSpan;
+            timeSpanSample.TimeSpan = newTimeSpan;
+            int newSampleSpan = timeSpanSample.SampleSpan;
+            if (currentSampleIndex == GetTimeSpanSampleProviderIndex(sampleProvider))
+            {
+               // Update state if currently playing in this sample
+               var sampleSpanDiff = newSampleSpan - oldSampleSpan;
+               currentSampleSpanEndPosition += sampleSpanDiff;
+            }
          }
       }
 
@@ -65,11 +81,36 @@ namespace StimmingSignalGenerator.Generators
       {
          lock (timeSpanSampleProviders)
          {
-            var timeSpanSample = timeSpanSampleProviders.SingleOrDefault(x => x.SampleProvider == sampleProvider);
-            if (timeSpanSample != null) timeSpanSampleProviders.Remove(timeSpanSample);
-            restartState();
+            var timeSpanSample = GetTimeSpanSampleProvider(sampleProvider);
+            if (timeSpanSample == null) return;
+            var removeIndex = GetTimeSpanSampleProviderIndex(sampleProvider);
+            timeSpanSampleProviders.Remove(timeSpanSample);
+            if (currentSampleIndex > removeIndex)
+            {
+               // shift current sample down if currently play above removed one
+               currentSampleIndex--;
+            }
+            else if (currentSampleIndex == removeIndex && timeSpanSampleProviders.Count > 0)
+            {
+               //if remove last sample than set to 0
+               if (currentSampleIndex >= timeSpanSampleProviders.Count)
+                  currentSampleIndex = 0;
+               // Current sample removed. Set new sampleSpan end position.
+               currentSampleSpanEndPosition = timeSpanSampleProviders[currentSampleIndex].SampleSpan;
+               // And reset to start position
+               currentSampleSpanPosition = 0;
+               // Avoid invoke event in lock block to prevent dead lock
+               QueueInvokeSampleProviderChanged(
+                  timeSpanSampleProviders[currentSampleIndex].SampleProvider);
+            }
          }
+         ProcessInvokeQueue();
       }
+
+      private TimeSpanSampleProvider GetTimeSpanSampleProvider(ISampleProvider sampleProvider)
+         => timeSpanSampleProviders.SingleOrDefault(x => x.SampleProvider == sampleProvider);
+      private int GetTimeSpanSampleProviderIndex(ISampleProvider sampleProvider)
+         => timeSpanSampleProviders.IndexOf(GetTimeSpanSampleProvider(sampleProvider));
 
       public int Read(float[] buffer, int offset, int count)
       {
@@ -85,58 +126,65 @@ namespace StimmingSignalGenerator.Generators
 
             while (sampleToReadRemain > 0)
             {
-               if (sampleSpanEndPosition > currentSamplePosition)// found position to read
+               // continue read if this sample still not reach the end
+               if (currentSampleSpanPosition < currentSampleSpanEndPosition)
                {
                   // calc read count
                   // read only until span end position
-                  var sampleToRead = sampleSpanEndPosition - currentSamplePosition;
+                  var sampleToRead = currentSampleSpanEndPosition - currentSampleSpanPosition;
                   // if span end position sitll far away read until full
                   if (sampleToRead > sampleToReadRemain) sampleToRead = sampleToReadRemain;
 
                   // read sample
-                  read += timeSpanSampleProviders[sampleIdx].SampleProvider.Read(buffer, count - sampleToReadRemain + offset, sampleToRead);
+                  read += timeSpanSampleProviders[currentSampleIndex].SampleProvider.Read(buffer, count - sampleToReadRemain + offset, sampleToRead);
                   // update reading status
-                  currentSamplePosition += sampleToRead;
+                  currentSampleSpanPosition += sampleToRead;
                   sampleToReadRemain -= sampleToRead;
 
-                  float progress =
-                     (float)(currentSamplePosition - sampleSpanStartPosition) /
-                     (sampleSpanEndPosition - sampleSpanStartPosition);
-                  ISampleProvider sampleProvider = timeSpanSampleProviders[sampleIdx].SampleProvider;
-
+                  // Do event invoke
+                  float progress = (float)currentSampleSpanPosition / currentSampleSpanEndPosition;
                   // Avoid invoke event in lock block to prevent dead lock
-                  QueueInvokeProgressChanged(sampleProvider, progress);
-                  QueueInvokeSampleProviderChanged(sampleProvider);
+                  QueueInvokeProgressChanged(
+                     timeSpanSampleProviders[currentSampleIndex].SampleProvider,
+                     progress);
                }
-               else
+               else // reach the end of sample. move to next sample.
                {
-                  var oldSampleIdx = sampleIdx;
-                  sampleIdx++;// position not found. move to next sample.
-                  if (sampleIdx >= timeSpanSampleProviders.Count && // if sampleIdx overflow
-                                       currentSamplePosition >= sampleSpanEndPosition) // and already read to the end
-                  {  // then loop to first sample
-                     restartState();
-                     sampleIdx++;
+                  currentSampleIndex++;
+                  if (currentSampleIndex >= timeSpanSampleProviders.Count)
+                  {
+                     // reach last sample go to first sample
+                     currentSampleIndex = 0;
                   }
-                  sampleSpanStartPosition = sampleSpanEndPosition;
-                  sampleSpanEndPosition += timeSpanSampleProviders[sampleIdx].SampleSpan;
+                  // Avoid invoke event in lock block to prevent dead lock
+                  QueueInvokeSampleProviderChanged(
+                     timeSpanSampleProviders[currentSampleIndex].SampleProvider);
+                  //sample changed reset position
+                  currentSampleSpanPosition = 0;
+                  //set end position
+                  currentSampleSpanEndPosition = timeSpanSampleProviders[currentSampleIndex].SampleSpan;
                }
             }
          }
-         
+
          ProcessInvokeQueue();
          return read;
       }
       public class SampleProviderChangedEventArgs : EventArgs
       {
-         public static SampleProviderChangedEventArgs Create(ISampleProvider sampleProvider)
-            => new SampleProviderChangedEventArgs { SampleProvider = sampleProvider };
+         public SampleProviderChangedEventArgs(ISampleProvider sampleProvider)
+         {
+            SampleProvider = sampleProvider;
+         }
          public ISampleProvider SampleProvider { get; set; }
       }
       public class ProgressChangedEventArgs : EventArgs
       {
-         public static ProgressChangedEventArgs Create(ISampleProvider sampleProvider, float progress)
-            => new ProgressChangedEventArgs { SampleProvider = sampleProvider, Progress = progress };
+         public ProgressChangedEventArgs(ISampleProvider sampleProvider, float progress)
+         {
+            SampleProvider = sampleProvider;
+            Progress = progress;
+         }
          public ISampleProvider SampleProvider { get; set; }
          /// <summary>
          /// Progress 0 to 1
@@ -145,23 +193,18 @@ namespace StimmingSignalGenerator.Generators
       }
 
       private readonly Queue<Action> eventInvokeQueue = new Queue<Action>();
-      private int lastInvokeSampleIdx = -1;
       private void QueueInvokeSampleProviderChanged(ISampleProvider sampleProvider)
       {
-         if (lastInvokeSampleIdx != sampleIdx) // only invoke event once per sampleIdx change
-         {
-            eventInvokeQueue.Enqueue(() =>
-               OnSampleProviderChanged?.Invoke(this,
-                  SampleProviderChangedEventArgs.Create(sampleProvider))
-               );
-            lastInvokeSampleIdx = sampleIdx;
-         }
+         eventInvokeQueue.Enqueue(() =>
+            OnSampleProviderChanged?.Invoke(this,
+               new SampleProviderChangedEventArgs(sampleProvider))
+            );
       }
       private void QueueInvokeProgressChanged(ISampleProvider sampleProvider, float progress)
       {
          eventInvokeQueue.Enqueue(() =>
             OnProgressChanged?.Invoke(this,
-               ProgressChangedEventArgs.Create(sampleProvider, progress))
+               new ProgressChangedEventArgs(sampleProvider, progress))
          );
       }
       private void ProcessInvokeQueue()
@@ -174,23 +217,19 @@ namespace StimmingSignalGenerator.Generators
 
       private class TimeSpanSampleProvider
       {
+         public TimeSpanSampleProvider(ISampleProvider sampleProvider, TimeSpan timeSpan)
+         {
+            SampleProvider = sampleProvider;
+            TimeSpan = timeSpan;
+         }
          public ISampleProvider SampleProvider { get; set; }
          public TimeSpan TimeSpan { get; set; }
          public int SampleSpan => WaveHelper.TimeSpanToSamples(TimeSpan, SampleProvider.WaveFormat);
       }
-      private List<TimeSpanSampleProvider> timeSpanSampleProviders;
-      private int currentSamplePosition = 0;
-      private int sampleSpanStartPosition = 0;
-      private int sampleSpanEndPosition = 0;
-      private int sampleIdx = -1;
-      private void restartState()
-      {
-         sampleSpanEndPosition = currentSamplePosition = 0;
-         sampleIdx = -1;
-      }
-      private int TimeSpanToSamples(TimeSpan time) => WaveHelper.TimeSpanToSamples(time, WaveFormat);
-      private TimeSpan SamplesToTimeSpan(int samples) => WaveHelper.SamplesToTimeSpan(samples, WaveFormat);
-
+      private readonly List<TimeSpanSampleProvider> timeSpanSampleProviders;
+      private int currentSampleSpanPosition = 0;
+      private int currentSampleSpanEndPosition = 0;
+      private int currentSampleIndex = -1;
    }
 
    public static class WaveHelper

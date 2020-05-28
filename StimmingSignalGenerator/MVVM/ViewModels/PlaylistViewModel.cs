@@ -56,6 +56,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ControlSliderViewModel MasterVolVM { get; }
 
       public TrackViewModel SelectedTrackVM { get => selectedTrackVM; set => this.RaiseAndSetIfChanged(ref selectedTrackVM, value); }
+      /// <summary>
+      /// Current track that play manually
+      /// </summary>
       public TrackViewModel PlayingTrackVM { get => playingTrackVM; set => this.RaiseAndSetIfChanged(ref playingTrackVM, value); }
       public bool IsAutoTrackChanging { get => isAutoTrackChanging; set => this.RaiseAndSetIfChanged(ref isAutoTrackChanging, value); }
       public ISampleProvider FinalSample => volumeSampleProvider;
@@ -63,6 +66,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private TrackViewModel selectedTrackVM;
       private TrackViewModel playingTrackVM;
+      private TrackViewModel autoplayingTrackVM;
       private bool isAutoTrackChanging;
       private string name;
       private readonly TimingSwitchSampleProvider timingSwitchSampleProvider;
@@ -106,10 +110,16 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          this.WhenAnyValue(x => x.IsAutoTrackChanging, x => x.PlayingTrackVM)
             .Subscribe(_ =>
             {
-               switchingSampleProvider.SampleProvider = IsAutoTrackChanging ?
-                  timingSwitchSampleProvider :
-                  PlayingTrackVM?.FinalSample;
-               UpdateIsPlaying(PlayingTrackVM);
+               if (IsAutoTrackChanging)
+               {
+                  switchingSampleProvider.SampleProvider = timingSwitchSampleProvider;
+                  UpdateIsPlaying(autoplayingTrackVM);
+               }
+               else
+               {
+                  switchingSampleProvider.SampleProvider = PlayingTrackVM?.FinalSample;
+                  UpdateIsPlaying(PlayingTrackVM);
+               }
             })
             .DisposeWith(Disposables);
          this.WhenAnyValue(x => x.SelectedTrackVM)
@@ -130,10 +140,20 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             })
             .DisposeWith(Disposables);
          timingSwitchSampleProvider.ObservableOnSampleProviderChanged
-            .Subscribe(x => UpdateIsPlaying(TrackVMsSourceList.Items.FirstOrDefault(vm => vm.FinalSample == x.EventArgs.SampleProvider)))
+            .Subscribe(x =>
+            {
+               autoplayingTrackVM = 
+                  TrackVMsSourceList.Items.FirstOrDefault(vm => 
+                     vm.FinalSample == x.EventArgs.SampleProvider);
+               UpdateIsPlaying(autoplayingTrackVM);
+            })
             .DisposeWith(Disposables);
       }
 
+      /// <summary>
+      /// Manual switch track playing
+      /// </summary>
+      /// <param name="trackVM"></param>
       public void SwitchPlayingTrack(TrackViewModel trackVM)
       {
          PlayingTrackVM = trackVM;
