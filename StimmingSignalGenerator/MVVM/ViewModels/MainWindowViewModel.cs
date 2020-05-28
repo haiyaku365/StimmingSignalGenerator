@@ -20,7 +20,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       static MainWindowViewModel CreateMainWindowViewModel(GeneratorModeType generatorModeType)
       {
          PrepareAppState();
-         var mainWindowVM = new MainWindowViewModel();
+         var mainWindowVM = new MainWindowViewModel(loadDefaultPlaylist: false);
+         mainWindowVM.PlaylistViewModel.AddNewTrack();
          mainWindowVM.PlaylistViewModel.TrackVMs[0].GeneratorMode = generatorModeType;
          return mainWindowVM;
       }
@@ -33,14 +34,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public AppState AppState { get; }
       public string Title => $"Stimming Signal Generator {AppState.Version}";
 
-      public MainWindowViewModel()
+      public MainWindowViewModel(bool loadDefaultPlaylist = true)
       {
          AppState = Locator.Current.GetService<AppState>();
          PlaylistViewModel = new PlaylistViewModel();
-         Observable.StartAsync(() => PlaylistViewModel.LoadDefaultAsync())
-            .Subscribe()
-            .DisposeWith(Disposables);
-         
+         if (loadDefaultPlaylist)
+         {
+            Observable.StartAsync(() => PlaylistViewModel.LoadDefaultAsync())
+               .Subscribe()
+               .DisposeWith(Disposables);
+         }
+
          PlotSampleViewModel =
             new PlotSampleViewModel(new PlotSampleProvider(PlaylistViewModel.FinalSample))
             .DisposeWith(Disposables);
