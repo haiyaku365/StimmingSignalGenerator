@@ -28,24 +28,18 @@
       <ColumnDefinition SharedSizeGroup="ControlSliderSharedSizeGroup2" Width="auto"/>
       <ColumnDefinition />
     </Grid.ColumnDefinitions>
-    <!-- Disable max min editing to prevent value clip and jump when playing -->
-    <!-- Disable max min editing can be remove if avalonia implement UpdateSourceTrigger=LostFocus -->
-    <NumericUpDown Grid.Column="0" ShowButtonSpinner="False"
-                   IsEnabled="{Binding !AppState.IsPlaying}"
+    <!-- NumericUpDown have special binding in code behind -->
+    <NumericUpDown Grid.Column="0" ShowButtonSpinner="False" Name="MinValueNumericUpDown"
                    Increment="1"
-                   FormatString="{}{0:N0}"
-                   Value="{Binding MinValue,Mode=TwoWay}" />
-    <NumericUpDown Grid.Column="1" ShowButtonSpinner="False"
+                   FormatString="{}{0:N0}" />
+    <NumericUpDown Grid.Column="1" ShowButtonSpinner="False" Name="ValueNumericUpDown"
                    Increment="{Binding LargeChange}"
                    Minimum="{Binding MinValue, Mode=OneWay}"
                    Maximum="{Binding MaxValue, Mode=OneWay}"
-                   FormatString="{Binding NumericUpDownTextFormat}"
-                   Value="{Binding Value,Mode=TwoWay}" />
-    <NumericUpDown Grid.Column="2" ShowButtonSpinner="False"
-                   IsEnabled="{Binding !AppState.IsPlaying}"
+                   FormatString="{Binding NumericUpDownTextFormat}" />
+    <NumericUpDown Grid.Column="2" ShowButtonSpinner="False" Name="MaxValueNumericUpDown"
                    Increment="1"
-                   FormatString="{}{0:N0}"
-                   Value="{Binding MaxValue,Mode=TwoWay}" />
+                   FormatString="{}{0:N0}"/>
 
     <Slider Grid.Column="3"
             Minimum="{Binding MinValue, Mode=OneWay}"

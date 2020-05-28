@@ -31,7 +31,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    }
    public class ControlSliderViewModel : ViewModelBase
    {
-      public AppState AppState { get; }
       public double Value { get => _value; set => this.RaiseAndSetIfChanged(ref _value, Math.Round(value, 4)); }
       public double MinValue
       {
@@ -71,8 +70,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ControlSliderViewModel() : this(440, 0, 10000, 1, 10, 50) { }
       public ControlSliderViewModel(double value, double minValue, double maxValue, double tickFrequency, double smallChange, double largeChange)
       {
-         AppState = Locator.Current.GetService<AppState>();
-
          Value = value;
          MinValue = minValue;
          MaxValue = maxValue;
