@@ -38,15 +38,23 @@ namespace StimmingSignalGenerator.MVVM.Views
                (NumericUpDowns[2], x => ViewModel.MaxValue = x , () => ViewModel.MaxValue),
             };
             // bind VM to V
-            // TODO fixes design time ViewModel == null
-            ViewModel?.WhenAnyValue(x => x.MinValue, x => x.Value, x => x.MaxValue)
-               .Subscribe(_ =>
-               {
-                  NumericUpDowns[0].Value = ViewModel.MinValue;
-                  NumericUpDowns[1].Value = ViewModel.Value;
-                  NumericUpDowns[2].Value = ViewModel.MaxValue;
-               })
-               .DisposeWith(disposables);
+            // In design time ViewModel can be null
+            var cancelSub = new CancellationDisposable().DisposeWith(disposables);
+            this.WhenAnyValue(x => x.ViewModel)
+            .Subscribe(_ =>
+            {
+               if (ViewModel == null) return; 
+               ViewModel.WhenAnyValue(x => x.MinValue, x => x.Value, x => x.MaxValue)
+                  .Subscribe(_ =>
+                  {
+                     NumericUpDowns[0].Value = ViewModel.MinValue;
+                     NumericUpDowns[1].Value = ViewModel.Value;
+                     NumericUpDowns[2].Value = ViewModel.MaxValue;
+                  })
+                  .DisposeWith(disposables);
+               //cancel WhenAnyValue(x => x.ViewModel) after success binding
+               cancelSub.Dispose();
+            }, cancelSub.Token);
 
             // bind V to VM
             foreach (var (numericUpDown, setVmValue, getVmValue) in NumericUpDownToVmBinder)
