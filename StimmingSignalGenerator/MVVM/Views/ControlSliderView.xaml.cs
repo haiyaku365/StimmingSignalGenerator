@@ -71,7 +71,7 @@ namespace StimmingSignalGenerator.MVVM.Views
                      {
                         setVmValue(numericUpDown.Value);
                      }
-                     if (x.EventArgs.Key == Key.Escape)
+                     else if (x.EventArgs.Key == Key.Escape)
                      {
                         numericUpDown.Value = getVmValue();
                      }

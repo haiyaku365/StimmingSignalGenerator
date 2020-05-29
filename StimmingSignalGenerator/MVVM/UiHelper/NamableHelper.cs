@@ -14,7 +14,11 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
          string namePrefix, SourceList<T> sourceList)
          where T : INamable
       {
-         vm.Name = GetNextName(namePrefix, sourceList);
+         //if not new vm then set name to index
+         var num = sourceList.Items.IndexOf(vm);
+         vm.Name = (num > 0) ?
+            $"{namePrefix}{num + 1}" :
+            GetNextName(namePrefix, sourceList);
          return vm;
       }
       private static string GetNextName<T>(string prefix, SourceList<T> sourceList)
@@ -25,7 +29,7 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
          if (sourceList.Items.Count() > 0)
          {
             maxNum = sourceList.Items
-                     .Max(x => int.TryParse(nameRegex.Match(x.Name).Groups[1].Value, out int num) ? num : 0);
+                     .Max(x => int.TryParse(nameRegex.Match(x.Name??"0").Groups[1].Value, out int num) ? num : 0);
          }
          return $"{prefix}{maxNum + 1}";
       }

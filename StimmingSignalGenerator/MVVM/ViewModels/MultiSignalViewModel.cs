@@ -23,7 +23,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    }
    public class MultiSignalViewModel : ViewModelBase, IDisposable
    {
-      private string name = "MultiSignal";
+      private string name = "MultiSignals";
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
       public ControlSliderViewModel VolControlSliderViewModel { get; }
       public ReactiveCommand<Unit, Unit> AddCommand { get; }
@@ -48,7 +48,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             multiSignalVM.BasicSignalVMsSourceList.Add(
                BasicSignalViewModel.FromPOCO(signal)
-                  .SetName(BasicSignalVMName, multiSignalVM.BasicSignalVMsSourceList)
             );
          }
          return multiSignalVM;
@@ -99,6 +98,18 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .ObservableForProperty(x => x.Value, skipInitial: false)
             .Subscribe(x => Volume = x.Value)
             .DisposeWith(Disposables);
+         
+         this.WhenAnyValue(x => x.Name)
+            .Subscribe(_ =>
+            {
+               //Update name 
+               foreach (var signalVM in BasicSignalVMsSourceList.Items)
+               {
+                  signalVM.SetName(BasicSignalVMName, BasicSignalVMsSourceList);
+               }
+            })
+            .DisposeWith(Disposables);
+         
       }
 
       public double Volume
@@ -121,7 +132,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          BasicSignalVMsSourceList.Remove(vm);
       }
 
-      private const string BasicSignalVMName = "Signal";
+      private static string GetBasicSignalVMName(string name) => $"{name}.Signal";
+      private string BasicSignalVMName => GetBasicSignalVMName(Name);
       private BasicSignalViewModel CreateVM(double volume = 0) =>
             new BasicSignalViewModel { Volume = volume }
             .SetName(BasicSignalVMName, BasicSignalVMsSourceList)

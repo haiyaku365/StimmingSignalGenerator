@@ -118,12 +118,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          foreach (var am in poco.AMSignals)
          {
-            var amVM = FromPOCO(am).SetName(AMName, basicSignalVM.AMSignalVMsSourceList);
+            var amVM = FromPOCO(am);
             basicSignalVM.AddAM(amVM);
          }
          foreach (var fm in poco.FMSignals)
          {
-            var fmVM = FromPOCO(fm).SetName(FMName, basicSignalVM.FMSignalVMsSourceList);
+            var fmVM = FromPOCO(fm);
             basicSignalVM.AddFM(fmVM);
          }
 
@@ -230,6 +230,20 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          RemoveFMCommand = ReactiveCommand.Create<BasicSignalViewModel>(
             vm => FMSignalVMsSourceList.Remove(vm))
             .DisposeWith(Disposables);
+         this.WhenAnyValue(x => x.Name)
+            .Subscribe(_=> {
+               //Update name 
+               foreach (var am in AMSignalVMsSourceList.Items)
+               {
+                  am.SetName(AMName, AMSignalVMsSourceList);
+               }
+               foreach (var fm in FMSignalVMsSourceList.Items)
+               {
+                  fm.SetName(FMName, FMSignalVMsSourceList);
+               }
+            })
+            .DisposeWith(Disposables);
+
 
          // HACK Expander IsExpanded is set somewhere from internal avalonia uncontrollable
          this.WhenAnyValue(x => x.IsAMExpanded)
@@ -257,9 +271,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private void AddFM() => AddFM(CreateFMVM());
       private void AddFM(BasicSignalViewModel vm) => FMSignalVMsSourceList.Add(vm);
 
-      private const string AMName = "AMSignal";
-      private const string FMName = "FMSignal";
-
+      private static string GetAMName(string name) => $"{name}.AMSignal";
+      private static string GetFMName(string name) => $"{name}.FMSignal";
+      private string AMName => GetAMName(Name);
+      private string FMName => GetFMName(Name);
       private BasicSignalViewModel CreateAMVM() =>
             new BasicSignalViewModel(ControlSliderViewModel.ModulationSignalFreq) { Volume = 0 }
             .SetName(AMName, AMSignalVMsSourceList)
