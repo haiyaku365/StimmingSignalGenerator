@@ -39,9 +39,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          AppState = Locator.Current.GetService<AppState>();
 
-         audioPlayer = new AudioPlayer(sampleProvider).DisposeWith(Disposables);
-         PlayCommand = ReactiveCommand.Create(() => Play()).DisposeWith(Disposables);
-         StopCommand = ReactiveCommand.Create(() => Stop()).DisposeWith(Disposables);
+         audioPlayer = new AudioPlayer(sampleProvider);
+
+         PlayCommand = ReactiveCommand.Create(() => Play(), AppState.WhenAnyValue(x => x.IsPlaying, x => !x))
+            .DisposeWith(Disposables);
+         StopCommand = ReactiveCommand.Create(() => Stop(), AppState.WhenAnyValue(x => x.IsPlaying))
+            .DisposeWith(Disposables);
       }
 
       public void Play()
