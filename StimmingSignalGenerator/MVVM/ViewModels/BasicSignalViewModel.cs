@@ -1,6 +1,5 @@
 ﻿using Avalonia.Media;
 using DynamicData;
-using NAudio.Wave.SampleProviders;
 using ReactiveUI;
 using StimmingSignalGenerator.Generators;
 using StimmingSignalGenerator.Helper;
@@ -13,7 +12,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -33,87 +31,46 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          };
    }
    public class BasicSignalViewModel : ViewModelBase,
-      INamable, ISignalTree, IDeepSourceList<BasicSignalViewModel>, IDisposable
+      INamable, ISignalTree, IDeepSourceList<BasicSignalViewModel>
    {
-      private string name;
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
+      public Brush BGColor { get; }
       public BasicSignal BasicSignal { get; }
       public ControlSliderViewModel FreqControlSliderViewModel { get; }
       public ControlSliderViewModel VolControlSliderViewModel { get; }
       public ControlSliderViewModel ZCPosControlSliderViewModel { get; }
-      public ISignalTree Parent { get; set; }
-      public BasicSignalType SignalType
-      {
-         get => signalType;
-         set
-         {
-            this.RaiseAndSetIfChanged(ref signalType, value);
-            BasicSignal.Type = signalType;
-         }
-      }
-      public double Frequency
-      {
-         get => FreqControlSliderViewModel.Value;
-         set
-         {
-            if (BasicSignal.Frequency == value) return;
-            this.RaisePropertyChanging(nameof(Frequency));
-            FreqControlSliderViewModel.Value = value;
-            BasicSignal.Frequency = value;
-            this.RaisePropertyChanged(nameof(Frequency));
-         }
-      }
-      public double Volume
-      {
-         get => VolControlSliderViewModel.Value;
-         set
-         {
-            if (BasicSignal.Gain == value) return;
-            this.RaisePropertyChanging(nameof(Volume));
-            VolControlSliderViewModel.Value = value;
-            BasicSignal.Gain = value;
-            this.RaisePropertyChanged(nameof(Volume));
-         }
-      }
-      public double ZeroCrossingPosition
-      {
-         get => ZCPosControlSliderViewModel.Value;
-         set
-         {
-            if (BasicSignal.ZeroCrossingPosition == value) return;
-            this.RaisePropertyChanging(nameof(ZeroCrossingPosition));
-            ZCPosControlSliderViewModel.Value = value;
-            BasicSignal.ZeroCrossingPosition = value;
-            this.RaisePropertyChanged(nameof(ZeroCrossingPosition));
-         }
-      }
+
+      public BasicSignalType SignalType { get => signalType; set { this.RaiseAndSetIfChanged(ref signalType, value); } }
+      public double Frequency { get => frequency; set { this.RaiseAndSetIfChanged(ref frequency, value); } }
+      public double Volume { get => volume; set { this.RaiseAndSetIfChanged(ref volume, value); } }
+      public double ZeroCrossingPosition { get => zeroCrossingPosition; set { this.RaiseAndSetIfChanged(ref zeroCrossingPosition, value); } }
+
       public bool IsExpanded { get => isExpanded; set => this.RaiseAndSetIfChanged(ref isExpanded, value); }
       public bool IsAMExpanded { get => isAMExpanded; set => this.RaiseAndSetIfChanged(ref isAMExpanded, value); }
       public bool IsFMExpanded { get => isFMExpanded; set => this.RaiseAndSetIfChanged(ref isFMExpanded, value); }
 
+      public ISignalTree Parent { get; set; }
       public IObservable<BasicSignalViewModel> ObservableItemAdded => DeepSourceListTracker.ObservableItemAdded;
       public IObservable<BasicSignalViewModel> ObservableItemRemoved => DeepSourceListTracker.ObservableItemRemoved;
       public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsAdded => ObservableItemAdded;
       public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsRemoved => ObservableItemRemoved;
 
-      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> amSignalVMs;
       public ReadOnlyObservableCollection<BasicSignalViewModel> AMSignalVMs => amSignalVMs;
-      private SourceList<BasicSignalViewModel> AMSignalVMsSourceList { get; }
-      public ReactiveCommand<Unit, Unit> AddAMCommand { get; }
-      public ReactiveCommand<Unit, Unit> AddAMFromClipboardCommand { get; }
-      public ReactiveCommand<BasicSignalViewModel, Unit> RemoveAMCommand { get; }
-
-
-      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> fmSignalVMs;
       public ReadOnlyObservableCollection<BasicSignalViewModel> FMSignalVMs => fmSignalVMs;
+
+      private string name;
+      private BasicSignalType signalType;
+      private double frequency;
+      private double volume;
+      private double zeroCrossingPosition;
+      private bool isExpanded;
+      private bool isAMExpanded;
+      private bool isFMExpanded;
+      private SourceList<BasicSignalViewModel> AMSignalVMsSourceList { get; }
       private SourceList<BasicSignalViewModel> FMSignalVMsSourceList { get; }
-      public ReactiveCommand<Unit, Unit> AddFMCommand { get; }
-      public ReactiveCommand<Unit, Unit> AddFMFromClipboardCommand { get; }
-      public ReactiveCommand<BasicSignalViewModel, Unit> RemoveFMCommand { get; }
-
+      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> amSignalVMs;
+      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> fmSignalVMs;
       private DeepSourceListTracker<BasicSignalViewModel> DeepSourceListTracker { get; }
-      public Brush BGColor { get; }
-
       public static BasicSignalViewModel FromPOCO(POCOs.BasicSignal poco)
       {
          var basicSignalVM = new BasicSignalViewModel(
@@ -188,11 +145,34 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe(x => ZeroCrossingPosition = x.Value)
             .DisposeWith(Disposables);
 
+         this.ObservableForProperty(x => x.SignalType, skipInitial: false)
+            .Subscribe(_ => BasicSignal.Type = SignalType)
+            .DisposeWith(Disposables);
+         this.ObservableForProperty(x => x.Frequency, skipInitial: false)
+            .Subscribe(_ =>
+            {
+               FreqControlSliderViewModel.Value = Frequency;
+               BasicSignal.Frequency = Frequency;
+            })
+            .DisposeWith(Disposables);
+         this.ObservableForProperty(x => x.Volume, skipInitial: false)
+            .Subscribe(_ =>
+            {
+               VolControlSliderViewModel.Value = Volume;
+               BasicSignal.Gain = Volume;
+            })
+            .DisposeWith(Disposables);
+         this.ObservableForProperty(x => x.ZeroCrossingPosition, skipInitial: false)
+            .Subscribe(_ =>
+            {
+               ZCPosControlSliderViewModel.Value = ZeroCrossingPosition;
+               BasicSignal.ZeroCrossingPosition = ZeroCrossingPosition;
+            })
+            .DisposeWith(Disposables);
+
          SignalType = BasicSignalType.Sin;
 
-         AMSignalVMsSourceList =
-            new SourceList<BasicSignalViewModel>()
-            .DisposeWith(Disposables);
+         AMSignalVMsSourceList = new SourceList<BasicSignalViewModel>().DisposeWith(Disposables);
          AMSignalVMsSourceList.Connect()
             .OnItemAdded(vm => BasicSignal.AddAMSignal(vm.BasicSignal))
             .OnItemRemoved(vm =>
@@ -204,19 +184,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Bind(out amSignalVMs)
             .Subscribe()
             .DisposeWith(Disposables);
-         AddAMCommand = ReactiveCommand
-            .Create(AddAM)
-            .DisposeWith(Disposables);
-         AddAMFromClipboardCommand = ReactiveCommand
-            .CreateFromTask(AddAMFromClipboard)
-            .DisposeWith(Disposables);
-         RemoveAMCommand = ReactiveCommand.Create<BasicSignalViewModel>(
-            vm => AMSignalVMsSourceList.Remove(vm))
-            .DisposeWith(Disposables);
 
-         FMSignalVMsSourceList =
-            new SourceList<BasicSignalViewModel>()
-            .DisposeWith(Disposables);
+         FMSignalVMsSourceList = new SourceList<BasicSignalViewModel>().DisposeWith(Disposables);
          FMSignalVMsSourceList.Connect()
             .OnItemAdded(vm => BasicSignal.AddFMSignal(vm.BasicSignal))
             .OnItemRemoved(vm =>
@@ -227,15 +196,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out fmSignalVMs)
             .Subscribe()
-            .DisposeWith(Disposables);
-         AddFMCommand = ReactiveCommand
-            .Create(AddFM)
-            .DisposeWith(Disposables);
-         AddFMFromClipboardCommand = ReactiveCommand
-            .CreateFromTask(AddFMFromClipboard)
-            .DisposeWith(Disposables);
-         RemoveFMCommand = ReactiveCommand.Create<BasicSignalViewModel>(
-            vm => FMSignalVMsSourceList.Remove(vm))
             .DisposeWith(Disposables);
          this.WhenAnyValue(x => x.Name)
             .Subscribe(_ =>
@@ -294,16 +254,19 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
 
-      private Task AddAMFromClipboard() => AMSignalVMsSourceList.AddFromClipboard(this, AMName);
-      private void AddAM() => AddAM(CreateAMVM(), this);
+      public void AddAM() => AddAM(CreateAMVM(), this);
+      public Task AddAMFromClipboard() => AMSignalVMsSourceList.AddFromClipboard(this, AMName);
+      public void RemoveAM(BasicSignalViewModel vm) => AMSignalVMsSourceList.Remove(vm);
       private void AddAM(BasicSignalViewModel vm, ISignalTree parent)
       {
          vm.Parent = parent;
          AMSignalVMsSourceList.Add(vm);
       }
 
-      private Task AddFMFromClipboard() => FMSignalVMsSourceList.AddFromClipboard(this, FMName);
-      private void AddFM() => AddFM(CreateFMVM(), this);
+
+      public void AddFM() => AddFM(CreateFMVM(), this);
+      public Task AddFMFromClipboard() => FMSignalVMsSourceList.AddFromClipboard(this, FMName);
+      public void RemoveFM(BasicSignalViewModel vm) => FMSignalVMsSourceList.Remove(vm);
       private void AddFM(BasicSignalViewModel vm, ISignalTree parent)
       {
          vm.Parent = parent;
@@ -315,16 +278,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private string AMName => GetAMName(Name);
       private string FMName => GetFMName(Name);
       private BasicSignalViewModel CreateAMVM() =>
-            new BasicSignalViewModel(ControlSliderViewModel.ModulationSignalFreq) { Volume = 0 }
-            .SetName(AMName, AMSignalVMsSourceList)
+         new BasicSignalViewModel(
+            ControlSliderViewModel.ModulationSignalFreq) { Volume = 0 }
+         .SetName(AMName, AMSignalVMsSourceList)
          .DisposeWith(Disposables);
 
       private BasicSignalViewModel CreateFMVM() =>
-            new BasicSignalViewModel(
-               ControlSliderViewModel.ModulationSignalFreq,
-               new ControlSliderViewModel(0, 0, 100, 1, 1, 5))
-            { Volume = 0 }
-            .SetName(FMName, FMSignalVMsSourceList)
+         new BasicSignalViewModel(
+            ControlSliderViewModel.ModulationSignalFreq,
+            new ControlSliderViewModel(0, 0, 100, 1, 1, 5))
+         { Volume = 0 }
+         .SetName(FMName, FMSignalVMsSourceList)
          .DisposeWith(Disposables);
 
       public async Task CopyToClipboard()
@@ -348,12 +312,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             return null;
          }
+         catch (Exception) { throw; };
       }
-
-      private BasicSignalType signalType;
-      private bool isExpanded;
-      private bool isAMExpanded;
-      private bool isFMExpanded;
 
       private static readonly Random rand = new Random();
       private Brush GetRandomBrush()
@@ -362,38 +322,5 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return new SolidColorBrush(Color.FromArgb(60, r, g, b));
       }
 
-
-
-      private CompositeDisposable Disposables { get; } = new CompositeDisposable();
-      private bool disposedValue;
-      protected virtual void Dispose(bool disposing)
-      {
-         if (!disposedValue)
-         {
-            if (disposing)
-            {
-               // dispose managed state (managed objects)
-               Disposables?.Dispose();
-            }
-
-            // free unmanaged resources (unmanaged objects) and override finalizer
-            // set large fields to null
-            disposedValue = true;
-         }
-      }
-
-      // // override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-      // ~BasicSignalViewModel()
-      // {
-      //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-      //     Dispose(disposing: false);
-      // }
-
-      public void Dispose()
-      {
-         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-         Dispose(disposing: true);
-         GC.SuppressFinalize(this);
-      }
    }
 }

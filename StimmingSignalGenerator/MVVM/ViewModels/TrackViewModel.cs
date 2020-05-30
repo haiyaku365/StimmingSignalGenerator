@@ -31,7 +31,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return new TrackViewModel { Name = "Track1", GeneratorMode = generatorModeType };
       }
    }
-   public class TrackViewModel : ViewModelBase, INamable, ISignalTree, IDisposable
+   public class TrackViewModel : ViewModelBase, INamable, ISignalTree
    {
       public AppState AppState { get; }
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
@@ -42,7 +42,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public List<MultiSignalViewModel> MultiSignalVMs { get; }
       public List<ControlSliderViewModel> VolVMs { get; }
       public GeneratorModeType GeneratorMode { get => generatorMode; set => this.RaiseAndSetIfChanged(ref generatorMode, value); }
-
       public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsAdded
          => GeneratorMode switch
          {
@@ -64,13 +63,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             _ => throw new NotImplementedException()
          };
 
-      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> allSubBasicSignalVMs;
       public ReadOnlyObservableCollection<BasicSignalViewModel> AllSubBasicSignalVMs => allSubBasicSignalVMs;
-      private SourceList<BasicSignalViewModel> AllSubBasicSignalVMsSourceList { get; }
       public ISignalTree Parent => null;
       public ISampleProvider FinalSample => sample;
 
-      readonly SwitchingModeSampleProvider sample;
+      private SourceList<BasicSignalViewModel> AllSubBasicSignalVMsSourceList { get; }
+      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> allSubBasicSignalVMs;
+      private readonly SwitchingModeSampleProvider sample;
       private GeneratorModeType generatorMode;
       private string name;
       private bool isPlaying;
@@ -78,6 +77,41 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private float progress;
       private double timeSpanSecond = 0;
 
+      public static TrackViewModel FromPOCO(POCOs.Track poco)
+      {
+         var vm = new TrackViewModel(
+            poco.MultiSignals.Select(x => MultiSignalViewModel.FromPOCO(x)).ToArray(),
+            poco.Volumes.Select(x => ControlSliderViewModel.FromPOCO(x)).ToArray()
+            );
+         vm.name = poco.Name;
+         vm.TimeSpanSecond = poco.TimeSpanSecond;
+         return vm;
+      }
+      public POCOs.Track ToPOCO()
+      {
+         IEnumerable<POCOs.MultiSignal> signalPocos;
+         IEnumerable<POCOs.ControlSlider> volPocos;
+         switch (GeneratorMode)
+         {
+            case GeneratorModeType.Mono:
+               signalPocos = MultiSignalVMs.Take(1).Select(vm => vm.ToPOCO());
+               volPocos = VolVMs.Take(2).Select(vm => vm.ToPOCO());
+               break;
+            case GeneratorModeType.Stereo:
+               signalPocos = MultiSignalVMs.Skip(1).Select(vm => vm.ToPOCO());
+               volPocos = VolVMs.Skip(2).Take(1).Select(vm => vm.ToPOCO());
+               break;
+            default:
+               throw new ApplicationException("Bad GeneratorMode");
+         }
+         return new POCOs.Track
+         {
+            Name = Name,
+            MultiSignals = signalPocos.ToList(),
+            Volumes = volPocos.ToList(),
+            TimeSpanSecond = TimeSpanSecond
+         };
+      }
       public TrackViewModel() : this(
          new[] { new MultiSignalViewModel(), new MultiSignalViewModel(), new MultiSignalViewModel() },
          new[] { ControlSliderViewModel.BasicVol, ControlSliderViewModel.BasicVol, ControlSliderViewModel.BasicVol })
@@ -227,41 +261,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
 
-      public POCOs.Track ToPOCO()
-      {
-         IEnumerable<POCOs.MultiSignal> signalPocos;
-         IEnumerable<POCOs.ControlSlider> volPocos;
-         switch (GeneratorMode)
-         {
-            case GeneratorModeType.Mono:
-               signalPocos = MultiSignalVMs.Take(1).Select(vm => vm.ToPOCO());
-               volPocos = VolVMs.Take(2).Select(vm => vm.ToPOCO());
-               break;
-            case GeneratorModeType.Stereo:
-               signalPocos = MultiSignalVMs.Skip(1).Select(vm => vm.ToPOCO());
-               volPocos = VolVMs.Skip(2).Take(1).Select(vm => vm.ToPOCO());
-               break;
-            default:
-               throw new ApplicationException("Bad GeneratorMode");
-         }
-         return new POCOs.Track
-         {
-            Name = Name,
-            MultiSignals = signalPocos.ToList(),
-            Volumes = volPocos.ToList(),
-            TimeSpanSecond = TimeSpanSecond
-         };
-      }
-      public static TrackViewModel FromPOCO(POCOs.Track poco)
-      {
-         var vm = new TrackViewModel(
-            poco.MultiSignals.Select(x => MultiSignalViewModel.FromPOCO(x)).ToArray(),
-            poco.Volumes.Select(x => ControlSliderViewModel.FromPOCO(x)).ToArray()
-            );
-         vm.name = poco.Name;
-         vm.TimeSpanSecond = poco.TimeSpanSecond;
-         return vm;
-      }
       public async Task CopyToClipboard()
       {
          var poco = this.ToPOCO();
@@ -282,38 +281,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             return null;
          }
-      }
-
-      private CompositeDisposable Disposables { get; } = new CompositeDisposable();
-      private bool disposedValue;
-      protected virtual void Dispose(bool disposing)
-      {
-         if (!disposedValue)
-         {
-            if (disposing)
-            {
-               // dispose managed state (managed objects)
-               Disposables?.Dispose();
-            }
-
-            // free unmanaged resources (unmanaged objects) and override finalizer
-            // set large fields to null
-            disposedValue = true;
-         }
-      }
-
-      // // override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-      // ~MainWindowViewModel()
-      // {
-      //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-      //     Dispose(disposing: false);
-      // }
-
-      public void Dispose()
-      {
-         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-         Dispose(disposing: true);
-         GC.SuppressFinalize(this);
       }
    }
 }

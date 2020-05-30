@@ -46,15 +46,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
    }
-   public class PlaylistViewModel : ViewModelBase, IDisposable
+   public class PlaylistViewModel : ViewModelBase
    {
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
-
-      private readonly ReadOnlyObservableCollection<TrackViewModel> trackVMs;
       public ReadOnlyObservableCollection<TrackViewModel> TrackVMs => trackVMs;
-      private SourceList<TrackViewModel> TrackVMsSourceList { get; }
       public ControlSliderViewModel MasterVolVM { get; }
-
       public TrackViewModel SelectedTrackVM { get => selectedTrackVM; set => this.RaiseAndSetIfChanged(ref selectedTrackVM, value); }
       /// <summary>
       /// Current track that play manually
@@ -64,6 +60,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ISampleProvider FinalSample => volumeSampleProvider;
       public AppState AppState { get; }
 
+      private SourceList<TrackViewModel> TrackVMsSourceList { get; }
+      private readonly ReadOnlyObservableCollection<TrackViewModel> trackVMs;
       private TrackViewModel selectedTrackVM;
       private TrackViewModel playingTrackVM;
       private TrackViewModel autoplayingTrackVM;
@@ -77,21 +75,30 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          AppState = Locator.Current.GetService<AppState>();
 
          TrackVMsSourceList = new SourceList<TrackViewModel>().DisposeWith(Disposables);
+         var innerDisposables =
+            new List<(TrackViewModel vm, CompositeDisposable disposable)>();
          TrackVMsSourceList.Connect()
-            .OnItemAdded(vm =>
+            .OnItemAdded(trackVM =>
             {
-               timingSwitchSampleProvider.AddSample(vm.FinalSample, TimeSpan.FromSeconds(vm.TimeSpanSecond));
-               vm
-               .WhenAnyValue(x => x.TimeSpanSecond)
-               .Subscribe(x => timingSwitchSampleProvider.UpdateTimeSpan(vm.FinalSample, TimeSpan.FromSeconds(x)))
-               .DisposeWith(Disposables);
+               timingSwitchSampleProvider.AddSample(trackVM.FinalSample, TimeSpan.FromSeconds(trackVM.TimeSpanSecond));
+               var disposable = new CompositeDisposable().DisposeWith(Disposables);
+               trackVM
+                  .WhenAnyValue(x => x.TimeSpanSecond)
+                  .Subscribe(x =>
+                     timingSwitchSampleProvider.UpdateTimeSpan(trackVM.FinalSample, TimeSpan.FromSeconds(x))
+                  )
+                  .DisposeWith(disposable);
+               innerDisposables.Add((trackVM, disposable));
             })
-            .OnItemRemoved(vm =>
+            .OnItemRemoved(trackVM =>
             {
-               if (vm.IsPlaying && !IsAutoTrackChanging)
+               if (trackVM.IsPlaying && !IsAutoTrackChanging)
                   SwitchPlayingTrack(null);
-               timingSwitchSampleProvider.RemoveSample(vm.FinalSample);
-               vm.Dispose();
+               timingSwitchSampleProvider.RemoveSample(trackVM.FinalSample);
+               var innerDisposable = innerDisposables.First(x => x.vm == trackVM);
+               innerDisposable.disposable.Dispose();
+               innerDisposables.Remove(innerDisposable);
+               trackVM.Dispose();
             })
             .ObserveOn(RxApp.MainThreadScheduler) // Make sure this is only right before the Bind()
             .Bind(out trackVMs)
@@ -103,9 +110,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          switchingSampleProvider = new SwitchingSampleProvider { SampleProvider = timingSwitchSampleProvider };
          volumeSampleProvider = new VolumeSampleProvider(switchingSampleProvider);
 
-         MasterVolVM = ControlSliderViewModel.BasicVol;
+         MasterVolVM = ControlSliderViewModel.BasicVol.DisposeWith(Disposables);
          MasterVolVM.WhenAnyValue(vm => vm.Value)
-            .Subscribe(m => volumeSampleProvider.Volume = (float)m);
+            .Subscribe(m => volumeSampleProvider.Volume = (float)m)
+            .DisposeWith(Disposables);
 
          this.WhenAnyValue(x => x.IsAutoTrackChanging, x => x.PlayingTrackVM)
             .Subscribe(_ =>
@@ -142,8 +150,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          timingSwitchSampleProvider.ObservableOnSampleProviderChanged
             .Subscribe(x =>
             {
-               autoplayingTrackVM = 
-                  TrackVMsSourceList.Items.FirstOrDefault(vm => 
+               autoplayingTrackVM =
+                  TrackVMsSourceList.Items.FirstOrDefault(vm =>
                      vm.FinalSample == x.EventArgs.SampleProvider);
                UpdateIsPlaying(autoplayingTrackVM);
             })
@@ -175,7 +183,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       }
       public async Task AddTrackFromClipboard()
       {
-         var vm = await TrackViewModel.PasteFromClipboard();
+         var vm = await TrackViewModel.PasteFromClipboard().DisposeWith(Disposables);
          if (vm == null) return;
          TrackVMsSourceList.Add(
             vm.SetName(TrackVMName, TrackVMsSourceList).DisposeWith(Disposables)
@@ -208,7 +216,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          Name = poco.Name;
          for (int i = 0; i < poco.Tracks.Count; i++)
          {
-            var trackVM = TrackViewModel.FromPOCO(poco.Tracks[i]);
+            var trackVM = TrackViewModel.FromPOCO(poco.Tracks[i]).DisposeWith(Disposables);
             if (trackVM.Name == null) trackVM.SetName(TrackVMName, TrackVMsSourceList);
             TrackVMsSourceList.Add(trackVM);
          }
@@ -219,38 +227,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          foreach (var trackVM in TrackVMsSourceList.Items) { trackVM.IsPlaying = false; }
          if (trackViewModel == null) return;
          trackViewModel.IsPlaying = true;
-      }
-
-      private CompositeDisposable Disposables { get; } = new CompositeDisposable();
-      private bool disposedValue;
-      protected virtual void Dispose(bool disposing)
-      {
-         if (!disposedValue)
-         {
-            if (disposing)
-            {
-               // dispose managed state (managed objects)
-               Disposables?.Dispose();
-            }
-
-            // free unmanaged resources (unmanaged objects) and override finalizer
-            // set large fields to null
-            disposedValue = true;
-         }
-      }
-
-      // // override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-      // ~PlaylistViewModel()
-      // {
-      //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-      //     Dispose(disposing: false);
-      // }
-
-      public void Dispose()
-      {
-         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-         Dispose(disposing: true);
-         GC.SuppressFinalize(this);
       }
    }
 }

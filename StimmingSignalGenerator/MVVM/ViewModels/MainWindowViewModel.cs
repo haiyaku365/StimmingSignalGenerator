@@ -26,7 +26,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return mainWindowVM;
       }
    }
-   public class MainWindowViewModel : ViewModelBase, IDisposable
+   public class MainWindowViewModel : ViewModelBase
    {
       public AudioPlayerViewModel AudioPlayerViewModel { get; }
       public PlotSampleViewModel PlotSampleViewModel { get; }
@@ -37,7 +37,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public MainWindowViewModel(bool loadDefaultPlaylist = true)
       {
          AppState = Locator.Current.GetService<AppState>();
-         PlaylistViewModel = new PlaylistViewModel();
+         PlaylistViewModel = new PlaylistViewModel().DisposeWith(Disposables);
          if (loadDefaultPlaylist)
          {
             Observable.StartAsync(() => PlaylistViewModel.LoadDefaultAsync())
@@ -69,46 +69,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private static void OpenUrl(string url)
       {
          System.Diagnostics.Process.Start(
-                     new System.Diagnostics.ProcessStartInfo()
-                     {
-                        FileName = url,
-                        UseShellExecute = true
-                     }
-                     );
-      }
-
-      private CompositeDisposable Disposables { get; } = new CompositeDisposable();
-      private bool disposedValue;
-      protected virtual void Dispose(bool disposing)
-      {
-         if (!disposedValue)
-         {
-            if (disposing)
+            new System.Diagnostics.ProcessStartInfo()
             {
-               // dispose managed state (managed objects)
-               Disposables?.Dispose();
+               FileName = url,
+               UseShellExecute = true
             }
-
-            // free unmanaged resources (unmanaged objects) and override finalizer
-            // set large fields to null
-            disposedValue = true;
-         }
+         );
       }
 
-      // // override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-      // ~MainWindowViewModel()
-      // {
-      //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-      //     Dispose(disposing: false);
-      // }
-
-      public void Dispose()
-      {
-         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-         Dispose(disposing: true);
-         GC.SuppressFinalize(this);
-      }
    }
-
-
 }

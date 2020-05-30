@@ -56,7 +56,7 @@
                     <v:BasicSignalView Grid.Column="0" DataContext="{Binding}"/>
                     <Button Grid.Column="1" Classes="Red Remove"
                             VerticalAlignment="Top" Margin="0 3 3 0"
-                            Command="{Binding $parent[UserControl].DataContext.RemoveCommand}"
+                            Command="{Binding $parent[UserControl].DataContext.Remove}"
                             CommandParameter="{Binding}"/>
                   </Grid>
 
@@ -69,11 +69,11 @@
                   Classes="Green" Height="30"
                   Width="{Binding $parent.Width,Mode=OneWay}" 
                   Content="BRRRR"
-                  Command="{Binding AddCommand}">
+                  Command="{Binding Add}">
             <Button.ContextMenu>
               <ContextMenu>
                 <MenuItem Header="Add from clipboard" Classes="Paste"
-                          Command="{Binding AddFromClipboardCommand}" />
+                          Command="{Binding AddFromClipboard}" />
               </ContextMenu>
             </Button.ContextMenu>
           </Button>
