@@ -5,6 +5,7 @@ using ReactiveUI;
 using StimmingSignalGenerator.Generators;
 using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.MVVM.UiHelper;
+using StimmingSignalGenerator.MVVM.ViewModels.Interface;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,7 +22,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    {
       public static MultiSignalViewModel Data => new MultiSignalViewModel();
    }
-   public class MultiSignalViewModel : ViewModelBase, IDisposable
+   public class MultiSignalViewModel : ViewModelBase, ISignalTree, IDisposable
    {
       private string name = "MultiSignals";
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
@@ -35,6 +36,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private SourceList<BasicSignalViewModel> BasicSignalVMsSourceList { get; }
       public ISampleProvider SampleSignal => multiSignal;
 
+      private DeepSourceListTracker<BasicSignalViewModel> DeepSourceListTracker { get; }
+      public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsAdded =>
+            DeepSourceListTracker.ObservableItemAdded;
+      public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsRemoved =>
+            DeepSourceListTracker.ObservableItemRemoved;
+      public ISignalTree Parent { get; set; }
       private readonly MultiSignal multiSignal;
 
       public static MultiSignalViewModel FromPOCO(POCOs.MultiSignal poco)
@@ -46,8 +53,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          foreach (var signal in poco.BasicSignals)
          {
-            multiSignalVM.BasicSignalVMsSourceList.Add(
-               BasicSignalViewModel.FromPOCO(signal)
+            multiSignalVM.AddVM(
+               BasicSignalViewModel.FromPOCO(signal), multiSignalVM
             );
          }
          return multiSignalVM;
@@ -83,6 +90,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe()
             .DisposeWith(Disposables);
 
+         DeepSourceListTracker =
+            new DeepSourceListTracker<BasicSignalViewModel>(BasicSignalVMsSourceList)
+            .DisposeWith(Disposables);
+
          AddCommand = ReactiveCommand
             .Create(AddVM)
             .DisposeWith(Disposables);
@@ -98,7 +109,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .ObservableForProperty(x => x.Value, skipInitial: false)
             .Subscribe(x => Volume = x.Value)
             .DisposeWith(Disposables);
-         
+
          this.WhenAnyValue(x => x.Name)
             .Subscribe(_ =>
             {
@@ -109,7 +120,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                }
             })
             .DisposeWith(Disposables);
-         
+
       }
 
       public double Volume
@@ -125,8 +136,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          }
       }
 
-      private void AddVM() => BasicSignalVMsSourceList.Add(CreateVM());
-      private Task AddVMFromClipboard() => BasicSignalVMsSourceList.AddFromClipboard(BasicSignalVMName);
+      private void AddVM() => AddVM(CreateVM(), this);
+      private void AddVM(BasicSignalViewModel vm, ISignalTree parent)
+      {
+         vm.Parent = parent;
+         BasicSignalVMsSourceList.Add(vm);
+      }
+      private Task AddVMFromClipboard() => BasicSignalVMsSourceList.AddFromClipboard(this, BasicSignalVMName);
       public void RemoveVM(BasicSignalViewModel vm)
       {
          BasicSignalVMsSourceList.Remove(vm);

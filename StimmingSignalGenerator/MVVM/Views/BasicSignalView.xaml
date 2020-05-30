@@ -52,26 +52,35 @@
         <RowDefinition />
         <RowDefinition />
         <RowDefinition />
+        <RowDefinition />
       </Grid.RowDefinitions>
       <ComboBox Grid.Row="0" Grid.Column="1"
                 Items="{Binding Source={helper:EnumBindingSource {x:Type p:BasicSignalType}}}"
                 SelectedItem="{Binding SignalType}"/>
-
       <TextBlock Grid.Row="1" Grid.Column="0"
+                 Text="Sync" ToolTip.Tip="Sync frequency with..." />
+      <ComboBox Grid.Row="1" Grid.Column="1" Items="{Binding AllLinkableBasicSignalVMs}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Name}"/>
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <TextBlock Grid.Row="2" Grid.Column="0"
                  Text="Freq" ToolTip.Tip="Frequency" />
-      <v:ControlSliderView Grid.Row="1" Grid.Column="1"
+      <v:ControlSliderView Grid.Row="2" Grid.Column="1"
                            DataContext="{Binding FreqControlSliderViewModel}"/>
 
-      <TextBlock Grid.Row="2" Grid.Column="0"
+      <TextBlock Grid.Row="3" Grid.Column="0"
                  Text="Vol" ToolTip.Tip="Volume" />
-      <v:ControlSliderView Grid.Row="2" Grid.Column="1"
+      <v:ControlSliderView Grid.Row="3" Grid.Column="1"
                            DataContext="{Binding VolControlSliderViewModel}"/>
 
-      <TextBlock Grid.Row="3" Grid.Column="0"
+      <TextBlock Grid.Row="4" Grid.Column="0"
                  Text="ZCP" ToolTip.Tip="ZeroCrossingPosition" />
-      <v:ControlSliderView Grid.Row="3" Grid.Column="1"
+      <v:ControlSliderView Grid.Row="4" Grid.Column="1"
                            DataContext="{Binding ZCPosControlSliderViewModel}"/>
-      <DockPanel Grid.Row="4" Grid.Column="1">
+      <DockPanel Grid.Row="5" Grid.Column="1">
         <Expander DockPanel.Dock="Top" IsExpanded="{Binding IsAMExpanded}"
                   Header="{Binding AMSignalVMs.Count,StringFormat={}{0} AM Signal(s)}" >
           <DockPanel>

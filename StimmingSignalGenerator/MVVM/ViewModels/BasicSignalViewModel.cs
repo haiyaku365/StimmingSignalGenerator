@@ -32,7 +32,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             IsExpanded = true
          };
    }
-   public class BasicSignalViewModel : ViewModelBase, INamable, IDisposable
+   public class BasicSignalViewModel : ViewModelBase,
+      INamable, ISignalTree, IDeepSourceList<BasicSignalViewModel>, IDisposable
    {
       private string name;
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
@@ -40,6 +41,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ControlSliderViewModel FreqControlSliderViewModel { get; }
       public ControlSliderViewModel VolControlSliderViewModel { get; }
       public ControlSliderViewModel ZCPosControlSliderViewModel { get; }
+      public ISignalTree Parent { get; set; }
       public BasicSignalType SignalType
       {
          get => signalType;
@@ -89,6 +91,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public bool IsAMExpanded { get => isAMExpanded; set => this.RaiseAndSetIfChanged(ref isAMExpanded, value); }
       public bool IsFMExpanded { get => isFMExpanded; set => this.RaiseAndSetIfChanged(ref isFMExpanded, value); }
 
+      public IObservable<BasicSignalViewModel> ObservableItemAdded => DeepSourceListTracker.ObservableItemAdded;
+      public IObservable<BasicSignalViewModel> ObservableItemRemoved => DeepSourceListTracker.ObservableItemRemoved;
+      public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsAdded => ObservableItemAdded;
+      public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsRemoved => ObservableItemRemoved;
+
       private readonly ReadOnlyObservableCollection<BasicSignalViewModel> amSignalVMs;
       public ReadOnlyObservableCollection<BasicSignalViewModel> AMSignalVMs => amSignalVMs;
       private SourceList<BasicSignalViewModel> AMSignalVMsSourceList { get; }
@@ -104,6 +111,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReactiveCommand<Unit, Unit> AddFMFromClipboardCommand { get; }
       public ReactiveCommand<BasicSignalViewModel, Unit> RemoveFMCommand { get; }
 
+      private DeepSourceListTracker<BasicSignalViewModel> DeepSourceListTracker { get; }
       public Brush BGColor { get; }
 
       public static BasicSignalViewModel FromPOCO(POCOs.BasicSignal poco)
@@ -119,12 +127,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          foreach (var am in poco.AMSignals)
          {
             var amVM = FromPOCO(am);
-            basicSignalVM.AddAM(amVM);
+            basicSignalVM.AddAM(amVM, basicSignalVM);
          }
          foreach (var fm in poco.FMSignals)
          {
             var fmVM = FromPOCO(fm);
-            basicSignalVM.AddFM(fmVM);
+            basicSignalVM.AddFM(fmVM, basicSignalVM);
          }
 
          return basicSignalVM;
@@ -206,7 +214,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             vm => AMSignalVMsSourceList.Remove(vm))
             .DisposeWith(Disposables);
 
-
          FMSignalVMsSourceList =
             new SourceList<BasicSignalViewModel>()
             .DisposeWith(Disposables);
@@ -231,7 +238,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             vm => FMSignalVMsSourceList.Remove(vm))
             .DisposeWith(Disposables);
          this.WhenAnyValue(x => x.Name)
-            .Subscribe(_=> {
+            .Subscribe(_ =>
+            {
                //Update name 
                foreach (var am in AMSignalVMsSourceList.Items)
                {
@@ -244,6 +252,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             })
             .DisposeWith(Disposables);
 
+         DeepSourceListTracker =
+            new DeepSourceListTracker<BasicSignalViewModel>(AMSignalVMsSourceList, FMSignalVMsSourceList)
+            .DisposeWith(Disposables);
 
          // HACK Expander IsExpanded is set somewhere from internal avalonia uncontrollable
          this.WhenAnyValue(x => x.IsAMExpanded)
@@ -263,13 +274,41 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
       }
 
-      private Task AddAMFromClipboard() => AMSignalVMsSourceList.AddFromClipboard(AMName);
-      private void AddAM() => AddAM(CreateAMVM());
-      private void AddAM(BasicSignalViewModel vm) => AMSignalVMsSourceList.Add(vm);
+      public ReadOnlyObservableCollection<BasicSignalViewModel> AllLinkableBasicSignalVMs
+         => RootSignalTree?.AllSubBasicSignalVMs ??
+            new ReadOnlyObservableCollection<BasicSignalViewModel>(
+            new ObservableCollection<BasicSignalViewModel>());
+      private TrackViewModel rootSignalTree;
+      private TrackViewModel RootSignalTree
+      {
+         get
+         {
+            if (Parent == null) return null;
+            if (rootSignalTree == null)
+            {
+               var p = Parent;
+               while (!(p is TrackViewModel)) p = p.Parent;
+               rootSignalTree = p as TrackViewModel;
+            }
+            return rootSignalTree;
+         }
+      }
 
-      private Task AddFMFromClipboard() => FMSignalVMsSourceList.AddFromClipboard(FMName);
-      private void AddFM() => AddFM(CreateFMVM());
-      private void AddFM(BasicSignalViewModel vm) => FMSignalVMsSourceList.Add(vm);
+      private Task AddAMFromClipboard() => AMSignalVMsSourceList.AddFromClipboard(this, AMName);
+      private void AddAM() => AddAM(CreateAMVM(), this);
+      private void AddAM(BasicSignalViewModel vm, ISignalTree parent)
+      {
+         vm.Parent = parent;
+         AMSignalVMsSourceList.Add(vm);
+      }
+
+      private Task AddFMFromClipboard() => FMSignalVMsSourceList.AddFromClipboard(this, FMName);
+      private void AddFM() => AddFM(CreateFMVM(), this);
+      private void AddFM(BasicSignalViewModel vm, ISignalTree parent)
+      {
+         vm.Parent = parent;
+         FMSignalVMsSourceList.Add(vm);
+      }
 
       private static string GetAMName(string name) => $"{name}.AMSignal";
       private static string GetFMName(string name) => $"{name}.FMSignal";
@@ -326,7 +365,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
 
       private CompositeDisposable Disposables { get; } = new CompositeDisposable();
-
       private bool disposedValue;
       protected virtual void Dispose(bool disposing)
       {

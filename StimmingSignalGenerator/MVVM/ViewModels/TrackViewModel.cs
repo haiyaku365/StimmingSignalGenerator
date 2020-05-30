@@ -15,6 +15,9 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using StimmingSignalGenerator.Helper;
+using System.Reactive.Linq;
+using DynamicData;
+using System.Collections.ObjectModel;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
@@ -28,7 +31,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return new TrackViewModel { Name = "Track1", GeneratorMode = generatorModeType };
       }
    }
-   public class TrackViewModel : ViewModelBase, INamable, IDisposable
+   public class TrackViewModel : ViewModelBase, INamable, ISignalTree, IDisposable
    {
       public AppState AppState { get; }
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
@@ -40,6 +43,31 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public List<ControlSliderViewModel> VolVMs { get; }
       public GeneratorModeType GeneratorMode { get => generatorMode; set => this.RaiseAndSetIfChanged(ref generatorMode, value); }
 
+      public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsAdded
+         => GeneratorMode switch
+         {
+            GeneratorModeType.Mono =>
+               MultiSignalVMs[0].ObservableBasicSignalViewModelsAdded,
+            GeneratorModeType.Stereo =>
+               MultiSignalVMs[1].ObservableBasicSignalViewModelsAdded.Merge(
+               MultiSignalVMs[2].ObservableBasicSignalViewModelsAdded),
+            _ => throw new NotImplementedException()
+         };
+      public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsRemoved
+         => GeneratorMode switch
+         {
+            GeneratorModeType.Mono =>
+               MultiSignalVMs[0].ObservableBasicSignalViewModelsRemoved,
+            GeneratorModeType.Stereo =>
+               MultiSignalVMs[1].ObservableBasicSignalViewModelsRemoved.Merge(
+               MultiSignalVMs[2].ObservableBasicSignalViewModelsRemoved),
+            _ => throw new NotImplementedException()
+         };
+
+      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> allSubBasicSignalVMs;
+      public ReadOnlyObservableCollection<BasicSignalViewModel> AllSubBasicSignalVMs => allSubBasicSignalVMs;
+      private SourceList<BasicSignalViewModel> AllSubBasicSignalVMsSourceList { get; }
+      public ISignalTree Parent => null;
       public ISampleProvider FinalSample => sample;
 
       readonly SwitchingModeSampleProvider sample;
@@ -62,13 +90,35 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          VolVMs = new List<ControlSliderViewModel>();
          MultiSignalVMs = new List<MultiSignalViewModel>();
+
+         AllSubBasicSignalVMsSourceList =
+            new SourceList<BasicSignalViewModel>()
+            .DisposeWith(Disposables);
+         AllSubBasicSignalVMsSourceList.Connect()
+            .ObserveOn(RxApp.MainThreadScheduler) // Make sure this is only right before the Bind()
+            .Bind(out allSubBasicSignalVMs)
+            .Subscribe()
+            .DisposeWith(Disposables);
+
          SetupVolumeControlSlider(controlSliderVMs);
          SetupSwitchingModeSignal(multiSignalVMs);
 
+         var GeneratorModeChangedDisposable = new CompositeDisposable().DisposeWith(Disposables);
          this.WhenAnyValue(x => x.GeneratorMode)
             .Subscribe(_ =>
             {
                sample.GeneratorMode = GeneratorMode;
+               // clean and switch mode
+               AllSubBasicSignalVMsSourceList.Clear();
+               GeneratorModeChangedDisposable.Dispose();
+               GeneratorModeChangedDisposable = new CompositeDisposable().DisposeWith(Disposables);
+               // resub to new mode
+               this.ObservableBasicSignalViewModelsAdded
+                  .Subscribe(x => AllSubBasicSignalVMsSourceList.Add(x))
+                  .DisposeWith(GeneratorModeChangedDisposable);
+               this.ObservableBasicSignalViewModelsRemoved
+                  .Subscribe(x => AllSubBasicSignalVMsSourceList.Remove(x))
+                  .DisposeWith(GeneratorModeChangedDisposable);
             })
             .DisposeWith(Disposables);
          this.WhenAnyValue(x => x.IsPlaying)
@@ -83,6 +133,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          VolVMs[2].WhenAnyValue(vm => vm.Value)
             .Subscribe(m => sample.StereoVolume = (float)m)
             .DisposeWith(Disposables);
+
       }
 
       private void SetupSwitchingModeSignal(MultiSignalViewModel[] multiSignalVMs)
@@ -129,6 +180,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          MultiSignalVMs[0].Name = "Signals";
          MultiSignalVMs[1].Name = "LSignals";
          MultiSignalVMs[2].Name = "RSignals";
+         foreach (var item in MultiSignalVMs)
+         {
+            item.Parent = this;
+         }
          sample.MonoSampleProvider = MultiSignalVMs.Take(1).Single().SampleSignal;
          sample.StereoSampleProviders = MultiSignalVMs.Skip(1).Select(x => x.SampleSignal);
       }
