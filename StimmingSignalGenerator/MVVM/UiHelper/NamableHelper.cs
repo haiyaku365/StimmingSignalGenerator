@@ -16,7 +16,7 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
       {
          //if not new vm then set name to index
          var num = sourceList.Items.IndexOf(vm);
-         vm.Name = (num > 0) ?
+         vm.Name = (num >= 0) ?
             $"{namePrefix}{num + 1}" :
             GetNextName(namePrefix, sourceList);
          return vm;
