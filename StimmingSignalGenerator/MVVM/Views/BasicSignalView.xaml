@@ -21,7 +21,7 @@
           <Setter.Value>
             <Template>
               <ContextMenu>
-                <MenuItem Header="Copy to clipboard" Classes="Copy" 
+                <MenuItem Header="Copy to clipboard" Classes="Copy"
                           Command="{Binding CopyToClipboard}" />
               </ContextMenu>
             </Template>
@@ -59,13 +59,20 @@
                 SelectedItem="{Binding SignalType}"/>
       <TextBlock Grid.Row="1" Grid.Column="0"
                  Text="Sync" ToolTip.Tip="Sync frequency with..." />
-      <ComboBox Grid.Row="1" Grid.Column="1" Items="{Binding AllLinkableBasicSignalVMs}">
-        <ComboBox.ItemTemplate>
-          <DataTemplate>
-            <TextBlock Text="{Binding Name}"/>
-          </DataTemplate>
-        </ComboBox.ItemTemplate>
-      </ComboBox>
+      <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="3">
+        <ToggleButton Content="SyncEnable" IsChecked="{Binding IsSyncFreq}" />
+        <ComboBox Items="{Binding AllLinkableBasicSignalVMs}" IsVisible="{Binding IsSyncFreq}"
+                  SelectedItem="{Binding SelectedLinkableBasicSignalVM}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal" Spacing="5">
+                <TextBlock Text="{Binding Name}"/>
+                <TextBlock Text="{Binding Frequency, StringFormat={}F:{0:N2}}"/>
+              </StackPanel>
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+      </StackPanel>
       <TextBlock Grid.Row="2" Grid.Column="0"
                  Text="Freq" ToolTip.Tip="Frequency" />
       <v:ControlSliderView Grid.Row="2" Grid.Column="1"
@@ -110,7 +117,7 @@
                     Content="+AM" Command="{Binding AddAM}" >
               <Button.ContextMenu>
                 <ContextMenu>
-                  <MenuItem Header="Add from clipboard" Classes="Paste" 
+                  <MenuItem Header="Add from clipboard" Classes="Paste"
                             Command="{Binding AddAMFromClipboard}" />
                 </ContextMenu>
               </Button.ContextMenu>

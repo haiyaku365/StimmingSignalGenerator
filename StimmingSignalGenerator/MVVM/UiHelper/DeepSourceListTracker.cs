@@ -24,7 +24,7 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
       private readonly ReplaySubject<T> subjectOfItemRemoved;
       private readonly List<(T item, CompositeDisposable disposable)> innerDisposables;
 
-      public DeepSourceListTracker(params SourceList<T>[] sourceLists)
+      public DeepSourceListTracker(params IObservableList<T>[] sourceLists)
       {
          subjectOfItemAdded = new ReplaySubject<T>().DisposeWith(Disposables);
          subjectOfItemRemoved = new ReplaySubject<T>().DisposeWith(Disposables);

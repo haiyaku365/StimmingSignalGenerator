@@ -20,7 +20,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    public class DesignMultiSignalViewModel : DesignViewModelBase
    {
-      public static MultiSignalViewModel Data => new MultiSignalViewModel();
+      public static MultiSignalViewModel Data
+      {
+         get
+         {
+            var track = new TrackViewModel();
+            return track.MultiSignalVMs[0];
+         }
+      }
    }
    public class MultiSignalViewModel : ViewModelBase, ISignalTree
    {
@@ -30,7 +37,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReadOnlyObservableCollection<BasicSignalViewModel> BasicSignalVMs => basicSignalVMs;
       public ISampleProvider SampleSignal => multiSignal;
 
-      public ISignalTree Parent { get; set; }
+      public ISignalTree Parent { get; }
       public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsAdded =>
             DeepSourceListTracker.ObservableItemAdded;
       public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsRemoved =>
@@ -43,9 +50,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private SourceList<BasicSignalViewModel> BasicSignalVMsSourceList { get; }
       private readonly ReadOnlyObservableCollection<BasicSignalViewModel> basicSignalVMs;
       private readonly MultiSignal multiSignal;
-      public static MultiSignalViewModel FromPOCO(POCOs.MultiSignal poco)
+      public static MultiSignalViewModel FromPOCO(POCOs.MultiSignal poco, ISignalTree parent)
       {
-         var multiSignalVM = new MultiSignalViewModel(new MultiSignal());
+         var multiSignalVM = new MultiSignalViewModel(parent, new MultiSignal());
          multiSignalVM.VolControlSliderViewModel.MinValue = poco.Volume.Min;
          multiSignalVM.VolControlSliderViewModel.MaxValue = poco.Volume.Max;
          multiSignalVM.VolControlSliderViewModel.Value = poco.Volume.Value;
@@ -53,7 +60,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          foreach (var signal in poco.BasicSignals)
          {
             multiSignalVM.AddVM(
-               BasicSignalViewModel.FromPOCO(signal), multiSignalVM
+               BasicSignalViewModel.FromPOCO(signal, multiSignalVM)
             );
          }
          return multiSignalVM;
@@ -65,14 +72,15 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             BasicSignals = BasicSignalVMs.Select(x => x.ToPOCO()).ToList()
          };
 
-      public MultiSignalViewModel() : this(new MultiSignal())
+      public MultiSignalViewModel(ISignalTree parent) : this(parent, new MultiSignal())
       {
          //init vm
          Add();
          basicSignalVMs.First().Volume = 1;
       }
-      public MultiSignalViewModel(MultiSignal multiSignal)
+      public MultiSignalViewModel(ISignalTree parent, MultiSignal multiSignal)
       {
+         Parent = parent ?? throw new ArgumentNullException(nameof(parent));
          BasicSignalVMsSourceList = new SourceList<BasicSignalViewModel>().DisposeWith(Disposables);
          this.multiSignal = multiSignal;
 
@@ -118,19 +126,18 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       }
 
-      public void Add() => AddVM(CreateVM(), this);
+      public void Add() => AddVM(CreateVM());
       public Task AddFromClipboard() => BasicSignalVMsSourceList.AddFromClipboard(this, BasicSignalVMName);
       public void Remove(BasicSignalViewModel vm) => BasicSignalVMsSourceList.Remove(vm);
-      private void AddVM(BasicSignalViewModel vm, ISignalTree parent)
+      private void AddVM(BasicSignalViewModel vm)
       {
-         vm.Parent = parent;
          BasicSignalVMsSourceList.Add(vm);
       }
 
       private static string GetBasicSignalVMName(string name) => $"{name}.Signal";
       private string BasicSignalVMName => GetBasicSignalVMName(Name);
       private BasicSignalViewModel CreateVM(double volume = 0) =>
-         new BasicSignalViewModel { Volume = volume }
+         new BasicSignalViewModel(this) { Volume = volume }
          .SetName(BasicSignalVMName, BasicSignalVMsSourceList)
          .DisposeWith(Disposables);
    }

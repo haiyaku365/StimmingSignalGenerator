@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media;
 using DynamicData;
+using DynamicData.Binding;
 using ReactiveUI;
 using StimmingSignalGenerator.Generators;
 using StimmingSignalGenerator.Helper;
@@ -19,16 +20,22 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    public class DesignBasicSignalViewModel : DesignViewModelBase
    {
-      public static BasicSignalViewModel Data =>
-         new BasicSignalViewModel
+      public static BasicSignalViewModel Data
+      {
+         get
          {
-            Name = $"Signal{random.Next(0, 100)}",
-            SignalType = GetRandomEnum<BasicSignalType>(),
-            Frequency = random.Next(300, 7000),
-            Volume = random.NextDouble(),
-            ZeroCrossingPosition = random.NextDouble(),
-            IsExpanded = true
-         };
+            var track = new TrackViewModel();
+            return new BasicSignalViewModel(track.MultiSignalVMs[0])
+            {
+               Name = $"Signal{random.Next(0, 100)}",
+               SignalType = GetRandomEnum<BasicSignalType>(),
+               Frequency = random.Next(300, 7000),
+               Volume = random.NextDouble(),
+               ZeroCrossingPosition = random.NextDouble(),
+               IsExpanded = true
+            };
+         }
+      }
    }
    public class BasicSignalViewModel : ViewModelBase,
       INamable, ISignalTree, IDeepSourceList<BasicSignalViewModel>
@@ -49,7 +56,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public bool IsAMExpanded { get => isAMExpanded; set => this.RaiseAndSetIfChanged(ref isAMExpanded, value); }
       public bool IsFMExpanded { get => isFMExpanded; set => this.RaiseAndSetIfChanged(ref isFMExpanded, value); }
 
-      public ISignalTree Parent { get; set; }
+      public ISignalTree Parent { get; }
       public IObservable<BasicSignalViewModel> ObservableItemAdded => DeepSourceListTracker.ObservableItemAdded;
       public IObservable<BasicSignalViewModel> ObservableItemRemoved => DeepSourceListTracker.ObservableItemRemoved;
       public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsAdded => ObservableItemAdded;
@@ -58,7 +65,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReadOnlyObservableCollection<BasicSignalViewModel> AMSignalVMs => amSignalVMs;
       public ReadOnlyObservableCollection<BasicSignalViewModel> FMSignalVMs => fmSignalVMs;
 
-      private string name;
+      public BasicSignalViewModel SelectedLinkableBasicSignalVM { get => selectedLinkableBasicSignalVM; set => this.RaiseAndSetIfChanged(ref selectedLinkableBasicSignalVM, value); }
+      public bool IsSyncFreq { get => isSyncFreq; set => this.RaiseAndSetIfChanged(ref isSyncFreq, value); }
+      public ReadOnlyObservableCollection<BasicSignalViewModel> AllLinkableBasicSignalVMs => allLinkableBasicSignalVMs;
+
+      private string name = "BasicSignal";
       private BasicSignalType signalType;
       private double frequency;
       private double volume;
@@ -71,9 +82,29 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private readonly ReadOnlyObservableCollection<BasicSignalViewModel> amSignalVMs;
       private readonly ReadOnlyObservableCollection<BasicSignalViewModel> fmSignalVMs;
       private DeepSourceListTracker<BasicSignalViewModel> DeepSourceListTracker { get; }
-      public static BasicSignalViewModel FromPOCO(POCOs.BasicSignal poco)
+      private TrackViewModel RootSignalTree
+      {
+         get
+         {
+            if (rootSignalTree == null)
+            {
+               var p = Parent;
+               while (!(p is TrackViewModel)) p = p.Parent;
+               rootSignalTree = p as TrackViewModel;
+            }
+            return rootSignalTree;
+         }
+      }
+
+      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> allLinkableBasicSignalVMs;
+      private BasicSignalViewModel selectedLinkableBasicSignalVM;
+      private bool isSyncFreq;
+      private TrackViewModel rootSignalTree;
+
+      public static BasicSignalViewModel FromPOCO(POCOs.BasicSignal poco, ISignalTree parent)
       {
          var basicSignalVM = new BasicSignalViewModel(
+            parent,
             ControlSliderViewModel.FromPOCO(poco.Frequency),
             ControlSliderViewModel.FromPOCO(poco.Volume),
             ControlSliderViewModel.FromPOCO(poco.ZeroCrossingPosition))
@@ -83,13 +114,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          foreach (var am in poco.AMSignals)
          {
-            var amVM = FromPOCO(am);
-            basicSignalVM.AddAM(amVM, basicSignalVM);
+            var amVM = FromPOCO(am, basicSignalVM);
+            basicSignalVM.AddAM(amVM);
          }
          foreach (var fm in poco.FMSignals)
          {
-            var fmVM = FromPOCO(fm);
-            basicSignalVM.AddFM(fmVM, basicSignalVM);
+            var fmVM = FromPOCO(fm, basicSignalVM);
+            basicSignalVM.AddFM(fmVM);
          }
 
          return basicSignalVM;
@@ -105,26 +136,27 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             FMSignals = FMSignalVMs.Select(x => x.ToPOCO()).ToList()
          };
 
-      public BasicSignalViewModel()
-         : this(ControlSliderViewModel.BasicSignalFreq)
+      public BasicSignalViewModel(ISignalTree parent)
+         : this(parent, ControlSliderViewModel.BasicSignalFreq)
       {
       }
-      public BasicSignalViewModel(
+      public BasicSignalViewModel(ISignalTree parent,
          ControlSliderViewModel freqControlSliderViewModel)
-         : this(freqControlSliderViewModel, ControlSliderViewModel.BasicVol)
+         : this(parent, freqControlSliderViewModel, ControlSliderViewModel.BasicVol)
       {
       }
-      public BasicSignalViewModel(
+      public BasicSignalViewModel(ISignalTree parent,
          ControlSliderViewModel freqControlSliderViewModel,
          ControlSliderViewModel volControlSliderViewModel)
-         : this(freqControlSliderViewModel, volControlSliderViewModel, ControlSliderViewModel.Vol(0.5)) { }
+         : this(parent, freqControlSliderViewModel, volControlSliderViewModel, ControlSliderViewModel.Vol(0.5)) { }
 
-      public BasicSignalViewModel(
+      public BasicSignalViewModel(ISignalTree parent,
          ControlSliderViewModel freqControlSliderViewModel,
          ControlSliderViewModel volControlSliderViewModel,
          ControlSliderViewModel zcPosControlSliderViewModel
          )
       {
+         Parent = parent ?? throw new ArgumentNullException(nameof(parent));
          BGColor = GetRandomBrush();
          BasicSignal = new BasicSignal();
 
@@ -232,44 +264,34 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .SubscribeOn(RxApp.MainThreadScheduler)
             .Subscribe(_ => IsFMExpanded = FMSignalVMs.Count > 0)
             .DisposeWith(Disposables);
+
+         RootSignalTree.AllLinkableBasicSignalVMs
+            .Connect()
+            .AutoRefresh(x => x.IsSyncFreq)
+            .Filter(x => x != this && !x.IsSyncFreq)//Cannot sync with self and signal that sync with another
+            .Bind(out allLinkableBasicSignalVMs)
+            .Subscribe()
+            .DisposeWith(Disposables);
+
+         this.WhenAnyValue(x => x.IsSyncFreq)
+            .Subscribe(_ => { if (!IsSyncFreq) { SelectedLinkableBasicSignalVM = null; } })
+            .DisposeWith(Disposables);
       }
 
-      public ReadOnlyObservableCollection<BasicSignalViewModel> AllLinkableBasicSignalVMs
-         => RootSignalTree?.AllSubBasicSignalVMs ??
-            new ReadOnlyObservableCollection<BasicSignalViewModel>(
-            new ObservableCollection<BasicSignalViewModel>());
-      private TrackViewModel rootSignalTree;
-      private TrackViewModel RootSignalTree
-      {
-         get
-         {
-            if (Parent == null) return null;
-            if (rootSignalTree == null)
-            {
-               var p = Parent;
-               while (!(p is TrackViewModel)) p = p.Parent;
-               rootSignalTree = p as TrackViewModel;
-            }
-            return rootSignalTree;
-         }
-      }
-
-      public void AddAM() => AddAM(CreateAMVM(), this);
+      public void AddAM() => AddAM(CreateAMVM());
       public Task AddAMFromClipboard() => AMSignalVMsSourceList.AddFromClipboard(this, AMName);
       public void RemoveAM(BasicSignalViewModel vm) => AMSignalVMsSourceList.Remove(vm);
-      private void AddAM(BasicSignalViewModel vm, ISignalTree parent)
+      private void AddAM(BasicSignalViewModel vm)
       {
-         vm.Parent = parent;
          AMSignalVMsSourceList.Add(vm);
       }
 
 
-      public void AddFM() => AddFM(CreateFMVM(), this);
+      public void AddFM() => AddFM(CreateFMVM());
       public Task AddFMFromClipboard() => FMSignalVMsSourceList.AddFromClipboard(this, FMName);
       public void RemoveFM(BasicSignalViewModel vm) => FMSignalVMsSourceList.Remove(vm);
-      private void AddFM(BasicSignalViewModel vm, ISignalTree parent)
+      private void AddFM(BasicSignalViewModel vm)
       {
-         vm.Parent = parent;
          FMSignalVMsSourceList.Add(vm);
       }
 
@@ -278,13 +300,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private string AMName => GetAMName(Name);
       private string FMName => GetFMName(Name);
       private BasicSignalViewModel CreateAMVM() =>
-         new BasicSignalViewModel(
-            ControlSliderViewModel.ModulationSignalFreq) { Volume = 0 }
+         new BasicSignalViewModel(this,
+            ControlSliderViewModel.ModulationSignalFreq)
+         { Volume = 0 }
          .SetName(AMName, AMSignalVMsSourceList)
          .DisposeWith(Disposables);
 
       private BasicSignalViewModel CreateFMVM() =>
-         new BasicSignalViewModel(
+         new BasicSignalViewModel(this,
             ControlSliderViewModel.ModulationSignalFreq,
             new ControlSliderViewModel(0, 0, 100, 1, 1, 5))
          { Volume = 0 }
@@ -298,7 +321,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          await Avalonia.Application.Current.Clipboard.SetTextAsync(json);
       }
 
-      public static async Task<BasicSignalViewModel> PasteFromClipboard()
+      public static async Task<BasicSignalViewModel> PasteFromClipboard(ISignalTree parent)
       {
          var json = await Avalonia.Application.Current.Clipboard.GetTextAsync();
          if (string.IsNullOrWhiteSpace(json)) return null;
@@ -306,7 +329,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             var poco = JsonSerializer.Deserialize<POCOs.BasicSignal>(json);
             if (typeof(POCOs.BasicSignal).GetProperties().All(x => x.GetValue(poco).IsNullOrDefault())) return null;
-            return BasicSignalViewModel.FromPOCO(poco);
+            return BasicSignalViewModel.FromPOCO(poco, parent);
          }
          catch (JsonException)
          {

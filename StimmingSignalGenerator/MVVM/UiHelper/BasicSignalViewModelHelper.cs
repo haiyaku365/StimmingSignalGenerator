@@ -12,9 +12,8 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
          ISignalTree parent, 
          string namePrefix)
       {
-         var vm = await BasicSignalViewModel.PasteFromClipboard();
+         var vm = await BasicSignalViewModel.PasteFromClipboard(parent);
          if (vm == null) return;
-         vm.Parent = parent;
          sourceList.Add(vm.SetName(namePrefix, sourceList));
       }
    }
