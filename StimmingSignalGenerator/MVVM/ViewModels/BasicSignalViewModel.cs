@@ -71,7 +71,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public bool IsSyncFreq { get => isSyncFreq; set => this.RaiseAndSetIfChanged(ref isSyncFreq, value); }
       public ReadOnlyObservableCollection<BasicSignalViewModel> AllLinkableBasicSignalVMs => allLinkableBasicSignalVMs;
 
-      private string name = "BasicSignal";
+      private string name = Constants.ViewModelName.BasicSignalVMName;
       private readonly ObservableAsPropertyHelper<string> fullName;
       private BasicSignalType signalType;
       private double frequency;
@@ -301,17 +301,21 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private readonly ObservableAsPropertyHelper<bool> canSyncFreq;
       public bool CanSyncFreq => canSyncFreq.Value;
       public void AddAM() => AddAM(CreateAMVM());
-      public Task AddAMFromClipboard() => AMSignalVMsSourceList.AddFromClipboard(this, AMName, Disposables);
-      public void RemoveAM(BasicSignalViewModel vm) => vm.RemoveAndMaintainName(AMName, AMSignalVMsSourceList);
-      private void AddAM(BasicSignalViewModel vm) => vm.AddAndSetName(AMName, AMSignalVMsSourceList);
+      public Task AddAMFromClipboard() =>
+         AMSignalVMsSourceList.AddFromClipboard(this, Constants.ViewModelName.AMName, Disposables);
+      public void RemoveAM(BasicSignalViewModel vm) =>
+         vm.RemoveAndMaintainName(Constants.ViewModelName.AMName, AMSignalVMsSourceList);
+      private void AddAM(BasicSignalViewModel vm) =>
+         vm.AddAndSetName(Constants.ViewModelName.AMName, AMSignalVMsSourceList);
 
       public void AddFM() => AddFM(CreateFMVM());
-      public Task AddFMFromClipboard() => FMSignalVMsSourceList.AddFromClipboard(this, FMName, Disposables);
-      public void RemoveFM(BasicSignalViewModel vm) => vm.RemoveAndMaintainName(FMName, FMSignalVMsSourceList);
-      private void AddFM(BasicSignalViewModel vm) => vm.AddAndSetName(FMName, FMSignalVMsSourceList);
+      public Task AddFMFromClipboard() =>
+         FMSignalVMsSourceList.AddFromClipboard(this, Constants.ViewModelName.FMName, Disposables);
+      public void RemoveFM(BasicSignalViewModel vm) =>
+         vm.RemoveAndMaintainName(Constants.ViewModelName.FMName, FMSignalVMsSourceList);
+      private void AddFM(BasicSignalViewModel vm) =>
+         vm.AddAndSetName(Constants.ViewModelName.FMName, FMSignalVMsSourceList);
 
-      private const string AMName = "AMSignal";
-      private const string FMName = "FMSignal";
       private BasicSignalViewModel CreateAMVM() =>
          new BasicSignalViewModel(this,
             ControlSliderViewModel.ModulationSignalFreq)

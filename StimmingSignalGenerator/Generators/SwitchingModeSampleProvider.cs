@@ -68,7 +68,7 @@ namespace StimmingSignalGenerator.Generators
 
       public SwitchingModeSampleProvider()
       {
-         WaveFormat = Constants.DefaultStereoWaveFormat;
+         WaveFormat = Constants.Wave.DefaultStereoWaveFormat;
       }
 
       public int Read(float[] buffer, int offset, int count)

@@ -36,7 +36,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             vm.TrackVMs[0].TimeSpanSecond = 1;
             vm.TrackVMs[1].GeneratorMode = GeneratorModeType.Stereo;
 
-            var count = Constants.DefaultSampleRate / 4;
+            var count = Constants.Wave.DefaultSampleRate / 4;
             float[] buffer = Array.Empty<float>();
             buffer = BufferHelpers.Ensure(buffer, count);
 
@@ -177,11 +177,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public void AddNewTrack()
       {
          var vm = new TrackViewModel().DisposeWith(Disposables);
-         vm.AddAndSetName(TrackVMName, TrackVMsSourceList);
+         vm.AddAndSetName(Constants.ViewModelName.TrackVMName, TrackVMsSourceList);
       }
-      public Task AddTrackFromClipboard() => TrackVMsSourceList.AddFromClipboard(TrackVMName, Disposables);
+      public Task AddTrackFromClipboard() =>
+         TrackVMsSourceList.AddFromClipboard(Constants.ViewModelName.TrackVMName, Disposables);
 
-      private const string TrackVMName = "Track";
       public void RemoveTrack(TrackViewModel trackVM)
       {
          TrackVMsSourceList.Remove(trackVM);
@@ -208,7 +208,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          for (int i = 0; i < poco.Tracks.Count; i++)
          {
             var trackVM = TrackViewModel.FromPOCO(poco.Tracks[i]).DisposeWith(Disposables);
-            if (trackVM.Name == null) trackVM.SetName(TrackVMName, TrackVMsSourceList);
+            if (trackVM.Name == null) trackVM.SetName(Constants.ViewModelName.TrackVMName, TrackVMsSourceList);
             TrackVMsSourceList.Add(trackVM);
          }
       }

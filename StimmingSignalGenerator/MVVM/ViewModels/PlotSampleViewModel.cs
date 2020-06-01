@@ -26,7 +26,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          var plotVM = new PlotSampleViewModel(plotSignal);
          plotVM.IsPlotEnable = true;
 
-         var count = Constants.DefaultSampleRate / 8 * signal.WaveFormat.Channels;
+         var count = Constants.Wave.DefaultSampleRate / 8 * signal.WaveFormat.Channels;
          float[] buffer = Array.Empty<float>();
          buffer = BufferHelpers.Ensure(buffer, count);
          plotVM.SampleSignal.Read(buffer, 0, count);

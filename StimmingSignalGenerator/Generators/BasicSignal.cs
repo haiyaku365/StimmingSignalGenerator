@@ -40,7 +40,7 @@ namespace StimmingSignalGenerator.Generators
       /// <param name="channel">Number of channels</param>
       public BasicSignal()
       {
-         WaveFormat = Constants.DefaultMonoWaveFormat;
+         WaveFormat = Constants.Wave.DefaultMonoWaveFormat;
 
          // Default
          Type = BasicSignalType.Sin;

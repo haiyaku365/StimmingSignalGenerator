@@ -44,7 +44,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsRemoved =>
             DeepSourceListTracker.ObservableItemRemoved;
 
-      private string name = "MultiSignals";
+      private string name = Constants.ViewModelName.MonoMultiSignalName;
       private readonly ObservableAsPropertyHelper<string> fullName;
       private double volume;
       private DeepSourceListTracker<BasicSignalViewModel> DeepSourceListTracker { get; }
@@ -117,13 +117,15 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          this.WhenAnyValue(x => x.Name)
             .ToProperty(this, nameof(FullName), out fullName);
       }
-      
-      public void Add() => AddVM(CreateVM());
-      public Task AddFromClipboard() => BasicSignalVMsSourceList.AddFromClipboard(this, BasicSignalVMName, Disposables);
-      public void Remove(BasicSignalViewModel vm) => vm.RemoveAndMaintainName(BasicSignalVMName, BasicSignalVMsSourceList);
-      private void AddVM(BasicSignalViewModel vm) => vm.AddAndSetName(BasicSignalVMName, BasicSignalVMsSourceList);
 
-      private const string BasicSignalVMName = "Signal";
+      public void Add() => AddVM(CreateVM());
+      public Task AddFromClipboard() =>
+         BasicSignalVMsSourceList.AddFromClipboard(this, Constants.ViewModelName.BasicSignalVMName, Disposables);
+      public void Remove(BasicSignalViewModel vm) =>
+         vm.RemoveAndMaintainName(Constants.ViewModelName.BasicSignalVMName, BasicSignalVMsSourceList);
+      private void AddVM(BasicSignalViewModel vm) =>
+         vm.AddAndSetName(Constants.ViewModelName.BasicSignalVMName, BasicSignalVMsSourceList);
+
       private BasicSignalViewModel CreateVM(double volume = 0) =>
          new BasicSignalViewModel(this) { Volume = volume }
          .DisposeWith(Disposables);

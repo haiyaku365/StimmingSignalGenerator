@@ -245,9 +245,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                //somthing wrong
                throw new ApplicationException("somthing wrong in TrackViewModel.SetupMultiSignal(params MultiSignalViewModel[] multiSignalVMs)");
          }
-         MultiSignalVMsSourceList.Items.ElementAt(0).Name = "Signals";
-         MultiSignalVMsSourceList.Items.ElementAt(1).Name = "LSignals";
-         MultiSignalVMsSourceList.Items.ElementAt(2).Name = "RSignals";
+         MultiSignalVMsSourceList.Items.ElementAt(0).Name = Constants.ViewModelName.MonoMultiSignalName;
+         MultiSignalVMsSourceList.Items.ElementAt(1).Name = Constants.ViewModelName.LeftMultiSignalName;
+         MultiSignalVMsSourceList.Items.ElementAt(2).Name = Constants.ViewModelName.RightMultiSignalName;
          sample.MonoSampleProvider = MultiSignalVMsSourceList.Items.Take(1).Single().SampleSignal;
          sample.StereoSampleProviders = MultiSignalVMsSourceList.Items.Skip(1).Select(x => x.SampleSignal);
 
