@@ -60,7 +60,7 @@
       <TextBlock Grid.Row="1" Grid.Column="0"
                  Text="Sync" ToolTip.Tip="Sync frequency with..." />
       <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="3">
-        <ToggleButton Content="SyncEnable" IsChecked="{Binding IsSyncFreq}" />
+        <ToggleButton Content="SyncEnable" IsChecked="{Binding IsSyncFreq}" IsEnabled="{Binding CanSyncFreq}"/>
         <ComboBox Items="{Binding AllLinkableBasicSignalVMs}" IsVisible="{Binding IsSyncFreq}"
                   SelectedItem="{Binding SelectedLinkableBasicSignalVM}">
           <ComboBox.ItemTemplate>

@@ -263,13 +263,27 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
          #endregion
 
-         RootSignalTree.AllLinkableBasicSignalVMs
-            .Connect()
+         var RootSignalTreeAllLinkableBasicSignalVMs =
+            RootSignalTree.AllLinkableBasicSignalVMs.Connect().Publish();
+
+         //Will not sync with self and signal that sync to another
+         RootSignalTreeAllLinkableBasicSignalVMs
             .AutoRefresh(x => x.IsSyncFreq)
-            .Filter(x => x != this && !x.IsSyncFreq)//Cannot sync with self and signal that sync with another
+            .Filter(x => x != this && !x.IsSyncFreq)
             .Bind(out allLinkableBasicSignalVMs)
             .Subscribe()
             .DisposeWith(Disposables);
+
+         //Not allow to sync if there are some signal sync to this one
+         RootSignalTreeAllLinkableBasicSignalVMs
+            .AutoRefresh(x => x.SelectedLinkableBasicSignalVM)
+            .Filter(x => x.SelectedLinkableBasicSignalVM == this)
+            .ToCollection()
+            .Select(x => x.Count == 0)
+            .ToProperty(this, nameof(CanSyncFreq), out canSyncFreq, initialValue: true)
+            .DisposeWith(Disposables);
+
+         RootSignalTreeAllLinkableBasicSignalVMs.Connect().DisposeWith(Disposables);
 
          this.WhenAnyValue(x => x.IsSyncFreq)
             .Subscribe(_ => { if (!IsSyncFreq) { SelectedLinkableBasicSignalVM = null; } })
@@ -281,9 +295,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          this.WhenAnyValue(x => x.Name, x => x.Parent.FullName)
             .Select(_ => $"{Parent.FullName}.{Name}")
-            .ToProperty(this, nameof(FullName), out fullName);
+            .ToProperty(this, nameof(FullName), out fullName)
+            .DisposeWith(Disposables);
       }
-
+      private readonly ObservableAsPropertyHelper<bool> canSyncFreq;
+      public bool CanSyncFreq => canSyncFreq.Value;
       public void AddAM() => AddAM(CreateAMVM());
       public Task AddAMFromClipboard() => AMSignalVMsSourceList.AddFromClipboard(this, AMName, Disposables);
       public void RemoveAM(BasicSignalViewModel vm) => vm.RemoveAndMaintainName(AMName, AMSignalVMsSourceList);
