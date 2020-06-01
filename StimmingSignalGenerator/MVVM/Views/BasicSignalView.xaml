@@ -73,10 +73,16 @@
           </ComboBox.ItemTemplate>
         </ComboBox>
       </StackPanel>
-      <TextBlock Grid.Row="2" Grid.Column="0"
+      <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding !IsSyncFreq}"
                  Text="Freq" ToolTip.Tip="Frequency" />
-      <v:ControlSliderView Grid.Row="2" Grid.Column="1"
-                           DataContext="{Binding FreqControlSliderViewModel}"/>
+      <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding !IsSyncFreq}">
+        <v:ControlSliderView DataContext="{Binding FreqControlSliderViewModel}"/>
+      </Grid>
+      <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding IsSyncFreq}"
+                 Text="PShift" ToolTip.Tip="Phase shift" />
+      <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding IsSyncFreq}">
+        <v:ControlSliderView DataContext="{Binding PhaseShiftControlSliderViewModel}"/>
+      </Grid>
 
       <TextBlock Grid.Row="3" Grid.Column="0"
                  Text="Vol" ToolTip.Tip="Volume" />

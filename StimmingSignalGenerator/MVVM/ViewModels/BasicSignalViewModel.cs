@@ -45,6 +45,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public Brush BGColor { get; }
       public BasicSignal BasicSignal { get; }
       public ControlSliderViewModel FreqControlSliderViewModel { get; }
+      public ControlSliderViewModel PhaseShiftControlSliderViewModel { get; }
       public ControlSliderViewModel VolControlSliderViewModel { get; }
       public ControlSliderViewModel ZCPosControlSliderViewModel { get; }
 
@@ -108,6 +109,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          var basicSignalVM = new BasicSignalViewModel(
             parent,
             ControlSliderViewModel.FromPOCO(poco.Frequency),
+            // default for backward compatibility with version0.2 save file 
+            ControlSliderViewModel.FromPOCOorDefault(poco.PhaseShift, ControlSliderViewModel.Vol(0)),
             ControlSliderViewModel.FromPOCO(poco.Volume),
             ControlSliderViewModel.FromPOCO(poco.ZeroCrossingPosition))
          {
@@ -140,20 +143,22 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public BasicSignalViewModel(ISignalTree parent)
          : this(parent, ControlSliderViewModel.BasicSignalFreq)
-      {
-      }
+      { }
       public BasicSignalViewModel(ISignalTree parent,
          ControlSliderViewModel freqControlSliderViewModel)
          : this(parent, freqControlSliderViewModel, ControlSliderViewModel.BasicVol)
-      {
-      }
+      { }
       public BasicSignalViewModel(ISignalTree parent,
          ControlSliderViewModel freqControlSliderViewModel,
          ControlSliderViewModel volControlSliderViewModel)
-         : this(parent, freqControlSliderViewModel, volControlSliderViewModel, ControlSliderViewModel.Vol(0.5)) { }
+         : this(parent,
+              freqControlSliderViewModel, ControlSliderViewModel.Vol(0),
+              volControlSliderViewModel, ControlSliderViewModel.Vol(0.5))
+      { }
 
       public BasicSignalViewModel(ISignalTree parent,
          ControlSliderViewModel freqControlSliderViewModel,
+         ControlSliderViewModel phaseShiftControlSliderViewModel,
          ControlSliderViewModel volControlSliderViewModel,
          ControlSliderViewModel zcPosControlSliderViewModel
          )
@@ -164,6 +169,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          SignalType = BasicSignalType.Sin;
 
          FreqControlSliderViewModel = freqControlSliderViewModel;
+         PhaseShiftControlSliderViewModel = phaseShiftControlSliderViewModel;
          VolControlSliderViewModel = volControlSliderViewModel;
          ZCPosControlSliderViewModel = zcPosControlSliderViewModel;
 
@@ -268,7 +274,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          this.WhenAnyValue(x => x.IsSyncFreq)
             .Subscribe(_ => { if (!IsSyncFreq) { SelectedLinkableBasicSignalVM = null; } })
             .DisposeWith(Disposables);
-         
+         this.WhenAnyValue(x => x.SelectedLinkableBasicSignalVM)
+            .Where(x => x == null)
+            .Subscribe(_ => IsSyncFreq = false)
+            .DisposeWith(Disposables);
+
          this.WhenAnyValue(x => x.Name, x => x.Parent.FullName)
             .Select(_ => $"{Parent.FullName}.{Name}")
             .ToProperty(this, nameof(FullName), out fullName);

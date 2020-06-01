@@ -50,6 +50,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco)
          => new ControlSliderViewModel().SetToPOCO(poco);
+      public static ControlSliderViewModel FromPOCOorDefault(
+         POCOs.ControlSlider poco, ControlSliderViewModel defaultVm)
+      {
+         if (poco == null) return defaultVm;
+         return new ControlSliderViewModel().SetToPOCO(poco);
+      }
+
       public ControlSliderViewModel SetToPOCO(POCOs.ControlSlider poco)
       {
          MinValue = poco.Min;
