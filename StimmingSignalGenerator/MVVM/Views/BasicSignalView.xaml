@@ -32,9 +32,9 @@
     <!-- Header -->
     <Expander.Header>
       <StackPanel Orientation="Horizontal" Spacing="5">
-        <TextBlock Text="{Binding Name}" />
+        <TextBlock Text="{Binding FullName}" />
         <TextBlock Text="{Binding SignalType}" />
-        <TextBlock Text="{Binding Frequency, StringFormat={}F:{0:N2}}" />
+        <TextBlock Text="{Binding Frequency, StringFormat={}F:{0:N2}Hz}" />
         <TextBlock Text="{Binding Volume, StringFormat={}V:{0:P1}}" />
         <TextBlock Text="{Binding ZeroCrossingPosition, StringFormat={}ZCP:{0:P1}}" />
       </StackPanel>
@@ -66,8 +66,8 @@
           <ComboBox.ItemTemplate>
             <DataTemplate>
               <StackPanel Orientation="Horizontal" Spacing="5">
-                <TextBlock Text="{Binding Name}"/>
-                <TextBlock Text="{Binding Frequency, StringFormat={}F:{0:N2}}"/>
+                <TextBlock Text="{Binding FullName}"/>
+                <TextBlock Text="{Binding Frequency, StringFormat={}F:{0:N2}Hz}"/>
               </StackPanel>
             </DataTemplate>
           </ComboBox.ItemTemplate>

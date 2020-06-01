@@ -32,10 +32,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return new TrackViewModel { Name = "Track1", GeneratorMode = generatorModeType };
       }
    }
-   public class TrackViewModel : ViewModelBase, INamable, ISignalTree
+   public class TrackViewModel : ViewModelBase, ISignalTree
    {
       public AppState AppState { get; }
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
+      public string FullName => fullName.Value;
       public bool IsPlaying { get => isPlaying; set => this.RaiseAndSetIfChanged(ref isPlaying, value); }
       public bool IsSelected { get => isSelected; set => this.RaiseAndSetIfChanged(ref isSelected, value); }
       public float Progress { get => progress; set => this.RaiseAndSetIfChanged(ref progress, value); }
@@ -81,6 +82,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private float progress;
       private double timeSpanSecond = 0;
       private ReplaySubject<Unit> initCompleteSignal = new ReplaySubject<Unit>();
+      private readonly ObservableAsPropertyHelper<string> fullName;
       public static TrackViewModel FromPOCO(POCOs.Track poco)
       {
          var vm = new TrackViewModel();
@@ -117,6 +119,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             TimeSpanSecond = TimeSpanSecond
          };
       }
+      
       public TrackViewModel()
       {
          AppState = Locator.Current.GetService<AppState>();
@@ -124,6 +127,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          sample = new SwitchingModeSampleProvider();
 
          VolVMs = new List<ControlSliderViewModel>();
+
+         this.WhenAnyValue(x => x.Name)
+            .ToProperty(this, nameof(FullName), out fullName);
 
          MultiSignalVMsSourceList =
             new SourceList<MultiSignalViewModel>()
@@ -156,31 +162,31 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                new MultiSignalViewModel(this) });
 
          var GeneratorModeChangedDisposable = new CompositeDisposable().DisposeWith(Disposables);
-         
-            Observable.Merge(
-               //MultiSignalVMsSourceList.CountChanged.Where(x => x > 0).Select(x => Unit.Default),
-               this.WhenAnyValue(x => x.GeneratorMode).Select(x => Unit.Default),
-               initCompleteSignal.Amb(Observable.Timer(TimeSpan.FromMilliseconds(100)).Select(x => Unit.Default))
-               )
-               //.DelaySubscription(TimeSpan.FromMilliseconds(100),RxApp.TaskpoolScheduler)
-               .ObserveOn(RxApp.MainThreadScheduler)
-               .Subscribe(_ =>
-               {
-                  sample.GeneratorMode = GeneratorMode;
-                  // clean and switch mode
-                  AllSubBasicSignalVMsSourceList.Clear();
-                  GeneratorModeChangedDisposable.Dispose();
-                  GeneratorModeChangedDisposable = new CompositeDisposable().DisposeWith(Disposables);
 
-                  // resub to new mode
-                  this.ObservableBasicSignalViewModelsAdded
-                     .Subscribe(x => AllSubBasicSignalVMsSourceList.Add(x))
-                     .DisposeWith(GeneratorModeChangedDisposable);
-                  this.ObservableBasicSignalViewModelsRemoved
-                     .Subscribe(x => AllSubBasicSignalVMsSourceList.Remove(x))
-                     .DisposeWith(GeneratorModeChangedDisposable);
-               })
-               .DisposeWith(Disposables);
+         Observable.Merge(
+            //MultiSignalVMsSourceList.CountChanged.Where(x => x > 0).Select(x => Unit.Default),
+            this.WhenAnyValue(x => x.GeneratorMode).Select(x => Unit.Default),
+            initCompleteSignal.Amb(Observable.Timer(TimeSpan.FromMilliseconds(100)).Select(x => Unit.Default))
+            )
+            //.DelaySubscription(TimeSpan.FromMilliseconds(100),RxApp.TaskpoolScheduler)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(_ =>
+            {
+               sample.GeneratorMode = GeneratorMode;
+               // clean and switch mode
+               AllSubBasicSignalVMsSourceList.Clear();
+               GeneratorModeChangedDisposable.Dispose();
+               GeneratorModeChangedDisposable = new CompositeDisposable().DisposeWith(Disposables);
+
+               // resub to new mode
+               this.ObservableBasicSignalViewModelsAdded
+               .Subscribe(x => AllSubBasicSignalVMsSourceList.Add(x))
+               .DisposeWith(GeneratorModeChangedDisposable);
+               this.ObservableBasicSignalViewModelsRemoved
+                  .Subscribe(x => AllSubBasicSignalVMsSourceList.Remove(x))
+                  .DisposeWith(GeneratorModeChangedDisposable);
+            })
+            .DisposeWith(Disposables);
 
          this.WhenAnyValue(x => x.IsPlaying)
             .Subscribe(_ => { if (!IsPlaying) Progress = 0; })
@@ -194,7 +200,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          VolVMs[2].WhenAnyValue(vm => vm.Value)
             .Subscribe(m => sample.StereoVolume = (float)m)
             .DisposeWith(Disposables);
-
       }
       public IObservableList<BasicSignalViewModel> AllLinkableBasicSignalVMs
          => AllSubBasicSignalVMsSourceList.AsObservableList();

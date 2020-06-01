@@ -176,19 +176,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public void AddNewTrack()
       {
-         TrackVMsSourceList.Add(
-            new TrackViewModel().SetName(TrackVMName, TrackVMsSourceList)
-            .DisposeWith(Disposables)
-         );
+         var vm = new TrackViewModel().DisposeWith(Disposables);
+         vm.AddAndSetName(TrackVMName, TrackVMsSourceList);
       }
-      public async Task AddTrackFromClipboard()
-      {
-         var vm = await TrackViewModel.PasteFromClipboard().DisposeWith(Disposables);
-         if (vm == null) return;
-         TrackVMsSourceList.Add(
-            vm.SetName(TrackVMName, TrackVMsSourceList).DisposeWith(Disposables)
-         );
-      }
+      public Task AddTrackFromClipboard() => TrackVMsSourceList.AddFromClipboard(TrackVMName, Disposables);
 
       private const string TrackVMName = "Track";
       public void RemoveTrack(TrackViewModel trackVM)

@@ -38,9 +38,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       }
    }
    public class BasicSignalViewModel : ViewModelBase,
-      INamable, ISignalTree, IDeepSourceList<BasicSignalViewModel>
+      ISignalTree, IDeepSourceList<BasicSignalViewModel>
    {
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
+      public string FullName => fullName.Value;
       public Brush BGColor { get; }
       public BasicSignal BasicSignal { get; }
       public ControlSliderViewModel FreqControlSliderViewModel { get; }
@@ -70,6 +71,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReadOnlyObservableCollection<BasicSignalViewModel> AllLinkableBasicSignalVMs => allLinkableBasicSignalVMs;
 
       private string name = "BasicSignal";
+      private readonly ObservableAsPropertyHelper<string> fullName;
       private BasicSignalType signalType;
       private double frequency;
       private double volume;
@@ -159,11 +161,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          Parent = parent ?? throw new ArgumentNullException(nameof(parent));
          BGColor = GetRandomBrush();
          BasicSignal = new BasicSignal();
+         SignalType = BasicSignalType.Sin;
 
          FreqControlSliderViewModel = freqControlSliderViewModel;
          VolControlSliderViewModel = volControlSliderViewModel;
          ZCPosControlSliderViewModel = zcPosControlSliderViewModel;
 
+         #region Prop bind
          FreqControlSliderViewModel
             .ObservableForProperty(x => x.Value, skipInitial: false)
             .Subscribe(x => Frequency = x.Value)
@@ -201,9 +205,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                BasicSignal.ZeroCrossingPosition = ZeroCrossingPosition;
             })
             .DisposeWith(Disposables);
+         #endregion
 
-         SignalType = BasicSignalType.Sin;
-
+         #region SourceList
          AMSignalVMsSourceList = new SourceList<BasicSignalViewModel>().DisposeWith(Disposables);
          AMSignalVMsSourceList.Connect()
             .OnItemAdded(vm => BasicSignal.AddAMSignal(vm.BasicSignal))
@@ -229,25 +233,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Bind(out fmSignalVMs)
             .Subscribe()
             .DisposeWith(Disposables);
-         this.WhenAnyValue(x => x.Name)
-            .Subscribe(_ =>
-            {
-               //Update name 
-               foreach (var am in AMSignalVMsSourceList.Items)
-               {
-                  am.SetName(AMName, AMSignalVMsSourceList);
-               }
-               foreach (var fm in FMSignalVMsSourceList.Items)
-               {
-                  fm.SetName(FMName, FMSignalVMsSourceList);
-               }
-            })
-            .DisposeWith(Disposables);
+         #endregion
 
          DeepSourceListTracker =
             new DeepSourceListTracker<BasicSignalViewModel>(AMSignalVMsSourceList, FMSignalVMsSourceList)
             .DisposeWith(Disposables);
 
+         #region Init IsExpanded
          // HACK Expander IsExpanded is set somewhere from internal avalonia uncontrollable
          this.WhenAnyValue(x => x.IsAMExpanded)
             .ObserveOn(RxApp.TaskpoolScheduler)
@@ -256,7 +248,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .SubscribeOn(RxApp.MainThreadScheduler)
             .Subscribe(_ => IsAMExpanded = AMSignalVMs.Count > 0)
             .DisposeWith(Disposables);
-
          this.WhenAnyValue(x => x.IsFMExpanded)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Sample(TimeSpan.FromMilliseconds(30), RxApp.TaskpoolScheduler)
@@ -264,6 +255,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .SubscribeOn(RxApp.MainThreadScheduler)
             .Subscribe(_ => IsFMExpanded = FMSignalVMs.Count > 0)
             .DisposeWith(Disposables);
+         #endregion
 
          RootSignalTree.AllLinkableBasicSignalVMs
             .Connect()
@@ -276,34 +268,28 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          this.WhenAnyValue(x => x.IsSyncFreq)
             .Subscribe(_ => { if (!IsSyncFreq) { SelectedLinkableBasicSignalVM = null; } })
             .DisposeWith(Disposables);
+         
+         this.WhenAnyValue(x => x.Name, x => x.Parent.FullName)
+            .Select(_ => $"{Parent.FullName}.{Name}")
+            .ToProperty(this, nameof(FullName), out fullName);
       }
 
       public void AddAM() => AddAM(CreateAMVM());
-      public Task AddAMFromClipboard() => AMSignalVMsSourceList.AddFromClipboard(this, AMName);
-      public void RemoveAM(BasicSignalViewModel vm) => AMSignalVMsSourceList.Remove(vm);
-      private void AddAM(BasicSignalViewModel vm)
-      {
-         AMSignalVMsSourceList.Add(vm);
-      }
-
+      public Task AddAMFromClipboard() => AMSignalVMsSourceList.AddFromClipboard(this, AMName, Disposables);
+      public void RemoveAM(BasicSignalViewModel vm) => vm.RemoveAndMaintainName(AMName, AMSignalVMsSourceList);
+      private void AddAM(BasicSignalViewModel vm) => vm.AddAndSetName(AMName, AMSignalVMsSourceList);
 
       public void AddFM() => AddFM(CreateFMVM());
-      public Task AddFMFromClipboard() => FMSignalVMsSourceList.AddFromClipboard(this, FMName);
-      public void RemoveFM(BasicSignalViewModel vm) => FMSignalVMsSourceList.Remove(vm);
-      private void AddFM(BasicSignalViewModel vm)
-      {
-         FMSignalVMsSourceList.Add(vm);
-      }
+      public Task AddFMFromClipboard() => FMSignalVMsSourceList.AddFromClipboard(this, FMName, Disposables);
+      public void RemoveFM(BasicSignalViewModel vm) => vm.RemoveAndMaintainName(FMName, FMSignalVMsSourceList);
+      private void AddFM(BasicSignalViewModel vm) => vm.AddAndSetName(FMName, FMSignalVMsSourceList);
 
-      private static string GetAMName(string name) => $"{name}.AMSignal";
-      private static string GetFMName(string name) => $"{name}.FMSignal";
-      private string AMName => GetAMName(Name);
-      private string FMName => GetFMName(Name);
+      private const string AMName = "AMSignal";
+      private const string FMName = "FMSignal";
       private BasicSignalViewModel CreateAMVM() =>
          new BasicSignalViewModel(this,
             ControlSliderViewModel.ModulationSignalFreq)
          { Volume = 0 }
-         .SetName(AMName, AMSignalVMsSourceList)
          .DisposeWith(Disposables);
 
       private BasicSignalViewModel CreateFMVM() =>
@@ -311,7 +297,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             ControlSliderViewModel.ModulationSignalFreq,
             new ControlSliderViewModel(0, 0, 100, 1, 1, 5))
          { Volume = 0 }
-         .SetName(FMName, FMSignalVMsSourceList)
          .DisposeWith(Disposables);
 
       public async Task CopyToClipboard()

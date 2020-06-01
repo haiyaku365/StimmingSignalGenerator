@@ -32,6 +32,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    public class MultiSignalViewModel : ViewModelBase, ISignalTree
    {
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
+      public string FullName => fullName.Value;
       public ControlSliderViewModel VolControlSliderViewModel { get; }
       public double Volume { get => volume; set { this.RaiseAndSetIfChanged(ref volume, value); } }
       public ReadOnlyObservableCollection<BasicSignalViewModel> BasicSignalVMs => basicSignalVMs;
@@ -43,8 +44,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsRemoved =>
             DeepSourceListTracker.ObservableItemRemoved;
 
-
       private string name = "MultiSignals";
+      private readonly ObservableAsPropertyHelper<string> fullName;
       private double volume;
       private DeepSourceListTracker<BasicSignalViewModel> DeepSourceListTracker { get; }
       private SourceList<BasicSignalViewModel> BasicSignalVMsSourceList { get; }
@@ -114,31 +115,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
 
          this.WhenAnyValue(x => x.Name)
-            .Subscribe(_ =>
-            {
-               //Update name 
-               foreach (var signalVM in BasicSignalVMsSourceList.Items)
-               {
-                  signalVM.SetName(BasicSignalVMName, BasicSignalVMsSourceList);
-               }
-            })
-            .DisposeWith(Disposables);
-
+            .ToProperty(this, nameof(FullName), out fullName);
       }
-
+      
       public void Add() => AddVM(CreateVM());
-      public Task AddFromClipboard() => BasicSignalVMsSourceList.AddFromClipboard(this, BasicSignalVMName);
-      public void Remove(BasicSignalViewModel vm) => BasicSignalVMsSourceList.Remove(vm);
-      private void AddVM(BasicSignalViewModel vm)
-      {
-         BasicSignalVMsSourceList.Add(vm);
-      }
+      public Task AddFromClipboard() => BasicSignalVMsSourceList.AddFromClipboard(this, BasicSignalVMName, Disposables);
+      public void Remove(BasicSignalViewModel vm) => vm.RemoveAndMaintainName(BasicSignalVMName, BasicSignalVMsSourceList);
+      private void AddVM(BasicSignalViewModel vm) => vm.AddAndSetName(BasicSignalVMName, BasicSignalVMsSourceList);
 
-      private static string GetBasicSignalVMName(string name) => $"{name}.Signal";
-      private string BasicSignalVMName => GetBasicSignalVMName(Name);
+      private const string BasicSignalVMName = "Signal";
       private BasicSignalViewModel CreateVM(double volume = 0) =>
          new BasicSignalViewModel(this) { Volume = volume }
-         .SetName(BasicSignalVMName, BasicSignalVMsSourceList)
          .DisposeWith(Disposables);
    }
 }
