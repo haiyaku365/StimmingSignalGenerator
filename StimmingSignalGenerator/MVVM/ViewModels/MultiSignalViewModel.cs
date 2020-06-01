@@ -44,7 +44,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsRemoved =>
             DeepSourceListTracker.ObservableItemRemoved;
 
-      private string name = Constants.ViewModelName.MonoMultiSignalName;
+      private string name = string.Empty;
       private readonly ObservableAsPropertyHelper<string> fullName;
       private double volume;
       private DeepSourceListTracker<BasicSignalViewModel> DeepSourceListTracker { get; }

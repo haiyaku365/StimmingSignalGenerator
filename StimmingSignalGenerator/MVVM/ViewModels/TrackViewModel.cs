@@ -66,17 +66,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             _ => throw new NotImplementedException()
          };
 
-      public ReadOnlyObservableCollection<BasicSignalViewModel> AllSubBasicSignalVMs => allSubBasicSignalVMs;
+      public IObservableList<BasicSignalViewModel> AllSubBasicSignalVMs
+         => AllSubBasicSignalVMsSourceList.AsObservableList();
       public ISignalTree Parent => null;
       public ISampleProvider FinalSample => sample;
 
       private SourceList<MultiSignalViewModel> MultiSignalVMsSourceList { get; }
       private readonly ReadOnlyObservableCollection<MultiSignalViewModel> multiSignalVMs;
       private SourceList<BasicSignalViewModel> AllSubBasicSignalVMsSourceList { get; }
-      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> allSubBasicSignalVMs;
       private readonly SwitchingModeSampleProvider sample;
       private GeneratorModeType generatorMode;
-      private string name;
+      private string name = string.Empty;
       private bool isPlaying;
       private bool isSelected;
       private float progress;
@@ -119,7 +119,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             TimeSpanSecond = TimeSpanSecond
          };
       }
-      
+
       public TrackViewModel()
       {
          AppState = Locator.Current.GetService<AppState>();
@@ -142,11 +142,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          AllSubBasicSignalVMsSourceList =
             new SourceList<BasicSignalViewModel>()
-            .DisposeWith(Disposables);
-         AllSubBasicSignalVMsSourceList.Connect()
-            .ObserveOn(RxApp.MainThreadScheduler) // Make sure this is only right before the Bind()
-            .Bind(out allSubBasicSignalVMs)
-            .Subscribe()
             .DisposeWith(Disposables);
 
          SetupVolumeControlSlider(
@@ -201,8 +196,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe(m => sample.StereoVolume = (float)m)
             .DisposeWith(Disposables);
       }
-      public IObservableList<BasicSignalViewModel> AllLinkableBasicSignalVMs
-         => AllSubBasicSignalVMsSourceList.AsObservableList();
 
       private void SetupSwitchingModeSignal(MultiSignalViewModel[] multiSignalVMs)
       {

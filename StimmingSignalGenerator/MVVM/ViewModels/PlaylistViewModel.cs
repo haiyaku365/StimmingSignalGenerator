@@ -66,7 +66,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private TrackViewModel playingTrackVM;
       private TrackViewModel autoplayingTrackVM;
       private bool isAutoTrackChanging;
-      private string name;
+      private string name = string.Empty;
       private readonly TimingSwitchSampleProvider timingSwitchSampleProvider;
       private readonly SwitchingSampleProvider switchingSampleProvider;
       private readonly VolumeSampleProvider volumeSampleProvider;

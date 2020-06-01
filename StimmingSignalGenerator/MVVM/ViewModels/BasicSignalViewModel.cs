@@ -69,9 +69,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public BasicSignalViewModel SelectedLinkableBasicSignalVM { get => selectedLinkableBasicSignalVM; set => this.RaiseAndSetIfChanged(ref selectedLinkableBasicSignalVM, value); }
       public bool IsSyncFreq { get => isSyncFreq; set => this.RaiseAndSetIfChanged(ref isSyncFreq, value); }
+      public bool CanSyncFreq => canSyncFreq.Value;
       public ReadOnlyObservableCollection<BasicSignalViewModel> AllLinkableBasicSignalVMs => allLinkableBasicSignalVMs;
 
-      private string name = Constants.ViewModelName.BasicSignalVMName;
+      private string name = string.Empty;
       private readonly ObservableAsPropertyHelper<string> fullName;
       private BasicSignalType signalType;
       private double frequency;
@@ -102,6 +103,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private readonly ReadOnlyObservableCollection<BasicSignalViewModel> allLinkableBasicSignalVMs;
       private BasicSignalViewModel selectedLinkableBasicSignalVM;
       private bool isSyncFreq;
+      private readonly ObservableAsPropertyHelper<bool> canSyncFreq;
       private TrackViewModel rootSignalTree;
 
       public static BasicSignalViewModel FromPOCO(POCOs.BasicSignal poco, ISignalTree parent)
@@ -116,6 +118,26 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             SignalType = poco.Type
          };
+
+         //init freq sync
+         if (!string.IsNullOrWhiteSpace(poco.FrequencySyncFrom))
+         {
+            basicSignalVM.RootSignalTree.AllSubBasicSignalVMs
+               .Connect()
+               .Filter(x => x.Name == poco.FrequencySyncFrom)
+               .Take(1)
+               .ToCollection()
+               // failed if not delay at all need to for ui load and get notify when set value
+               .DelaySubscription(TimeSpan.FromMilliseconds(300))
+               .Subscribe(x =>
+               {
+                  basicSignalVM.IsSyncFreq = true;
+                  basicSignalVM.SelectedLinkableBasicSignalVM = x.First();
+               },
+               //cancel in 1 min if not find any
+               token: new System.Threading.CancellationTokenSource(TimeSpan.FromMinutes(1)).Token
+               );
+         }
 
          foreach (var am in poco.AMSignals)
          {
@@ -135,10 +157,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             Type = BasicSignal.Type,
             Frequency = FreqControlSliderViewModel.ToPOCO(),
+            PhaseShift = PhaseShiftControlSliderViewModel.ToPOCO(),
             Volume = VolControlSliderViewModel.ToPOCO(),
             ZeroCrossingPosition = ZCPosControlSliderViewModel.ToPOCO(),
             AMSignals = AMSignalVMs.Select(x => x.ToPOCO()).ToList(),
-            FMSignals = FMSignalVMs.Select(x => x.ToPOCO()).ToList()
+            FMSignals = FMSignalVMs.Select(x => x.ToPOCO()).ToList(),
+            FrequencySyncFrom = SelectedLinkableBasicSignalVM?.Name
          };
 
       public BasicSignalViewModel(ISignalTree parent)
@@ -263,11 +287,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
          #endregion
 
-         var RootSignalTreeAllLinkableBasicSignalVMs =
-            RootSignalTree.AllLinkableBasicSignalVMs.Connect().Publish();
+         var RootSignalTreeAllSubBasicSignalVMs =
+            RootSignalTree.AllSubBasicSignalVMs.Connect().Publish();
 
          //Will not sync with self and signal that sync to another
-         RootSignalTreeAllLinkableBasicSignalVMs
+         RootSignalTreeAllSubBasicSignalVMs
             .AutoRefresh(x => x.IsSyncFreq)
             .Filter(x => x != this && !x.IsSyncFreq)
             .Bind(out allLinkableBasicSignalVMs)
@@ -275,7 +299,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
 
          //Not allow to sync if there are some signal sync to this one
-         RootSignalTreeAllLinkableBasicSignalVMs
+         RootSignalTreeAllSubBasicSignalVMs
             .AutoRefresh(x => x.SelectedLinkableBasicSignalVM)
             .Filter(x => x.SelectedLinkableBasicSignalVM == this)
             .ToCollection()
@@ -283,7 +307,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .ToProperty(this, nameof(CanSyncFreq), out canSyncFreq, initialValue: true)
             .DisposeWith(Disposables);
 
-         RootSignalTreeAllLinkableBasicSignalVMs.Connect().DisposeWith(Disposables);
+         RootSignalTreeAllSubBasicSignalVMs.Connect().DisposeWith(Disposables);
 
          this.WhenAnyValue(x => x.IsSyncFreq)
             .Subscribe(_ => { if (!IsSyncFreq) { SelectedLinkableBasicSignalVM = null; } })
@@ -298,8 +322,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .ToProperty(this, nameof(FullName), out fullName)
             .DisposeWith(Disposables);
       }
-      private readonly ObservableAsPropertyHelper<bool> canSyncFreq;
-      public bool CanSyncFreq => canSyncFreq.Value;
+
       public void AddAM() => AddAM(CreateAMVM());
       public Task AddAMFromClipboard() =>
          AMSignalVMsSourceList.AddFromClipboard(this, Constants.ViewModelName.AMName, Disposables);

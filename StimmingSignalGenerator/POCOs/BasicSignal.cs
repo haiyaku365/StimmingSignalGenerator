@@ -16,5 +16,6 @@ namespace StimmingSignalGenerator.POCOs
       public ControlSlider ZeroCrossingPosition { get; set; }
       public List<BasicSignal> AMSignals { get; set; }
       public List<BasicSignal> FMSignals { get; set; }
+      public string FrequencySyncFrom { get; set; }
    }
 }
