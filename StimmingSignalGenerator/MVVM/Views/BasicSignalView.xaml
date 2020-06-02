@@ -34,11 +34,11 @@
       <StackPanel Orientation="Horizontal" Spacing="5">
         <TextBlock Text="{Binding FullName}" />
         <TextBlock Text="{Binding SignalType}" />
-        <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}" 
+        <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}"
                    Text="{Binding Frequency, StringFormat={}F:{0:N2}Hz}"/>
-        <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}" 
+        <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}"
                    Text="{Binding SelectedLinkableBasicSignalVM.Frequency, StringFormat={}F:{0:N2}Hz}" />
-        <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}" 
+        <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}"
                    Text="{Binding PhaseShift, StringFormat={}PS:{0:P1}}" />
         <TextBlock Text="{Binding Volume, StringFormat={}V:{0:P1}}" />
         <TextBlock Text="{Binding ZeroCrossingPosition, StringFormat={}ZCP:{0:P1}}" />
@@ -46,59 +46,69 @@
     </Expander.Header>
 
     <!-- Content -->
-    <Grid Grid.IsSharedSizeScope="True">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="35" />
-        <ColumnDefinition />
-      </Grid.ColumnDefinitions>
+    <Grid>
       <Grid.RowDefinitions>
         <RowDefinition />
         <RowDefinition />
-        <RowDefinition />
-        <RowDefinition />
-        <RowDefinition />
-        <RowDefinition />
       </Grid.RowDefinitions>
-      <ComboBox Grid.Row="0" Grid.Column="1"
-                Items="{Binding Source={helper:EnumBindingSource {x:Type p:BasicSignalType}}}"
-                SelectedItem="{Binding SignalType}"/>
-      <TextBlock Grid.Row="1" Grid.Column="0"
-                 Text="Sync" ToolTip.Tip="Sync frequency with..." />
-      <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="3">
-        <ToggleButton Content="SyncEnable" IsChecked="{Binding IsSyncFreq}" IsEnabled="{Binding CanSyncFreq}"/>
-        <ComboBox Items="{Binding AllLinkableBasicSignalVMs}" IsVisible="{Binding IsSyncFreq}"
-                  SelectedItem="{Binding SelectedLinkableBasicSignalVM}">
-          <ComboBox.ItemTemplate>
-            <DataTemplate>
-              <StackPanel Orientation="Horizontal" Spacing="5">
-                <TextBlock Text="{Binding FullName}"/>
-                <TextBlock Text="{Binding Frequency, StringFormat={}F:{0:N2}Hz}"/>
-              </StackPanel>
-            </DataTemplate>
-          </ComboBox.ItemTemplate>
-        </ComboBox>
-      </StackPanel>
-      <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}"
-                 Text="Freq" ToolTip.Tip="Frequency" />
-      <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}">
-        <v:ControlSliderView DataContext="{Binding FreqControlSliderViewModel}"/>
+      <Grid Grid.Row="0" Grid.IsSharedSizeScope="True">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="35" />
+          <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition />
+          <RowDefinition />
+          <RowDefinition />
+          <RowDefinition />
+          <RowDefinition />
+        </Grid.RowDefinitions>
+        <!-- SignalType -->
+        <ComboBox Grid.Row="0" Grid.Column="1" Margin="0 5 0 0"
+                  Items="{Binding Source={helper:EnumBindingSource {x:Type p:BasicSignalType}}}"
+                  SelectedItem="{Binding SignalType}"/>
+        <!-- Sync -->
+        <TextBlock Grid.Row="1" Grid.Column="0"
+                   Text="Sync" ToolTip.Tip="Sync frequency with..." />
+        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="3">
+          <ToggleButton Content="SyncEnable" IsChecked="{Binding IsSyncFreq}" IsEnabled="{Binding CanSyncFreq}"/>
+          <ComboBox Items="{Binding AllLinkableBasicSignalVMs}" IsVisible="{Binding IsSyncFreq}"
+                    SelectedItem="{Binding SelectedLinkableBasicSignalVM}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                  <TextBlock Text="{Binding FullName}"/>
+                  <TextBlock Text="{Binding Frequency, StringFormat={}F:{0:N2}Hz}"/>
+                </StackPanel>
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+        <!-- Freq -->
+        <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}"
+                   Text="Freq" ToolTip.Tip="Frequency" />
+        <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}">
+          <v:ControlSliderView DataContext="{Binding FreqControlSliderViewModel}"/>
+        </Grid>
+        <!-- PShift -->
+        <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}"
+                   Text="PShift" ToolTip.Tip="Phase shift" />
+        <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}">
+          <v:ControlSliderView DataContext="{Binding PhaseShiftControlSliderViewModel}"/>
+        </Grid>
+        <!-- Vol -->
+        <TextBlock Grid.Row="3" Grid.Column="0"
+                   Text="Vol" ToolTip.Tip="Volume" />
+        <v:ControlSliderView Grid.Row="3" Grid.Column="1"
+                             DataContext="{Binding VolControlSliderViewModel}"/>
+        <!-- ZCP -->
+        <TextBlock Grid.Row="4" Grid.Column="0"
+                   Text="ZCP" ToolTip.Tip="ZeroCrossingPosition" />
+        <v:ControlSliderView Grid.Row="4" Grid.Column="1"
+                             DataContext="{Binding ZCPosControlSliderViewModel}"/>
       </Grid>
-      <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}"
-                 Text="PShift" ToolTip.Tip="Phase shift" />
-      <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}">
-        <v:ControlSliderView DataContext="{Binding PhaseShiftControlSliderViewModel}"/>
-      </Grid>
-
-      <TextBlock Grid.Row="3" Grid.Column="0"
-                 Text="Vol" ToolTip.Tip="Volume" />
-      <v:ControlSliderView Grid.Row="3" Grid.Column="1"
-                           DataContext="{Binding VolControlSliderViewModel}"/>
-
-      <TextBlock Grid.Row="4" Grid.Column="0"
-                 Text="ZCP" ToolTip.Tip="ZeroCrossingPosition" />
-      <v:ControlSliderView Grid.Row="4" Grid.Column="1"
-                           DataContext="{Binding ZCPosControlSliderViewModel}"/>
-      <DockPanel Grid.Row="5" Grid.Column="1">
+      <DockPanel Grid.Row="1">
+        <!-- AM Expander -->
         <Expander DockPanel.Dock="Top" IsExpanded="{Binding IsAMExpanded}"
                   Header="{Binding AMSignalVMs.Count,StringFormat={}{0} AM Signal(s)}" >
           <DockPanel>
@@ -109,13 +119,9 @@
                   <Border BorderBrush="#3399ff" Background="{Binding BGColor}"
                           BorderThickness="1" CornerRadius="2" Margin="2">
                     <Grid>
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="30"/>
-                      </Grid.ColumnDefinitions>
-                      <v:BasicSignalView Grid.Column="0" DataContext="{Binding}"/>
-                      <Button Grid.Column="1"  Classes="Red Remove"
-                              VerticalAlignment="Top" Margin="0 3 3 0"
+                      <v:BasicSignalView DataContext="{Binding}"/>
+                      <Button Classes="Red Remove" Margin="0 3 3 0"
+                              VerticalAlignment="Top" HorizontalAlignment="Right"
                               Command="{Binding $parent[UserControl].DataContext.RemoveAM}"
                               CommandParameter="{Binding}"/>
                     </Grid>
@@ -135,6 +141,7 @@
             </Button>
           </DockPanel>
         </Expander>
+        <!-- FM Expander -->
         <Expander DockPanel.Dock="Top" IsExpanded="{Binding IsFMExpanded}"
                   Header="{Binding FMSignalVMs.Count,StringFormat={}{0} FM Signal(s)}">
           <DockPanel>
@@ -145,13 +152,9 @@
                   <Border BorderBrush="#3399ff" Background="{Binding BGColor}"
                           BorderThickness="1" CornerRadius="2" Margin="2">
                     <Grid>
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="30"/>
-                      </Grid.ColumnDefinitions>
-                      <v:BasicSignalView Grid.Column="0" DataContext="{Binding}"/>
-                      <Button Grid.Column="1" Classes="Red Remove"
-                              VerticalAlignment="Top" Margin="0 3 3 0"
+                      <v:BasicSignalView DataContext="{Binding}"/>
+                      <Button Classes="Red Remove" Margin="0 3 3 0"
+                              VerticalAlignment="Top" HorizontalAlignment="Right"
                               Command="{Binding $parent[UserControl].DataContext.RemoveFM}"
                               CommandParameter="{Binding}"/>
                     </Grid>

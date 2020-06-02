@@ -51,13 +51,9 @@
                 <Border BorderBrush="#3399ff" Background="{Binding BGColor}"
                         BorderThickness="1" CornerRadius="2" Margin="2">
                   <Grid>
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition />
-                      <ColumnDefinition Width="30"/>
-                    </Grid.ColumnDefinitions>
-                    <v:BasicSignalView Grid.Column="0" DataContext="{Binding}"/>
-                    <Button Grid.Column="1" Classes="Red Remove"
-                            VerticalAlignment="Top" Margin="0 3 3 0"
+                    <v:BasicSignalView DataContext="{Binding}"/>
+                    <Button Classes="Red Remove" Margin="0 3 3 0"
+                            VerticalAlignment="Top" HorizontalAlignment="Right"
                             Command="{Binding $parent[UserControl].DataContext.Remove}"
                             CommandParameter="{Binding}"/>
                   </Grid>
