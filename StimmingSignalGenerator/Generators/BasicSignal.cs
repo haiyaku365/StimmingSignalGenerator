@@ -304,7 +304,7 @@ namespace StimmingSignalGenerator.Generators
 
                   // Triangle Generator
 
-                  sampleValue = 2 * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
+                  sampleValue = -2 * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
                   if (sampleValue > 1)
                      sampleValue = 2 - sampleValue;
                   if (sampleValue < -1)
