@@ -73,11 +73,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             BasicSignals = BasicSignalVMs.Select(x => x.ToPOCO()).ToList()
          };
 
-      public MultiSignalViewModel(ISignalTree parent) : this(parent, new MultiSignal())
+      public MultiSignalViewModel(ISignalTree parent, bool addFirstSignal = true) : this(parent, new MultiSignal())
       {
          //init vm
-         Add();
-         basicSignalVMs.First().Volume = 1;
+         if (addFirstSignal)
+         {
+            Add();
+            basicSignalVMs.First().Volume = 1;
+         }
       }
       public MultiSignalViewModel(ISignalTree parent, MultiSignal multiSignal)
       {

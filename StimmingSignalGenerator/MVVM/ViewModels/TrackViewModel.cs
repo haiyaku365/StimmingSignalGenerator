@@ -85,7 +85,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private readonly ObservableAsPropertyHelper<string> fullName;
       public static TrackViewModel FromPOCO(POCOs.Track poco)
       {
-         var vm = new TrackViewModel();
+         var vm = new TrackViewModel(isFromPOCO: true);
          vm.name = poco.Name;
          vm.TimeSpanSecond = poco.TimeSpanSecond;
          vm.SetupVolumeControlSlider(poco.Volumes.Select(x => ControlSliderViewModel.FromPOCO(x)).ToArray());
@@ -119,8 +119,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             TimeSpanSecond = TimeSpanSecond
          };
       }
-
-      public TrackViewModel()
+      public TrackViewModel() : this(isFromPOCO: false) { }
+      private TrackViewModel(bool isFromPOCO)
       {
          AppState = Locator.Current.GetService<AppState>();
 
@@ -150,11 +150,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                ControlSliderViewModel.BasicVol,
                ControlSliderViewModel.BasicVol }
             );
+
+         // Add signal when load from POCO will confuse the sync signal loading logic
+         // name will be duplicate and it will pickup wrong object
          SetupSwitchingModeSignal(
             new[] {
-               new MultiSignalViewModel(this),
-               new MultiSignalViewModel(this),
-               new MultiSignalViewModel(this) });
+               new MultiSignalViewModel(this,addFirstSignal: !isFromPOCO),
+               new MultiSignalViewModel(this,addFirstSignal: !isFromPOCO),
+               new MultiSignalViewModel(this,addFirstSignal: !isFromPOCO) });
 
          var GeneratorModeChangedDisposable = new CompositeDisposable().DisposeWith(Disposables);
 
@@ -175,8 +178,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
                // resub to new mode
                this.ObservableBasicSignalViewModelsAdded
-               .Subscribe(x => AllSubBasicSignalVMsSourceList.Add(x))
-               .DisposeWith(GeneratorModeChangedDisposable);
+                  .Subscribe(x => AllSubBasicSignalVMsSourceList.Add(x))
+                  .DisposeWith(GeneratorModeChangedDisposable);
                this.ObservableBasicSignalViewModelsRemoved
                   .Subscribe(x => AllSubBasicSignalVMsSourceList.Remove(x))
                   .DisposeWith(GeneratorModeChangedDisposable);

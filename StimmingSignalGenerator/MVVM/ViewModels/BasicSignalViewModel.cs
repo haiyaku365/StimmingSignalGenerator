@@ -126,11 +126,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             basicSignalVM.RootSignalTree.AllSubBasicSignalVMs
                .Connect()
-               .Filter(x => x.Name == poco.FrequencySyncFrom)
+               .Filter(x => x.FullName == poco.FrequencySyncFrom)
                .Take(1)
                .ToCollection()
-               // failed if not delay at all need to for ui load and get notify when set value
-               .DelaySubscription(TimeSpan.FromMilliseconds(300))
                .Subscribe(x =>
                {
                   basicSignalVM.IsSyncFreq = true;
@@ -164,7 +162,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             ZeroCrossingPosition = ZCPosControlSliderViewModel.ToPOCO(),
             AMSignals = AMSignalVMs.Select(x => x.ToPOCO()).ToList(),
             FMSignals = FMSignalVMs.Select(x => x.ToPOCO()).ToList(),
-            FrequencySyncFrom = SelectedLinkableBasicSignalVM?.Name
+            FrequencySyncFrom = SelectedLinkableBasicSignalVM?.FullName
          };
 
       public BasicSignalViewModel(ISignalTree parent)
@@ -340,7 +338,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                   BasicSignal.Frequency = Frequency;
 
                   // reset phase shift if not sync to any signal
-                  // to avoid confusion of haveing master signal phase shifted
+                  // to avoid confusion of having master signal phase shifted
                   PhaseShift = 0; 
                }
                else
