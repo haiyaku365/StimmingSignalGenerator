@@ -40,7 +40,9 @@
                  Text="Vol" ToolTip.Tip="Volume" />
       <v:ControlSliderView Grid.Row="0" Grid.Column="1" Margin="5"
                            DataContext="{Binding VolControlSliderViewModel}"/>
-      <ScrollViewer Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" >
+      <ScrollViewer Grid.Row="1" Grid.Column="1"
+                    VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Auto">
         <DockPanel>
           <ItemsControl DockPanel.Dock="Top" Margin="2"
                         Items="{Binding BasicSignalVMs }">
@@ -67,7 +69,7 @@
           </ItemsControl>
           <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom"
                   Classes="Green" Height="30"
-                  Width="{Binding $parent.Width,Mode=OneWay}" 
+                  Width="{Binding $parent.Width,Mode=OneWay}"
                   Content="BRRRR"
                   Command="{Binding Add}">
             <Button.ContextMenu>

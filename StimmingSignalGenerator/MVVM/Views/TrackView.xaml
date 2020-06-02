@@ -53,6 +53,7 @@
         <Grid DockPanel.Dock="Top">
           <Grid.ColumnDefinitions>
             <ColumnDefinition />
+            <ColumnDefinition Width="auto"/>
             <ColumnDefinition />
           </Grid.ColumnDefinitions>
           <Border Grid.Column="0" Margin="0 0 1 0"
@@ -60,7 +61,8 @@
             <v:MultiSignalView DockPanel.Dock="Bottom" Margin="5"
                                DataContext="{Binding MultiSignalVMs[1]}"/>
           </Border>
-          <Border Grid.Column="1" Margin="1 0 0 0"
+          <GridSplitter Grid.Column="1"/>
+          <Border Grid.Column="2" Margin="1 0 0 0"
                   BorderBrush="Red" BorderThickness="1" CornerRadius="2">
             <v:MultiSignalView DockPanel.Dock="Bottom" Margin="5"
                                DataContext="{Binding MultiSignalVMs[2]}"/>
