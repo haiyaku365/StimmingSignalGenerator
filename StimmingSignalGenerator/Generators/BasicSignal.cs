@@ -291,7 +291,6 @@ namespace StimmingSignalGenerator.Generators
 
                   // Sinus Generator
                   sampleValue = currentGain * SampleSin(x, frequencyFactor, shift);
-                  CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
                case BasicSignalType.SawTooth:
@@ -299,7 +298,6 @@ namespace StimmingSignalGenerator.Generators
                   // SawTooth Generator
 
                   sampleValue = currentGain * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
-                  CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
                case BasicSignalType.Triangle:
@@ -314,7 +312,6 @@ namespace StimmingSignalGenerator.Generators
 
                   sampleValue *= currentGain;
 
-                  CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
                case BasicSignalType.Square:
@@ -325,7 +322,6 @@ namespace StimmingSignalGenerator.Generators
                      SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero) < 0 ?
                         currentGain : -currentGain;
 
-                  CalculateNextPhase(aggregateFMBuffer[sampleCount]);
                   break;
 
                case BasicSignalType.Pink:
@@ -354,6 +350,8 @@ namespace StimmingSignalGenerator.Generators
                   sampleValue = 0.0;
                   break;
             }
+            // also CalculateNextPhase when do noise to avoid out of phase when sync with another signal
+            CalculateNextPhase(aggregateFMBuffer[sampleCount]);
             CalculateNextGain();
             // Phase Reverse, Gain Per Channel and AM signal
             for (int i = 0; i < WaveFormat.Channels; i++)
