@@ -13,7 +13,7 @@ namespace StimmingSignalGenerator.Generators
 
       public SwitchingSampleProvider()
       {
-         WaveFormat = Constants.DefaultStereoWaveFormat;
+         WaveFormat = Constants.Wave.DefaultStereoWaveFormat;
       }
 
       public int Read(float[] buffer, int offset, int count)

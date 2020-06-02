@@ -25,7 +25,7 @@ namespace StimmingSignalGenerator.Generators
 
       public MultiSignal()
       {
-         WaveFormat = Constants.DefaultMonoWaveFormat;
+         WaveFormat = Constants.Wave.DefaultMonoWaveFormat;
 
          mixingSampleProvider = new MixingSampleProvider(WaveFormat);
          sources = new List<BasicSignal>();

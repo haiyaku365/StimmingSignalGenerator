@@ -5,6 +5,7 @@ using ReactiveUI;
 using StimmingSignalGenerator.Generators;
 using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.MVVM.UiHelper;
+using StimmingSignalGenerator.MVVM.ViewModels.Interface;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,41 +20,52 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    public class DesignMultiSignalViewModel : DesignViewModelBase
    {
-      public static MultiSignalViewModel Data => new MultiSignalViewModel();
+      public static MultiSignalViewModel Data
+      {
+         get
+         {
+            var track = new TrackViewModel();
+            return track.MultiSignalVMs[0];
+         }
+      }
    }
-   public class MultiSignalViewModel : ViewModelBase, IDisposable
+   public class MultiSignalViewModel : ViewModelBase, ISignalTree
    {
-      private string name = "MultiSignal";
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
+      public string FullName => fullName.Value;
       public ControlSliderViewModel VolControlSliderViewModel { get; }
-      public ReactiveCommand<Unit, Unit> AddCommand { get; }
-      public ReactiveCommand<Unit, Unit> AddFromClipboardCommand { get; }
-      public ReactiveCommand<BasicSignalViewModel, Unit> RemoveCommand { get; }
-
-      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> basicSignalVMs;
+      public double Volume { get => volume; set { this.RaiseAndSetIfChanged(ref volume, value); } }
       public ReadOnlyObservableCollection<BasicSignalViewModel> BasicSignalVMs => basicSignalVMs;
-      private SourceList<BasicSignalViewModel> BasicSignalVMsSourceList { get; }
       public ISampleProvider SampleSignal => multiSignal;
 
-      private readonly MultiSignal multiSignal;
+      public ISignalTree Parent { get; }
+      public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsAdded =>
+            DeepSourceListTracker.ObservableItemAdded;
+      public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsRemoved =>
+            DeepSourceListTracker.ObservableItemRemoved;
 
-      public static MultiSignalViewModel FromPOCO(POCOs.MultiSignal poco)
+      private string name = string.Empty;
+      private readonly ObservableAsPropertyHelper<string> fullName;
+      private double volume;
+      private DeepSourceListTracker<BasicSignalViewModel> DeepSourceListTracker { get; }
+      private SourceList<BasicSignalViewModel> BasicSignalVMsSourceList { get; }
+      private readonly ReadOnlyObservableCollection<BasicSignalViewModel> basicSignalVMs;
+      private readonly MultiSignal multiSignal;
+      public static MultiSignalViewModel FromPOCO(POCOs.MultiSignal poco, ISignalTree parent)
       {
-         var multiSignalVM = new MultiSignalViewModel(new MultiSignal());
+         var multiSignalVM = new MultiSignalViewModel(parent, new MultiSignal());
          multiSignalVM.VolControlSliderViewModel.MinValue = poco.Volume.Min;
          multiSignalVM.VolControlSliderViewModel.MaxValue = poco.Volume.Max;
          multiSignalVM.VolControlSliderViewModel.Value = poco.Volume.Value;
 
          foreach (var signal in poco.BasicSignals)
          {
-            multiSignalVM.BasicSignalVMsSourceList.Add(
-               BasicSignalViewModel.FromPOCO(signal)
-                  .SetName(BasicSignalVMName, multiSignalVM.BasicSignalVMsSourceList)
+            multiSignalVM.AddVM(
+               BasicSignalViewModel.FromPOCO(signal, multiSignalVM)
             );
          }
          return multiSignalVM;
       }
-
       public POCOs.MultiSignal ToPOCO() =>
          new POCOs.MultiSignal()
          {
@@ -61,14 +73,15 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             BasicSignals = BasicSignalVMs.Select(x => x.ToPOCO()).ToList()
          };
 
-      public MultiSignalViewModel() : this(new MultiSignal())
+      public MultiSignalViewModel(ISignalTree parent) : this(parent, new MultiSignal())
       {
          //init vm
-         AddVM();
+         Add();
          basicSignalVMs.First().Volume = 1;
       }
-      public MultiSignalViewModel(MultiSignal multiSignal)
+      public MultiSignalViewModel(ISignalTree parent, MultiSignal multiSignal)
       {
+         Parent = parent ?? throw new ArgumentNullException(nameof(parent));
          BasicSignalVMsSourceList = new SourceList<BasicSignalViewModel>().DisposeWith(Disposables);
          this.multiSignal = multiSignal;
 
@@ -84,79 +97,37 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe()
             .DisposeWith(Disposables);
 
-         AddCommand = ReactiveCommand
-            .Create(AddVM)
-            .DisposeWith(Disposables);
-         AddFromClipboardCommand = ReactiveCommand
-            .CreateFromTask(AddVMFromClipboard)
-            .DisposeWith(Disposables);
-         RemoveCommand = ReactiveCommand
-            .Create<BasicSignalViewModel>(RemoveVM)
+         DeepSourceListTracker =
+            new DeepSourceListTracker<BasicSignalViewModel>(BasicSignalVMsSourceList)
             .DisposeWith(Disposables);
 
-         VolControlSliderViewModel = ControlSliderViewModel.BasicVol;
+         VolControlSliderViewModel = ControlSliderViewModel.BasicVol.DisposeWith(Disposables);
          VolControlSliderViewModel
             .ObservableForProperty(x => x.Value, skipInitial: false)
             .Subscribe(x => Volume = x.Value)
             .DisposeWith(Disposables);
-      }
-
-      public double Volume
-      {
-         get => VolControlSliderViewModel.Value;
-         set
-         {
-            if (multiSignal.Gain == value) return;
-            this.RaisePropertyChanging(nameof(Volume));
-            VolControlSliderViewModel.Value = value;
-            multiSignal.Gain = value;
-            this.RaisePropertyChanged(nameof(Volume));
-         }
-      }
-
-      private void AddVM() => BasicSignalVMsSourceList.Add(CreateVM());
-      private Task AddVMFromClipboard() => BasicSignalVMsSourceList.AddFromClipboard(BasicSignalVMName);
-      public void RemoveVM(BasicSignalViewModel vm)
-      {
-         BasicSignalVMsSourceList.Remove(vm);
-      }
-
-      private const string BasicSignalVMName = "Signal";
-      private BasicSignalViewModel CreateVM(double volume = 0) =>
-            new BasicSignalViewModel { Volume = volume }
-            .SetName(BasicSignalVMName, BasicSignalVMsSourceList)
-         .DisposeWith(Disposables);
-
-      private CompositeDisposable Disposables { get; } = new CompositeDisposable();
-      private bool disposedValue;
-      protected virtual void Dispose(bool disposing)
-      {
-         if (!disposedValue)
-         {
-            if (disposing)
+         this.ObservableForProperty(x => x.Volume, skipInitial: false)
+            .Subscribe(_ =>
             {
-               // dispose managed state (managed objects)
-               Disposables?.Dispose();
-            }
+               VolControlSliderViewModel.Value = Volume;
+               multiSignal.Gain = Volume;
+            })
+            .DisposeWith(Disposables);
 
-            // free unmanaged resources (unmanaged objects) and override finalizer
-            // set large fields to null
-            disposedValue = true;
-         }
+         this.WhenAnyValue(x => x.Name)
+            .ToProperty(this, nameof(FullName), out fullName);
       }
 
-      // // override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-      // ~PlotSampleViewModel()
-      // {
-      //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-      //     Dispose(disposing: false);
-      // }
+      public void Add() => AddVM(CreateVM());
+      public Task AddFromClipboard() =>
+         BasicSignalVMsSourceList.AddFromClipboard(this, Constants.ViewModelName.BasicSignalVMName, Disposables);
+      public void Remove(BasicSignalViewModel vm) =>
+         vm.RemoveAndMaintainName(Constants.ViewModelName.BasicSignalVMName, BasicSignalVMsSourceList);
+      private void AddVM(BasicSignalViewModel vm) =>
+         vm.AddAndSetName(Constants.ViewModelName.BasicSignalVMName, BasicSignalVMsSourceList);
 
-      public void Dispose()
-      {
-         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-         Dispose(disposing: true);
-         GC.SuppressFinalize(this);
-      }
+      private BasicSignalViewModel CreateVM(double volume = 0) =>
+         new BasicSignalViewModel(this) { Volume = volume }
+         .DisposeWith(Disposables);
    }
 }

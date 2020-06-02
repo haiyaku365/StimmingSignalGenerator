@@ -59,14 +59,15 @@ namespace StimmingSignalGenerator.FileService
             return poco;
          }
       }
-      private const string PlaylistNamePrefix = "Playlist";
-      private static readonly Regex defaultFileRegex = new Regex(@$"(?:{PlaylistNamePrefix})(\d*)(?:.json)$");
+      
+      private static readonly Regex defaultFileRegex = 
+         new Regex(@$"(?:{Constants.File.PlaylistNamePrefix})(\d*)(?:.json)$");
       private static string GetNextFileName()
       {
          int maxNum =
                Directory.EnumerateFiles(PlaylistPath).DefaultIfEmpty("0")
                   .Max(x => int.TryParse(defaultFileRegex.Match(x).Groups[1].Value, out int num) ? num : 0);
-         return $"{PlaylistNamePrefix}{maxNum + 1}.json";
+         return $"{Constants.File.PlaylistNamePrefix}{maxNum + 1}.json";
       }
 
       private static readonly List<FileDialogFilter> fileDialogFilters =
@@ -91,7 +92,8 @@ namespace StimmingSignalGenerator.FileService
 
       private static void CreatePlaylistDir() => Directory.CreateDirectory(PlaylistPath);
 
-      private const string PlaylistDirectoryName = "Playlists";
-      private static string PlaylistPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PlaylistDirectoryName);
+      
+      private static string PlaylistPath => 
+         Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Constants.File.PlaylistDirectoryName);
    }
 }

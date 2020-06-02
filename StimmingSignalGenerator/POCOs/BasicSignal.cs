@@ -11,9 +11,11 @@ namespace StimmingSignalGenerator.POCOs
    {
       public BasicSignalType Type { get; set; }
       public ControlSlider Frequency { get; set; }
+      public ControlSlider PhaseShift { get; set; }
       public ControlSlider Volume { get; set; }
       public ControlSlider ZeroCrossingPosition { get; set; }
       public List<BasicSignal> AMSignals { get; set; }
       public List<BasicSignal> FMSignals { get; set; }
+      public string FrequencySyncFrom { get; set; }
    }
 }

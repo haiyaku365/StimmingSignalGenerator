@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels.Interface
 {
-   interface INamable
+   public interface INamable
    {
       string Name { get; set; }
    }

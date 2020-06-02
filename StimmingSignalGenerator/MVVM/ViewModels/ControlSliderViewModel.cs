@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -32,22 +33,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    public class ControlSliderViewModel : ViewModelBase
    {
       public double Value { get => _value; set => this.RaiseAndSetIfChanged(ref _value, Math.Round(value, 4)); }
-      public double MinValue
-      {
-         get => minValue; set
-         {
-            this.RaiseAndSetIfChanged(ref minValue, Math.Round(value, 4));
-            AdjustStepChange();
-         }
-      }
-      public double MaxValue
-      {
-         get => maxValue; set
-         {
-            this.RaiseAndSetIfChanged(ref maxValue, Math.Round(value, 4));
-            AdjustStepChange();
-         }
-      }
+      public double MinValue { get => minValue; set { this.RaiseAndSetIfChanged(ref minValue, Math.Round(value, 4)); } }
+      public double MaxValue { get => maxValue; set { this.RaiseAndSetIfChanged(ref maxValue, Math.Round(value, 4)); } }
       public double TickFrequency { get => tickFrequency; set => this.RaiseAndSetIfChanged(ref tickFrequency, value); }
       public double SmallChange { get => smallChange; set => this.RaiseAndSetIfChanged(ref smallChange, value); }
       public double LargeChange { get => largeChange; set => this.RaiseAndSetIfChanged(ref largeChange, value); }
@@ -60,6 +47,30 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public const string TextFormat = "{0:N0}";
       public const string SmallTickTextFormat = "{0:N2}";
       public const string SuperSmallTickTextFormat = "{0:N3}";
+
+      public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco)
+         => new ControlSliderViewModel().SetToPOCO(poco);
+      public static ControlSliderViewModel FromPOCOorDefault(
+         POCOs.ControlSlider poco, ControlSliderViewModel defaultVm)
+      {
+         if (poco == null) return defaultVm;
+         return new ControlSliderViewModel().SetToPOCO(poco);
+      }
+
+      public ControlSliderViewModel SetToPOCO(POCOs.ControlSlider poco)
+      {
+         MinValue = poco.Min;
+         MaxValue = poco.Max;
+         Value = poco.Value;
+         return this;
+      }
+      public POCOs.ControlSlider ToPOCO() =>
+         new POCOs.ControlSlider()
+         {
+            Min = MinValue,
+            Max = MaxValue,
+            Value = Value
+         };
       public static ControlSliderViewModel BasicSignalFreq =>
          new ControlSliderViewModel(440, BasicSignalFreqMin, 8000, Tick, Tick, Tick);
       public static ControlSliderViewModel ModulationSignalFreq =>
@@ -76,6 +87,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          TickFrequency = tickFrequency;
          SmallChange = smallChange;
          LargeChange = largeChange;
+
+         this.WhenAnyValue(x => x.MinValue, x => x.MaxValue)
+            .Subscribe(_ => AdjustStepChange())
+            .DisposeWith(Disposables);
       }
 
       private double _value;
@@ -98,7 +113,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             TickFrequency = SmallChange = LargeChange = SmallTick;
             NumericUpDownTextFormat = SmallTickTextFormat;
-
          }
          else
          {
@@ -127,23 +141,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             return;
          }
+         catch (Exception) { throw; }
       }
-
-      public static ControlSliderViewModel FromPOCO(POCOs.ControlSlider poco)
-         => new ControlSliderViewModel().SetToPOCO(poco);
-      public ControlSliderViewModel SetToPOCO(POCOs.ControlSlider poco)
-      {
-         MinValue = poco.Min;
-         MaxValue = poco.Max;
-         Value = poco.Value;
-         return this;
-      }
-      public POCOs.ControlSlider ToPOCO() =>
-         new POCOs.ControlSlider()
-         {
-            Min = MinValue,
-            Max = MaxValue,
-            Value = Value
-         };
    }
 }

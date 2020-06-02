@@ -26,7 +26,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          var plotVM = new PlotSampleViewModel(plotSignal);
          plotVM.IsPlotEnable = true;
 
-         var count = Constants.DefaultSampleRate / 8 * signal.WaveFormat.Channels;
+         var count = Constants.Wave.DefaultSampleRate / 8 * signal.WaveFormat.Channels;
          float[] buffer = Array.Empty<float>();
          buffer = BufferHelpers.Ensure(buffer, count);
          plotVM.SampleSignal.Read(buffer, 0, count);
@@ -34,7 +34,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return plotVM;
       }
    }
-   public class PlotSampleViewModel : ViewModelBase, IDisposable
+   public class PlotSampleViewModel : ViewModelBase
    {
       public PlotModel PlotModel { get; }
       public bool IsPlotEnable { get => isPlotEnable; set => this.RaiseAndSetIfChanged(ref isPlotEnable, value); }
@@ -55,38 +55,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          this.ObservableForProperty(x => x.IsHighDefinition)
             .Subscribe(x => plotSampleProvider.IsHighDefinition = x.Value)
             .DisposeWith(Disposables);
-      }
-
-      private CompositeDisposable Disposables { get; } = new CompositeDisposable();
-      private bool disposedValue;
-      protected virtual void Dispose(bool disposing)
-      {
-         if (!disposedValue)
-         {
-            if (disposing)
-            {
-               // dispose managed state (managed objects)
-               Disposables?.Dispose();
-            }
-
-            // free unmanaged resources (unmanaged objects) and override finalizer
-            // set large fields to null
-            disposedValue = true;
-         }
-      }
-
-      // // override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-      // ~PlotSampleViewModel()
-      // {
-      //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-      //     Dispose(disposing: false);
-      // }
-
-      public void Dispose()
-      {
-         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-         Dispose(disposing: true);
-         GC.SuppressFinalize(this);
       }
    }
 }

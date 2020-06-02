@@ -28,7 +28,7 @@ namespace StimmingSignalGenerator.Generators
 
       public TimingSwitchSampleProvider()
       {
-         WaveFormat = Constants.DefaultStereoWaveFormat;
+         WaveFormat = Constants.Wave.DefaultStereoWaveFormat;
          timeSpanSampleProviders = new List<TimeSpanSampleProvider>();
       }
 
