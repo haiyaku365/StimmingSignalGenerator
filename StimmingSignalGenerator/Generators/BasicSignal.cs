@@ -63,19 +63,32 @@ namespace StimmingSignalGenerator.Generators
       /// </summary>
       public double Frequency
       {
-         get => targetPhaseStep;
+         get => TargetPhaseStep;
          set
          {
-            targetPhaseStep = value;
-            seekFrequency = true;
+            TargetPhaseStep = value;
+            SeekFrequency = true;
          }
       }
 
-      private bool seekFrequency;
-      private double targetPhaseStep;
-      private double currentPhaseStep;
-      private double phaseStepDelta;
-      private double phase;
+      /// <summary>
+      /// Phase shift (0.0 to 1.0)
+      /// </summary>
+      public double PhaseShift { get; set; }
+      public void SetFrequencyAndPhaseTo(BasicSignal basicSignal)
+      {
+         SeekFrequency = basicSignal.SeekFrequency;
+         TargetPhaseStep = basicSignal.TargetPhaseStep;
+         CurrentPhaseStep = basicSignal.CurrentPhaseStep;
+         PhaseStepDelta = basicSignal.PhaseStepDelta;
+         Phase = basicSignal.Phase;
+      }
+
+      public bool SeekFrequency { get; private set; }
+      public double TargetPhaseStep { get; private set; }
+      public double CurrentPhaseStep { get; private set; }
+      public double PhaseStepDelta { get; private set; }
+      public double Phase { get; private set; }
       private double Period => WaveFormat.SampleRate;
       /// <summary>
       /// Position when signal cross zero default 0.5 (0.0 to 1.0)
@@ -88,7 +101,7 @@ namespace StimmingSignalGenerator.Generators
       /// </summary>
       public double FrequencyLog => Math.Log(Frequency);
 
-      List<BasicSignal> FMSignals;
+      readonly List<BasicSignal> FMSignals;
       float[] fmBuffer;
       float[] aggregateFMBuffer;
 
@@ -119,7 +132,7 @@ namespace StimmingSignalGenerator.Generators
       /// </summary>
       public double GainStepDelta { get => gainStepDelta; }
 
-      List<BasicSignal> AMSignals;
+      readonly List<BasicSignal> AMSignals;
       float[] amBuffer;
       float[] aggregateAMBuffer;
 
@@ -192,10 +205,10 @@ namespace StimmingSignalGenerator.Generators
             seekGain = false;
          }
          // Calc frequencyStepDelta
-         if (seekFrequency) // process frequency change only once per call to Read
+         if (SeekFrequency) // process frequency change only once per call to Read
          {
-            phaseStepDelta = (targetPhaseStep - currentPhaseStep) / countPerChannel;
-            seekFrequency = false;
+            PhaseStepDelta = (TargetPhaseStep - CurrentPhaseStep) / countPerChannel;
+            SeekFrequency = false;
          }
 
          aggregateAMBuffer = BufferHelpers.Ensure(aggregateAMBuffer, count);
@@ -248,6 +261,7 @@ namespace StimmingSignalGenerator.Generators
                buffer[i] = 0;
 
             //prevent out of phase when mixing multi signal
+            //TODO Remove this, dont need it if frequency can be linked
             for (int i = 0; i < countPerChannel; i++)
                CalculateNextPhase(aggregateAMBuffer[i]);
 
@@ -258,7 +272,7 @@ namespace StimmingSignalGenerator.Generators
          for (int sampleCount = 0; sampleCount < countPerChannel; sampleCount++)
          {
             //calculate common variable
-            x = phase % Period;
+            x = Phase % Period;
 
             bool isBeforeCrossingZero = 0 <= x && x < zeroCrossingPoint;
             //bool isAfterCrossingZero = zeroCrossingPoint <= x && x < period;
@@ -365,16 +379,16 @@ namespace StimmingSignalGenerator.Generators
       private void CalculateNextPhase(float fmValue)
       {
          // move to next phase and apply FM
-         phase += currentPhaseStep + fmValue;
-         if (phase > Period) phase -= Period;
-         if (currentPhaseStep != targetPhaseStep)
+         Phase += CurrentPhaseStep + fmValue;
+         if (Phase > Period) Phase -= Period;
+         if (CurrentPhaseStep != TargetPhaseStep)
          {
             //calculate currentPhaseStep
-            currentPhaseStep += phaseStepDelta;
+            CurrentPhaseStep += PhaseStepDelta;
             //correct if value exceed target
-            if (phaseStepDelta > 0 && currentPhaseStep > targetPhaseStep ||
-                phaseStepDelta < 0 && currentPhaseStep < targetPhaseStep)
-               currentPhaseStep = targetPhaseStep;
+            if (PhaseStepDelta > 0 && CurrentPhaseStep > TargetPhaseStep ||
+                PhaseStepDelta < 0 && CurrentPhaseStep < TargetPhaseStep)
+               CurrentPhaseStep = TargetPhaseStep;
          }
       }
 

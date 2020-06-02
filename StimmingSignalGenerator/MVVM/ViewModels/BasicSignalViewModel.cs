@@ -51,6 +51,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public BasicSignalType SignalType { get => signalType; set { this.RaiseAndSetIfChanged(ref signalType, value); } }
       public double Frequency { get => frequency; set { this.RaiseAndSetIfChanged(ref frequency, value); } }
+      public double PhaseShift { get => phaseShift; set { this.RaiseAndSetIfChanged(ref phaseShift, value); } }
       public double Volume { get => volume; set { this.RaiseAndSetIfChanged(ref volume, value); } }
       public double ZeroCrossingPosition { get => zeroCrossingPosition; set { this.RaiseAndSetIfChanged(ref zeroCrossingPosition, value); } }
 
@@ -76,6 +77,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private readonly ObservableAsPropertyHelper<string> fullName;
       private BasicSignalType signalType;
       private double frequency;
+      private double phaseShift;
       private double volume;
       private double zeroCrossingPosition;
       private bool isExpanded;
@@ -198,9 +200,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          ZCPosControlSliderViewModel = zcPosControlSliderViewModel;
 
          #region Prop bind
+         // bind control slider to prop
          FreqControlSliderViewModel
             .ObservableForProperty(x => x.Value, skipInitial: false)
             .Subscribe(x => Frequency = x.Value)
+            .DisposeWith(Disposables);
+         PhaseShiftControlSliderViewModel
+            .ObservableForProperty(x => x.Value, skipInitial: false)
+            .Subscribe(x => PhaseShift = x.Value)
             .DisposeWith(Disposables);
          VolControlSliderViewModel
             .ObservableForProperty(x => x.Value, skipInitial: false)
@@ -211,6 +218,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe(x => ZeroCrossingPosition = x.Value)
             .DisposeWith(Disposables);
 
+         // bind prop to control slider and generator
          this.ObservableForProperty(x => x.SignalType, skipInitial: false)
             .Subscribe(_ => BasicSignal.Type = SignalType)
             .DisposeWith(Disposables);
@@ -219,6 +227,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             {
                FreqControlSliderViewModel.Value = Frequency;
                BasicSignal.Frequency = Frequency;
+            })
+            .DisposeWith(Disposables);
+         this.ObservableForProperty(x => x.PhaseShift, skipInitial: false)
+            .Subscribe(_ =>
+            {
+               PhaseShiftControlSliderViewModel.Value = PhaseShift;
+               BasicSignal.PhaseShift = PhaseShift;
             })
             .DisposeWith(Disposables);
          this.ObservableForProperty(x => x.Volume, skipInitial: false)
@@ -312,9 +327,23 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          this.WhenAnyValue(x => x.IsSyncFreq)
             .Subscribe(_ => { if (!IsSyncFreq) { SelectedLinkableBasicSignalVM = null; } })
             .DisposeWith(Disposables);
-         this.WhenAnyValue(x => x.SelectedLinkableBasicSignalVM)
-            .Where(x => x == null)
-            .Subscribe(_ => IsSyncFreq = false)
+
+         this.WhenAnyValue(
+               property1: x => x.SelectedLinkableBasicSignalVM,
+               property2: x => x.SelectedLinkableBasicSignalVM.Frequency)
+            .Subscribe(x =>
+            {
+               var (vm, f) = x;
+               if (vm == null)
+               {
+                  IsSyncFreq = false;
+                  BasicSignal.Frequency = Frequency;
+               }
+               else
+               {
+                  BasicSignal.SetFrequencyAndPhaseTo(SelectedLinkableBasicSignalVM.BasicSignal);
+               }
+            })
             .DisposeWith(Disposables);
 
          this.WhenAnyValue(x => x.Name, x => x.Parent.FullName)

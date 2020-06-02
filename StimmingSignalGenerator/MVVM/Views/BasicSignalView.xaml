@@ -34,7 +34,10 @@
       <StackPanel Orientation="Horizontal" Spacing="5">
         <TextBlock Text="{Binding FullName}" />
         <TextBlock Text="{Binding SignalType}" />
-        <TextBlock Text="{Binding Frequency, StringFormat={}F:{0:N2}Hz}" />
+        <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}" 
+                   Text="{Binding Frequency, StringFormat={}F:{0:N2}Hz}"/>
+        <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}" 
+                   Text="{Binding SelectedLinkableBasicSignalVM.Frequency, StringFormat={}F:{0:N2}Hz}" />
         <TextBlock Text="{Binding Volume, StringFormat={}V:{0:P1}}" />
         <TextBlock Text="{Binding ZeroCrossingPosition, StringFormat={}ZCP:{0:P1}}" />
       </StackPanel>
@@ -73,14 +76,14 @@
           </ComboBox.ItemTemplate>
         </ComboBox>
       </StackPanel>
-      <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding !IsSyncFreq}"
+      <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}"
                  Text="Freq" ToolTip.Tip="Frequency" />
-      <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding !IsSyncFreq}">
+      <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}">
         <v:ControlSliderView DataContext="{Binding FreqControlSliderViewModel}"/>
       </Grid>
-      <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding IsSyncFreq}"
+      <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}"
                  Text="PShift" ToolTip.Tip="Phase shift" />
-      <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding IsSyncFreq}">
+      <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}">
         <v:ControlSliderView DataContext="{Binding PhaseShiftControlSliderViewModel}"/>
       </Grid>
 
