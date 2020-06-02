@@ -38,6 +38,8 @@
                    Text="{Binding Frequency, StringFormat={}F:{0:N2}Hz}"/>
         <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}" 
                    Text="{Binding SelectedLinkableBasicSignalVM.Frequency, StringFormat={}F:{0:N2}Hz}" />
+        <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}" 
+                   Text="{Binding PhaseShift, StringFormat={}PS:{0:P1}}" />
         <TextBlock Text="{Binding Volume, StringFormat={}V:{0:P1}}" />
         <TextBlock Text="{Binding ZeroCrossingPosition, StringFormat={}ZCP:{0:P1}}" />
       </StackPanel>

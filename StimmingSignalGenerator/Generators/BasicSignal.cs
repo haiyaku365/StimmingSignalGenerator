@@ -257,13 +257,11 @@ namespace StimmingSignalGenerator.Generators
          //skip calc if gain is 0
          if (Gain == 0)
          {
-            for (int i = 0; i < count; i++)
-               buffer[i] = 0;
+            Array.Fill(buffer, 0, offset, count);
 
             //prevent out of phase when mixing multi signal
-            //TODO Remove this, dont need it if frequency can be linked
             for (int i = 0; i < countPerChannel; i++)
-               CalculateNextPhase(aggregateAMBuffer[i]);
+               CalculateNextPhase(aggregateFMBuffer[i]);
 
             return count;
          }
@@ -272,7 +270,7 @@ namespace StimmingSignalGenerator.Generators
          for (int sampleCount = 0; sampleCount < countPerChannel; sampleCount++)
          {
             //calculate common variable
-            x = Phase % Period;
+            x = (Phase + (PhaseShift * Period)) % Period;
 
             bool isBeforeCrossingZero = 0 <= x && x < zeroCrossingPoint;
             //bool isAfterCrossingZero = zeroCrossingPoint <= x && x < period;

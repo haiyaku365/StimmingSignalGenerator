@@ -338,6 +338,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                {
                   IsSyncFreq = false;
                   BasicSignal.Frequency = Frequency;
+
+                  // reset phase shift if not sync to any signal
+                  // to avoid confusion of haveing master signal phase shifted
+                  PhaseShift = 0; 
                }
                else
                {
@@ -345,7 +349,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                }
             })
             .DisposeWith(Disposables);
-
+         
          this.WhenAnyValue(x => x.Name, x => x.Parent.FullName)
             .Select(_ => $"{Parent.FullName}.{Name}")
             .ToProperty(this, nameof(FullName), out fullName)
