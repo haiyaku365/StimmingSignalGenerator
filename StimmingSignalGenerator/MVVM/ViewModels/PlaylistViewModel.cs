@@ -29,6 +29,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             PrepareAppState();
             var vm = new PlaylistViewModel();
             vm.Name = "Design playlist";
+            vm.Note = "Design playlist Note: \r\n" +
+               "zH4uUAnv2tejBdAcKf5gyqjGSsd43vdgAfjW5bVC \r\n" +
+               "PycwQb596YrnhUgxPtfKM6hEKka6zuYrjC9Rjx37 \r\n" +
+               "5wbWfWNgJkyatkfS5vvruUgjzx4UpM5Su2qsAHev \r\n" +
+               "QJTYJjgXnVz2XaP2wHDTw9GPVeW5mYCnr2rKzn8z \r\n" +
+               "67jDcN8fYD6zVsCRsAe33BSHfGdDUdQq6S8N3jvU \r\n" +
+               "4yrkcYsjBy7bVDzAEw2DJm4vvAa8CUZskg9YbNcC \r\n" +
+               "m9ryr5XRzuQtTVSAqXkwdUd4Cyn7R6aBs4Z5MNVX \r\n";
             vm.AddNewTrack();
             vm.AddNewTrack();
             vm.AddNewTrack();
@@ -49,6 +57,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    public class PlaylistViewModel : ViewModelBase
    {
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
+      public string Note { get => note; set => this.RaiseAndSetIfChanged(ref note, value); }
       public ReadOnlyObservableCollection<TrackViewModel> TrackVMs => trackVMs;
       public ControlSliderViewModel MasterVolVM { get; }
       public TrackViewModel SelectedTrackVM { get => selectedTrackVM; set => this.RaiseAndSetIfChanged(ref selectedTrackVM, value); }
@@ -57,6 +66,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       /// </summary>
       public TrackViewModel PlayingTrackVM { get => playingTrackVM; set => this.RaiseAndSetIfChanged(ref playingTrackVM, value); }
       public bool IsTimingMode { get => isTimingMode; set => this.RaiseAndSetIfChanged(ref isTimingMode, value); }
+      public bool IsNoteMode { get => isNoteMode; set => this.RaiseAndSetIfChanged(ref isNoteMode, value); }
       public ISampleProvider FinalSample => volumeSampleProvider;
       public AppState AppState { get; }
 
@@ -66,7 +76,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private TrackViewModel playingTrackVM;
       private TrackViewModel autoplayingTrackVM;
       private bool isTimingMode;
+      private bool isNoteMode;
       private string name = string.Empty;
+      private string note;
       private readonly TimingSwitchSampleProvider timingSwitchSampleProvider;
       private readonly SwitchingSampleProvider switchingSampleProvider;
       private readonly VolumeSampleProvider volumeSampleProvider;
@@ -192,6 +204,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return new POCOs.Playlist
          {
             Name = Name,
+            Note = Note,
             Tracks = TrackVMsSourceList.Items.Select(x => x.ToPOCO()).ToList()
          };
       }
@@ -205,6 +218,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          TrackVMsSourceList.Clear();
          //Load to vm
          Name = poco.Name;
+         Note = poco.Note;
          for (int i = 0; i < poco.Tracks.Count; i++)
          {
             var trackVM = TrackViewModel.FromPOCO(poco.Tracks[i]).DisposeWith(Disposables);

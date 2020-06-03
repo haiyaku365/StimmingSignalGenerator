@@ -33,14 +33,18 @@
           </ContextMenu>
         </Button.ContextMenu>
       </Button>
+
+      <!-- Tools -->
       <StackPanel DockPanel.Dock="Top" Margin="0 0 0 2" Spacing="5" Orientation="Horizontal">
         <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
         <Button Content="Save" Command="{Binding SaveAsync}" />
         <Button Content="Load" Command="{Binding LoadAsync}" />
       </StackPanel>
-      <ToggleButton DockPanel.Dock="Top"
-                    Content="Timing Mode"
-                    IsChecked="{Binding IsTimingMode}" />
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5">
+        <ToggleButton Content="Note" IsChecked="{Binding IsNoteMode}"/>
+        <ToggleButton Content="Timing mode" IsChecked="{Binding IsTimingMode}" />
+      </StackPanel>
+      <!-- Track List -->
       <ListBox DockPanel.Dock="Top" Margin="0 2" Name="TrackList"
                Items="{ Binding TrackVMs }" SelectedItem="{Binding SelectedTrackVM}"
                SelectionMode="Single" Grid.IsSharedSizeScope="True">
@@ -100,7 +104,14 @@
         </ListBox.ItemTemplate>
       </ListBox>
     </DockPanel>
-    <ItemsControl Grid.Column="1" Grid.Row="1" Items="{ Binding TrackVMs }">
+    <!-- Note -->
+    <TextBox Grid.Column="1" Grid.Row="1" IsVisible="{Binding IsNoteMode}"
+             FontSize="18" Background="#fef1dc"
+             Text="{Binding Note}"
+             AcceptsTab="True" AcceptsReturn="True" />
+    <!-- Track -->
+    <ItemsControl Grid.Column="1" Grid.Row="1" IsVisible="{Binding !IsNoteMode}"
+                  Items="{Binding TrackVMs}" >
       <ItemsControl.ItemTemplate>
         <DataTemplate>
           <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="2"

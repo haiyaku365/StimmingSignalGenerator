@@ -11,6 +11,7 @@ namespace StimmingSignalGenerator.POCOs
    public class Playlist
    {
       [JsonIgnore] public string Name { get; set; }
+      public string Note { get; set; }
       public List<Track> Tracks { get; set; }
    }
 }
