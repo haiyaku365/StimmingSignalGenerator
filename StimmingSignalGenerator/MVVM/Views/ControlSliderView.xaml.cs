@@ -14,6 +14,7 @@ using System.Reactive.Linq;
 using Avalonia.Interactivity;
 using System.Reactive;
 using Avalonia.Input;
+using StimmingSignalGenerator.MVVM.UiHelper;
 
 namespace StimmingSignalGenerator.MVVM.Views
 {
@@ -60,11 +61,11 @@ namespace StimmingSignalGenerator.MVVM.Views
             foreach (var (numericUpDown, setVmValue, getVmValue) in NumericUpDownToVmBinder)
             {
                //set value when spin number
-               ObserveSpinned(numericUpDown)
+               numericUpDown.ObservableSpinned()
                   .Subscribe(_ => setVmValue(numericUpDown.Value))
                   .DisposeWith(disposables);
                //set value when hit enter cancel when hit esc
-               ObserveKeyDown(numericUpDown)
+               numericUpDown.ObservableKeyDown()
                   .Subscribe(x =>
                   {
                      if (x.EventArgs.Key == Key.Enter)
@@ -78,25 +79,14 @@ namespace StimmingSignalGenerator.MVVM.Views
                   })
                   .DisposeWith(disposables);
                //set value when lost focus
-               ObserveLostFocus(numericUpDown)
+               numericUpDown.ObservableLostFocus()
                   .Subscribe(_ => setVmValue(numericUpDown.Value))
                   .DisposeWith(disposables);
             }
          });
          InitializeComponent();
       }
-      IObservable<EventPattern<SpinEventArgs>> ObserveSpinned(NumericUpDown numericUpDown)
-         => Observable.FromEventPattern<SpinEventArgs>(
-            h => numericUpDown.Spinned += h,
-            h => numericUpDown.Spinned -= h);
-      IObservable<EventPattern<KeyEventArgs>> ObserveKeyDown(IControl control)
-         => Observable.FromEventPattern<KeyEventArgs>(
-            h => control.KeyDown += h,
-            h => control.KeyDown -= h);
-      IObservable<EventPattern<RoutedEventArgs>> ObserveLostFocus(IControl control)
-         => Observable.FromEventPattern<RoutedEventArgs>(
-            h => control.LostFocus += h,
-            h => control.LostFocus -= h);
+      
 
       private void InitializeComponent()
       {

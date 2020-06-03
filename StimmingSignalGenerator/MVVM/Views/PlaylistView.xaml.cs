@@ -6,6 +6,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using DynamicData;
 using ReactiveUI;
+using StimmingSignalGenerator.MVVM.UiHelper;
 using StimmingSignalGenerator.MVVM.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -27,9 +28,7 @@ namespace StimmingSignalGenerator.MVVM.Views
          this.WhenActivated(disposables =>
          {
             // When new item add to TrackList
-            Observable.FromEventPattern<ItemContainerEventArgs>(
-               h => TrackList.ItemContainerGenerator.Materialized += h,
-               h => TrackList.ItemContainerGenerator.Materialized -= h)
+            TrackList.ItemContainerGenerator.ObservableMaterialized()
             .Subscribe(x =>
             {
                foreach (var container in x.EventArgs.Containers)
@@ -37,11 +36,8 @@ namespace StimmingSignalGenerator.MVVM.Views
                   var dragData = new DataObject();
                   dragData.Set(DataFormats.Text, $"{container.Index}");
                   // Each TrackList item DoDragDrop when pointer pressesd
-                  var pointerPressedDisposable =
-                     Observable.FromEventPattern<PointerPressedEventArgs>(
-                        h => container.ContainerControl.PointerPressed += h,
-                        h => container.ContainerControl.PointerPressed -= h,
-                        RxApp.MainThreadScheduler)
+                  var containerDisposables = new CompositeDisposable();
+                  container.ContainerControl.ObservablePointerPressed(RxApp.MainThreadScheduler)
                      .Subscribe(x => Observable.StartAsync(() =>
                      {
                         if (x.EventArgs.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
@@ -53,19 +49,17 @@ namespace StimmingSignalGenerator.MVVM.Views
                            x.EventArgs.Handled = false;
                            return Task.CompletedTask;
                         }
-                     }));
+                     })).DisposeWith(containerDisposables);
                   //keep disposable to dispose when item remove
                   trackControlPointerPressedDisposables.Add(
-                     (container.ContainerControl, pointerPressedDisposable)
+                     (container.ContainerControl, containerDisposables)
                   );
                }
             })
             .DisposeWith(disposables);
 
             //when item remove from TrackList
-            Observable.FromEventPattern<ItemContainerEventArgs>(
-               h => TrackList.ItemContainerGenerator.Dematerialized += h,
-                     h => TrackList.ItemContainerGenerator.Dematerialized -= h)
+            TrackList.ItemContainerGenerator.ObservableDematerialized()
                   .Subscribe(x =>
                   {
                      foreach (var container in x.EventArgs.Containers)
