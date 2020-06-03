@@ -86,7 +86,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public static TrackViewModel FromPOCO(POCOs.Track poco)
       {
          var vm = new TrackViewModel(isFromPOCO: true);
-         vm.name = poco.Name;
+         vm.Name = poco.Name;
          vm.TimeSpanSecond = poco.TimeSpanSecond;
          vm.SetupVolumeControlSlider(poco.Volumes.Select(x => ControlSliderViewModel.FromPOCO(x)).ToArray());
          vm.SetupSwitchingModeSignal(poco.MultiSignals.Select(x => MultiSignalViewModel.FromPOCO(x, vm)).ToArray());
