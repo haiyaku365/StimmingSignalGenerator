@@ -148,6 +148,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                foreach (var vm in TrackVMsSourceList.Items) { vm.IsSelected = false; }
                if (SelectedTrackVM == null) return;
                SelectedTrackVM.IsSelected = true;
+               if (IsNoteMode) IsNoteMode = false;
             })
             .DisposeWith(Disposables);
          timingSwitchSampleProvider.ObservableOnProgressChanged
