@@ -21,10 +21,11 @@
         </DataTemplate>
       </ComboBox.ItemTemplate>
     </ComboBox>
-    <StackPanel Orientation="Horizontal" Spacing="5" ToolTip.Tip="Toggle Hotkey:Ctrl+Space">
+    <StackPanel Orientation="Horizontal" Spacing="5" ToolTip.Tip="Toggle Hotkey:Ctrl+Tilde">
       <Button Content="Play" Command="{Binding PlayCommand}"/>
       <Button Content="Stop" Command="{Binding StopCommand}" />
-      <Button Content="TogglePlay" Command="{Binding TogglePlayCommand}" HotKey="Ctrl+Space" IsVisible="False" />
+      <!-- HotKey="Ctrl+Space" conflict with a lot of control it will trigger button if focus etc. -->
+      <Button Content="TogglePlay" Command="{Binding TogglePlayCommand}" HotKey="Ctrl+OemTilde" IsVisible="False" />
     </StackPanel>
 
   </StackPanel>
