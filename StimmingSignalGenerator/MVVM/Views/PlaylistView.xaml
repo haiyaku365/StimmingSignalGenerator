@@ -39,8 +39,8 @@
         <Button Content="Load" Command="{Binding LoadAsync}" />
       </StackPanel>
       <ToggleButton DockPanel.Dock="Top"
-                    Content="Auto track changing"
-                    IsChecked="{Binding IsAutoTrackChanging}" />
+                    Content="Timing Mode"
+                    IsChecked="{Binding IsTimingMode}" />
       <ListBox DockPanel.Dock="Top" Margin="0 2" Name="TrackList"
                Items="{ Binding TrackVMs }" SelectedItem="{Binding SelectedTrackVM}"
                SelectionMode="Single" Grid.IsSharedSizeScope="True">
@@ -75,11 +75,11 @@
                 <TextBlock Grid.Column="1"
                            Margin="0 0 5 0" VerticalAlignment="Center"
                            Text="{Binding Name}"/>
-                <NumericUpDown Grid.Column="3" IsVisible="{Binding $parent[UserControl].DataContext.IsAutoTrackChanging}"
+                <NumericUpDown Grid.Column="3" IsVisible="{Binding $parent[UserControl].DataContext.IsTimingMode}"
                                ToolTip.Tip="Duration (second)"
                                Increment="0.1" Minimum="0" Maximum="86400" AllowSpin="True"
                                Value="{Binding TimeSpanSecond}" FormatString="{}{0:N1}"/>
-                <Button Grid.Column="3" IsVisible="{Binding !$parent[UserControl].DataContext.IsAutoTrackChanging}"
+                <Button Grid.Column="3" IsVisible="{Binding !$parent[UserControl].DataContext.IsTimingMode}"
                         Background="Transparent" BorderThickness="0"
                         Command="{Binding $parent[UserControl].DataContext.SwitchPlayingTrack}"
                         CommandParameter="{Binding }"

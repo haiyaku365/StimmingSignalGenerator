@@ -56,7 +56,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       /// Current track that play manually
       /// </summary>
       public TrackViewModel PlayingTrackVM { get => playingTrackVM; set => this.RaiseAndSetIfChanged(ref playingTrackVM, value); }
-      public bool IsAutoTrackChanging { get => isAutoTrackChanging; set => this.RaiseAndSetIfChanged(ref isAutoTrackChanging, value); }
+      public bool IsTimingMode { get => isTimingMode; set => this.RaiseAndSetIfChanged(ref isTimingMode, value); }
       public ISampleProvider FinalSample => volumeSampleProvider;
       public AppState AppState { get; }
 
@@ -65,7 +65,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private TrackViewModel selectedTrackVM;
       private TrackViewModel playingTrackVM;
       private TrackViewModel autoplayingTrackVM;
-      private bool isAutoTrackChanging;
+      private bool isTimingMode;
       private string name = string.Empty;
       private readonly TimingSwitchSampleProvider timingSwitchSampleProvider;
       private readonly SwitchingSampleProvider switchingSampleProvider;
@@ -92,7 +92,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             })
             .OnItemRemoved(trackVM =>
             {
-               if (trackVM.IsPlaying && !IsAutoTrackChanging)
+               if (trackVM.IsPlaying && !IsTimingMode)
                   SwitchPlayingTrack(null);
                timingSwitchSampleProvider.RemoveSample(trackVM.FinalSample);
                var innerDisposable = innerDisposables.First(x => x.vm == trackVM);
@@ -115,10 +115,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe(m => volumeSampleProvider.Volume = (float)m)
             .DisposeWith(Disposables);
 
-         this.WhenAnyValue(x => x.IsAutoTrackChanging, x => x.PlayingTrackVM)
+         this.WhenAnyValue(x => x.IsTimingMode, x => x.PlayingTrackVM)
             .Subscribe(_ =>
             {
-               if (IsAutoTrackChanging)
+               if (IsTimingMode)
                {
                   switchingSampleProvider.SampleProvider = timingSwitchSampleProvider;
                   UpdateIsPlaying(autoplayingTrackVM);
