@@ -176,8 +176,26 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       /// <param name="trackVM"></param>
       public void SwitchPlayingTrack(TrackViewModel trackVM)
       {
+         if (trackVM == null) return;
          PlayingTrackVM = trackVM;
       }
+      private void SwitchPlayingTrackByIndex(int trackVmIndex) 
+         => SwitchPlayingTrack(TrackVMsSourceList.Items.ElementAtOrDefault(trackVmIndex));
+
+      // Issue CommandParameter not passing when using Hotkey 
+      // https://github.com/AvaloniaUI/Avalonia/issues/2446
+      #region Hard code workaround
+      public void SwitchPlayingTrackByIndex0() => SwitchPlayingTrackByIndex(0);
+      public void SwitchPlayingTrackByIndex1() => SwitchPlayingTrackByIndex(1);
+      public void SwitchPlayingTrackByIndex2() => SwitchPlayingTrackByIndex(2);
+      public void SwitchPlayingTrackByIndex3() => SwitchPlayingTrackByIndex(3);
+      public void SwitchPlayingTrackByIndex4() => SwitchPlayingTrackByIndex(4);
+      public void SwitchPlayingTrackByIndex5() => SwitchPlayingTrackByIndex(5);
+      public void SwitchPlayingTrackByIndex6() => SwitchPlayingTrackByIndex(6);
+      public void SwitchPlayingTrackByIndex7() => SwitchPlayingTrackByIndex(7);
+      public void SwitchPlayingTrackByIndex8() => SwitchPlayingTrackByIndex(8);
+      public void SwitchPlayingTrackByIndex9() => SwitchPlayingTrackByIndex(9);
+      #endregion 
 
       public void MoveTrack(int fromIdx, int toIdx)
       {

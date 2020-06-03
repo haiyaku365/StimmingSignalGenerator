@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              
              xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
              xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
@@ -44,6 +45,22 @@
         <ToggleButton Content="Note" IsChecked="{Binding IsNoteMode}"/>
         <ToggleButton Content="Timing mode" IsChecked="{Binding IsTimingMode}" />
       </StackPanel>
+      <!-- HotKey for play track-->
+      <Panel IsVisible="False">
+        <!-- Issue CommandParameter not passing when using Hotkey https://github.com/AvaloniaUI/Avalonia/issues/2446 -->
+        <!--<Button IsVisible="False" HotKey="Ctrl+D1" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="0" />-->
+        <Button HotKey="Ctrl+D1" Command="{Binding SwitchPlayingTrackByIndex0}" />
+        <Button HotKey="Ctrl+D2" Command="{Binding SwitchPlayingTrackByIndex1}" />
+        <Button HotKey="Ctrl+D3" Command="{Binding SwitchPlayingTrackByIndex2}" />
+        <Button HotKey="Ctrl+D4" Command="{Binding SwitchPlayingTrackByIndex3}" />
+        <Button HotKey="Ctrl+D5" Command="{Binding SwitchPlayingTrackByIndex4}" />
+        <Button HotKey="Ctrl+D6" Command="{Binding SwitchPlayingTrackByIndex5}" />
+        <Button HotKey="Ctrl+D7" Command="{Binding SwitchPlayingTrackByIndex6}" />
+        <Button HotKey="Ctrl+D8" Command="{Binding SwitchPlayingTrackByIndex7}" />
+        <Button HotKey="Ctrl+D9" Command="{Binding SwitchPlayingTrackByIndex8}" />
+        <Button HotKey="Ctrl+D0" Command="{Binding SwitchPlayingTrackByIndex9}" />
+      </Panel>
+
       <!-- Track List -->
       <ListBox DockPanel.Dock="Top" Margin="0 2" Name="TrackList"
                Items="{ Binding TrackVMs }" SelectedItem="{Binding SelectedTrackVM}"
@@ -87,7 +104,7 @@
                         Background="Transparent" BorderThickness="0"
                         Command="{Binding $parent[UserControl].DataContext.SwitchPlayingTrack}"
                         CommandParameter="{Binding }"
-                        ToolTip.Tip="Play track">
+                        ToolTip.Tip="Play track (Hotkey: Ctrl+1 to Ctrl+0)">
                   <Button.Content>
                     <Viewbox Height="24">
                       <Image Source="/Assets/Icons/play.png" />

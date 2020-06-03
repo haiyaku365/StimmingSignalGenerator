@@ -1,9 +1,5 @@
 
-//-TODO signal phase shift
-//-TODO phase, frequency lock and sync between signal
-//-TODO Play, pause shortcut key
-//TODO play track 0-9 shortcut key
-//-TODO add note section to playlist
+//TODO phase mod
 
 //-TODO Waveform visualization (OxyPlot)
 //-TODO Exp with faster way to plot or optimize oxyplot(use Decimator to reduce datapoint)
