@@ -14,7 +14,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 {
    public class DesignAudioPlayerViewModel : DesignViewModelBase
    {
-      public static AudioPlayerViewModel Data => new AudioPlayerViewModel(new BasicSignal());
+      public static AudioPlayerViewModel Data
+      {
+         get
+         {
+            PrepareAppState();
+            return new AudioPlayerViewModel(new BasicSignal());
+         }
+      }
    }
    public class AudioPlayerViewModel : ViewModelBase
    {
@@ -32,6 +39,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       }
       public ReactiveCommand<Unit, Unit> PlayCommand { get; }
       public ReactiveCommand<Unit, Unit> StopCommand { get; }
+      public ReactiveCommand<Unit, Unit> TogglePlayCommand { get; }
 
       private readonly AudioPlayer audioPlayer;
       public AppState AppState { get; }
@@ -45,6 +53,18 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
          StopCommand = ReactiveCommand.Create(() => Stop(), AppState.WhenAnyValue(x => x.IsPlaying))
             .DisposeWith(Disposables);
+         TogglePlayCommand = ReactiveCommand.Create(() =>
+         {
+            if (AppState.IsPlaying)
+            {
+               Stop();
+            }
+            else
+            {
+               Play();
+            }
+         }).DisposeWith(Disposables);
+
       }
 
       public void Play()

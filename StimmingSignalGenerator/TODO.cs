@@ -1,7 +1,7 @@
 
 //-TODO signal phase shift
 //-TODO phase, frequency lock and sync between signal
-//TODO Play, pause shortcut key
+//-TODO Play, pause shortcut key
 //TODO play track 0-9 shortcut key
 //-TODO add note section to playlist
 

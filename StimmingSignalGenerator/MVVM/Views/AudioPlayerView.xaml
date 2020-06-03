@@ -21,7 +21,11 @@
         </DataTemplate>
       </ComboBox.ItemTemplate>
     </ComboBox>
-    <Button Content="Play" Command="{Binding PlayCommand}" />
-    <Button Content="Stop" Command="{Binding StopCommand}" />
+    <StackPanel Orientation="Horizontal" Spacing="5" ToolTip.Tip="Toggle Hotkey:Ctrl+Space">
+      <Button Content="Play" Command="{Binding PlayCommand}"/>
+      <Button Content="Stop" Command="{Binding StopCommand}" />
+      <Button Content="TogglePlay" Command="{Binding TogglePlayCommand}" HotKey="Ctrl+Space" IsVisible="False" />
+    </StackPanel>
+
   </StackPanel>
 </UserControl>
