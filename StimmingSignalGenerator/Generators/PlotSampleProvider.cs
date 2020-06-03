@@ -2,7 +2,6 @@
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
-using StimmingSignalGenerator.Generators.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

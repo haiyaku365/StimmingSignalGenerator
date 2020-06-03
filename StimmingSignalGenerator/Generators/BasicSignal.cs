@@ -1,6 +1,5 @@
 ﻿using NAudio.Utils;
 using NAudio.Wave;
-using StimmingSignalGenerator.Generators.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -185,6 +184,7 @@ namespace StimmingSignalGenerator.Generators
       public int Read(float[] buffer, int offset, int count)
       {
          int outIndex = offset;
+         //TODO no need to do multi channels. Cleanup all channel logic and only provide mono.
          int countPerChannel = count / WaveFormat.Channels;
 
          // Generator current value
