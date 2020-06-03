@@ -26,26 +26,26 @@
     </Expander.Header>
 
     <!-- Content -->
-    <Grid>
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="auto" />
-        <ColumnDefinition />
-      </Grid.ColumnDefinitions>
-      <Grid.RowDefinitions>
-        <RowDefinition Height="auto"/>
-        <RowDefinition />
-      </Grid.RowDefinitions>
+    <DockPanel>
+      <!-- Vol slider -->
+      <Grid DockPanel.Dock="Top">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="auto" />
+          <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Margin="0 5"
+                   Text="Vol" ToolTip.Tip="Volume" />
+        <v:ControlSliderView Grid.Column="1" Margin="5"
+                             DataContext="{Binding VolControlSliderViewModel}"/>
+      </Grid>
 
-      <TextBlock Grid.Row="0" Grid.Column="0" Margin="0 5"
-                 Text="Vol" ToolTip.Tip="Volume" />
-      <v:ControlSliderView Grid.Row="0" Grid.Column="1" Margin="5"
-                           DataContext="{Binding VolControlSliderViewModel}"/>
-      <ScrollViewer Grid.Row="1" Grid.Column="1"
+      <!-- Collection -->
+      <ScrollViewer DockPanel.Dock="Top"
                     VerticalScrollBarVisibility="Auto"
                     HorizontalScrollBarVisibility="Auto">
         <DockPanel>
           <ItemsControl DockPanel.Dock="Top" Margin="2"
-                        Items="{Binding BasicSignalVMs }">
+                        Items="{Binding SignalsViewModel.SignalVMs }">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
                 <Border BorderBrush="#3399ff" Background="{Binding BGColor}"
@@ -54,12 +54,10 @@
                     <v:BasicSignalView DataContext="{Binding}"/>
                     <Button Classes="Red Remove" Margin="0 3 3 0"
                             VerticalAlignment="Top" HorizontalAlignment="Right"
-                            Command="{Binding $parent[UserControl].DataContext.Remove}"
+                            Command="{Binding $parent[UserControl].DataContext.SignalsViewModel.Remove}"
                             CommandParameter="{Binding}"/>
                   </Grid>
-
                 </Border>
-
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
@@ -67,17 +65,16 @@
                   Classes="Green" Height="30"
                   Width="{Binding $parent.Width,Mode=OneWay}"
                   Content="BRRRR"
-                  Command="{Binding Add}">
+                  Command="{Binding SignalsViewModel.Add}">
             <Button.ContextMenu>
               <ContextMenu>
                 <MenuItem Header="Add from clipboard" Classes="Paste"
-                          Command="{Binding AddFromClipboard}" />
+                          Command="{Binding SignalsViewModel.AddFromClipboard}" />
               </ContextMenu>
             </Button.ContextMenu>
           </Button>
-
         </DockPanel>
       </ScrollViewer>
-    </Grid>
+    </DockPanel>
   </Expander>
 </UserControl>

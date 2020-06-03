@@ -107,74 +107,10 @@
         <v:ControlSliderView Grid.Row="4" Grid.Column="1"
                              DataContext="{Binding ZCPosControlSliderViewModel}"/>
       </Grid>
+      <!-- Modulation Signal -->
       <DockPanel Grid.Row="1">
-        <!-- AM Expander -->
-        <Expander DockPanel.Dock="Top" IsExpanded="{Binding IsAMExpanded}"
-                  Header="{Binding AMSignalVMs.Count,StringFormat={}{0} AM Signal(s)}" >
-          <DockPanel>
-            <ItemsControl DockPanel.Dock="Top" Margin="2"
-                          Items="{Binding AMSignalVMs }">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                  <Border BorderBrush="#3399ff" Background="{Binding BGColor}"
-                          BorderThickness="1" CornerRadius="2" Margin="2">
-                    <Grid>
-                      <v:BasicSignalView DataContext="{Binding}"/>
-                      <Button Classes="Red Remove" Margin="0 3 3 0"
-                              VerticalAlignment="Top" HorizontalAlignment="Right"
-                              Command="{Binding $parent[UserControl].DataContext.RemoveAM}"
-                              CommandParameter="{Binding}"/>
-                    </Grid>
-                  </Border>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <Button DockPanel.Dock="Top" HorizontalAlignment="Left" Classes="Green"
-                    Width="{Binding $parent.Width,Mode=OneWay}" Height="30" Margin="2"
-                    Content="+AM" Command="{Binding AddAM}" >
-              <Button.ContextMenu>
-                <ContextMenu>
-                  <MenuItem Header="Add from clipboard" Classes="Paste"
-                            Command="{Binding AddAMFromClipboard}" />
-                </ContextMenu>
-              </Button.ContextMenu>
-            </Button>
-          </DockPanel>
-        </Expander>
-        <!-- FM Expander -->
-        <Expander DockPanel.Dock="Top" IsExpanded="{Binding IsFMExpanded}"
-                  Header="{Binding FMSignalVMs.Count,StringFormat={}{0} FM Signal(s)}">
-          <DockPanel>
-            <ItemsControl DockPanel.Dock="Top" Margin="2"
-                          Items="{Binding FMSignalVMs }">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                  <Border BorderBrush="#3399ff" Background="{Binding BGColor}"
-                          BorderThickness="1" CornerRadius="2" Margin="2">
-                    <Grid>
-                      <v:BasicSignalView DataContext="{Binding}"/>
-                      <Button Classes="Red Remove" Margin="0 3 3 0"
-                              VerticalAlignment="Top" HorizontalAlignment="Right"
-                              Command="{Binding $parent[UserControl].DataContext.RemoveFM}"
-                              CommandParameter="{Binding}"/>
-                    </Grid>
-                  </Border>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <Button DockPanel.Dock="Top" HorizontalAlignment="Left" Classes="Green"
-                        Width="{Binding $parent.Width,Mode=OneWay}" Height="30" Margin="2"
-                        Content="+FM" Command="{Binding AddFM}">
-              <Button.ContextMenu>
-                <ContextMenu>
-                  <MenuItem Header="Add from clipboard" Classes="Paste"
-                            Command="{Binding AddFMFromClipboard}"/>
-                </ContextMenu>
-              </Button.ContextMenu>
-            </Button>
-          </DockPanel>
-        </Expander>
-
+        <v:BasicSignalGroupView DockPanel.Dock="Top" DataContext="{Binding AmplitudeModulationSignalsViewModel}" />
+        <v:BasicSignalGroupView DockPanel.Dock="Top" DataContext="{Binding FrequencyModulationSignalsViewModel}" />
       </DockPanel>
     </Grid>
   </Expander>
