@@ -81,17 +81,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private bool isSelected;
       private float progress;
       private double timeSpanSecond = 0;
-      private ReplaySubject<Unit> initCompleteSignal = new ReplaySubject<Unit>();
+      private readonly ReplaySubject<Unit> initCompleteSignal = new ReplaySubject<Unit>();
       private readonly ObservableAsPropertyHelper<string> fullName;
       public static TrackViewModel FromPOCO(POCOs.Track poco)
       {
          var vm = new TrackViewModel(isFromPOCO: true);
          vm.Name = poco.Name;
          vm.TimeSpanSecond = poco.TimeSpanSecond;
+         //Init outside const because MultiSignalViewModel need to set parent.
          vm.SetupVolumeControlSlider(poco.Volumes.Select(x => ControlSliderViewModel.FromPOCO(x)).ToArray());
          vm.SetupSwitchingModeSignal(poco.MultiSignals.Select(x => MultiSignalViewModel.FromPOCO(x, vm)).ToArray());
-         vm.initCompleteSignal.OnNext(Unit.Default);
-         vm.initCompleteSignal.OnCompleted();
+         vm.SignalInitCompleted();
          return vm;
       }
       public POCOs.Track ToPOCO()
@@ -144,29 +144,26 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             new SourceList<BasicSignalViewModel>()
             .DisposeWith(Disposables);
 
-         SetupVolumeControlSlider(
-            new[] {
+         //If from POCO it will load outside const.
+         if (!isFromPOCO)
+         {
+            SetupVolumeControlSlider(
+               new[] {
                ControlSliderViewModel.BasicVol,
                ControlSliderViewModel.BasicVol,
                ControlSliderViewModel.BasicVol }
-            );
+               );
 
-         // Add signal when load from POCO will confuse the sync signal loading logic
-         // name will be duplicate and it will pickup wrong object
-         SetupSwitchingModeSignal(
-            new[] {
-               new MultiSignalViewModel(this,addFirstSignal: !isFromPOCO),
-               new MultiSignalViewModel(this,addFirstSignal: !isFromPOCO),
-               new MultiSignalViewModel(this,addFirstSignal: !isFromPOCO) });
+            SetupSwitchingModeSignal(
+               new[] {
+               new MultiSignalViewModel(this),
+               new MultiSignalViewModel(this),
+               new MultiSignalViewModel(this) });
+         }
 
          var GeneratorModeChangedDisposable = new CompositeDisposable().DisposeWith(Disposables);
-
-         Observable.Merge(
-            //MultiSignalVMsSourceList.CountChanged.Where(x => x > 0).Select(x => Unit.Default),
-            this.WhenAnyValue(x => x.GeneratorMode).Select(x => Unit.Default),
-            initCompleteSignal.Amb(Observable.Timer(TimeSpan.FromMilliseconds(100)).Select(x => Unit.Default))
-            )
-            //.DelaySubscription(TimeSpan.FromMilliseconds(100),RxApp.TaskpoolScheduler)
+         initCompleteSignal.Merge(
+         this.WhenAnyValue(x => x.GeneratorMode).Skip(1).Select(x => Unit.Default))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(_ =>
             {
@@ -190,7 +187,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe(_ => { if (!IsPlaying) Progress = 0; })
             .DisposeWith(Disposables);
 
-         initCompleteSignal.Amb(Observable.Timer(TimeSpan.FromMilliseconds(100)).Select(x => Unit.Default))
+         initCompleteSignal
             .Subscribe(_ =>
             {
                VolVMs[0].WhenAnyValue(vm => vm.Value)
@@ -203,6 +200,16 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                   .Subscribe(m => sample.StereoVolume = (float)m)
                   .DisposeWith(Disposables);
             }).DisposeWith(Disposables);
+
+         //If from POCO it will completed outside const.
+         if (!isFromPOCO) SignalInitCompleted();
+      }
+
+      private void SignalInitCompleted()
+      {
+         initCompleteSignal.OnNext(Unit.Default);
+         initCompleteSignal.OnCompleted(); 
+         initCompleteSignal.Dispose();
       }
 
       private void SetupSwitchingModeSignal(MultiSignalViewModel[] multiSignalVMs)
