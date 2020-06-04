@@ -48,6 +48,6 @@ Note that save along with playlist.
 When startup it will load first playlist file sort by file name.
 
 ### screenshot
-![Window1](v0.3.0.0_1.png)
+![Window1](v0.3.0.0_1.PNG)
 
-![Window2](v0.3.0.0_2.png)
+![Window2](v0.3.0.0_2.PNG)
