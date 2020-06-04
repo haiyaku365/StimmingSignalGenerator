@@ -26,17 +26,9 @@ namespace StimmingSignalGenerator.Generators
    /// </remarks>
    public class BasicSignal : ISampleProvider
    {
-
-      // Random Number for the White Noise & Pink Noise Generator
-      private readonly Random random = new Random();
-
-      private readonly double[] pinkNoiseBuffer = new double[7];
-
       /// <summary>
       /// Initializes a new instance for the Generator
       /// </summary>
-      /// <param name="sampleRate">Desired sample rate</param>
-      /// <param name="channel">Number of channels</param>
       public BasicSignal()
       {
          WaveFormat = Constants.Wave.DefaultMonoWaveFormat;
@@ -58,6 +50,12 @@ namespace StimmingSignalGenerator.Generators
       public WaveFormat WaveFormat { get; }
 
       /// <summary>
+      /// Type of Generator.
+      /// </summary>
+      public BasicSignalType Type { get; set; }
+
+      #region Frequency and Phase field, prop
+      /// <summary>
       /// Frequency for the Generator. (20.0 - 20000.0 Hz)
       /// Noise ignore this
       /// </summary>
@@ -70,7 +68,6 @@ namespace StimmingSignalGenerator.Generators
             SeekFrequency = true;
          }
       }
-
       /// <summary>
       /// Phase shift (0.0 to 1.0)
       /// </summary>
@@ -95,14 +92,9 @@ namespace StimmingSignalGenerator.Generators
       /// Noise ignore this
       /// </summary>
       public double ZeroCrossingPosition { get; set; }
+      #endregion
 
-      /// <summary>
-      /// Return Log of Frequency Start (Read only)
-      /// </summary>
-      public double FrequencyLog => Math.Log(Frequency);
-
-
-
+      #region Amplitude field, Prop, Method
       /// <summary>
       /// Gain for the Generator. (0.0 to 1.0)
       /// </summary>
@@ -118,23 +110,17 @@ namespace StimmingSignalGenerator.Generators
 
       private bool seekGain;
       private double targetGain;
-      private double currentGain;
-      private double gainStepDelta;
-
       /// <summary>
       /// Gain before seek to target gain.
       /// </summary>
-      public double CurrentGain { get => currentGain; }
+      public double CurrentGain { get; private set; }
       /// <summary>
       /// Gain step delta of latest read.
       /// </summary>
-      public double GainStepDelta { get => gainStepDelta; }
+      public double GainStepDelta { get; private set; }
+      #endregion
 
-      /// <summary>
-      /// Type of Generator.
-      /// </summary>
-      public BasicSignalType Type { get; set; }
-
+      #region Modulation field, Prop, Add, Remove method
       float[] modulationBuffer;
       readonly List<BasicSignal> AMSignals;
       float[] aggregateAMBuffer;
@@ -196,16 +182,19 @@ namespace StimmingSignalGenerator.Generators
             PMSignals.Remove(signal);
          }
       }
+      #endregion
+
+      #region Noise generator field, prop, method
+      // Random Number for the White Noise & Pink Noise Generator
+      private readonly Random random = new Random();
+      private readonly double[] pinkNoiseBuffer = new double[7];
+      #endregion
 
       /// <summary>
       /// Reads from this provider.
       /// </summary>
       public int Read(float[] buffer, int offset, int count)
       {
-         int outIndex = offset;
-         //TODO no need to do multi channels. Cleanup all channel logic and only provide mono.
-         int countPerChannel = count / WaveFormat.Channels;
-
          // Generator current value
          double sampleValue;
 
@@ -220,13 +209,13 @@ namespace StimmingSignalGenerator.Generators
          // Calc gainStepDelta
          if (seekGain) // process Gain change only once per call to Read
          {
-            gainStepDelta = (targetGain - currentGain) / countPerChannel;
+            GainStepDelta = (targetGain - CurrentGain) / count;
             seekGain = false;
          }
          // Calc frequencyStepDelta
          if (SeekFrequency) // process frequency change only once per call to Read
          {
-            PhaseStepDelta = (TargetPhaseStep - CurrentPhaseStep) / countPerChannel;
+            PhaseStepDelta = (TargetPhaseStep - CurrentPhaseStep) / count;
             SeekFrequency = false;
          }
 
@@ -255,7 +244,6 @@ namespace StimmingSignalGenerator.Generators
                }
             }
          }
-
 
          aggregateFMBuffer = BufferHelpers.Ensure(aggregateFMBuffer, count);
          Array.Fill(aggregateFMBuffer, 0);
@@ -294,14 +282,14 @@ namespace StimmingSignalGenerator.Generators
             Array.Fill(buffer, 0, offset, count);
 
             //prevent out of phase when mixing multi signal
-            for (int i = 0; i < countPerChannel; i++)
+            for (int i = offset; i < count; i++)
                CalculateNextPhase(aggregateFMBuffer[i]);
 
             return count;
          }
 
          // Complete Buffer
-         for (int sampleCount = 0; sampleCount < countPerChannel; sampleCount++)
+         for (int sampleCount = offset; sampleCount < count; sampleCount++)
          {
             //calculate common variable
             x = (Phase + ((PhaseShift + aggregatePMBuffer[sampleCount]) * Period)) % Period;
@@ -324,14 +312,14 @@ namespace StimmingSignalGenerator.Generators
                case BasicSignalType.Sin:
 
                   // Sinus Generator
-                  sampleValue = currentGain * SampleSin(x, frequencyFactor, shift);
+                  sampleValue = CurrentGain * SampleSin(x, frequencyFactor, shift);
                   break;
 
                case BasicSignalType.SawTooth:
 
                   // SawTooth Generator
 
-                  sampleValue = currentGain * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
+                  sampleValue = CurrentGain * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
                   break;
 
                case BasicSignalType.Triangle:
@@ -344,7 +332,7 @@ namespace StimmingSignalGenerator.Generators
                   if (sampleValue < -1)
                      sampleValue = -2 - sampleValue;
 
-                  sampleValue *= currentGain;
+                  sampleValue *= CurrentGain;
 
                   break;
 
@@ -354,7 +342,7 @@ namespace StimmingSignalGenerator.Generators
 
                   sampleValue =
                      SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero) < 0 ?
-                        currentGain : -currentGain;
+                        CurrentGain : -CurrentGain;
 
                   break;
 
@@ -362,22 +350,13 @@ namespace StimmingSignalGenerator.Generators
 
                   // Pink Noise Generator
 
-                  double white = NextRandomTwo();
-                  pinkNoiseBuffer[0] = 0.99886 * pinkNoiseBuffer[0] + white * 0.0555179;
-                  pinkNoiseBuffer[1] = 0.99332 * pinkNoiseBuffer[1] + white * 0.0750759;
-                  pinkNoiseBuffer[2] = 0.96900 * pinkNoiseBuffer[2] + white * 0.1538520;
-                  pinkNoiseBuffer[3] = 0.86650 * pinkNoiseBuffer[3] + white * 0.3104856;
-                  pinkNoiseBuffer[4] = 0.55000 * pinkNoiseBuffer[4] + white * 0.5329522;
-                  pinkNoiseBuffer[5] = -0.7616 * pinkNoiseBuffer[5] - white * 0.0168980;
-                  double pink = pinkNoiseBuffer[0] + pinkNoiseBuffer[1] + pinkNoiseBuffer[2] + pinkNoiseBuffer[3] + pinkNoiseBuffer[4] + pinkNoiseBuffer[5] + pinkNoiseBuffer[6] + white * 0.5362;
-                  pinkNoiseBuffer[6] = white * 0.115926;
-                  sampleValue = (currentGain * (pink / 5));
+                  sampleValue = CurrentGain * SamplePink();
                   break;
 
                case BasicSignalType.White:
 
                   // White Noise Generator
-                  sampleValue = (currentGain * NextRandomTwo());
+                  sampleValue = CurrentGain * SampleWhite();
                   break;
 
                default:
@@ -387,11 +366,8 @@ namespace StimmingSignalGenerator.Generators
             // also CalculateNextPhase when do noise to avoid out of phase when sync with another signal
             CalculateNextPhase(aggregateFMBuffer[sampleCount]);
             CalculateNextGain();
-            // Phase Reverse, Gain Per Channel and AM signal
-            for (int i = 0; i < WaveFormat.Channels; i++)
-            {
-               buffer[outIndex++] = (float)sampleValue * aggregateAMBuffer[sampleCount];
-            }
+            // apply AM signal
+            buffer[sampleCount] = (float)sampleValue * aggregateAMBuffer[sampleCount];
          }
          return count;
       }
@@ -399,11 +375,11 @@ namespace StimmingSignalGenerator.Generators
       private void CalculateNextGain()
       {
          //calculate currentGain
-         currentGain += gainStepDelta;
+         CurrentGain += GainStepDelta;
          //correct if value exceed target
-         if (gainStepDelta > 0 && currentGain > targetGain ||
-             gainStepDelta < 0 && currentGain < targetGain)
-            currentGain = targetGain;
+         if (GainStepDelta > 0 && CurrentGain > targetGain ||
+             GainStepDelta < 0 && CurrentGain < targetGain)
+            CurrentGain = targetGain;
       }
 
       private void CalculateNextPhase(float fmValue)
@@ -456,12 +432,25 @@ namespace StimmingSignalGenerator.Generators
       }
 
       /// <summary>
-      /// Private :: Random for WhiteNoise &amp; Pink Noise (Value form -1 to 1)
+      /// White noise (Value form -1 to 1)
       /// </summary>
       /// <returns>Random value from -1 to +1</returns>
-      private double NextRandomTwo()
+      private double SampleWhite()
       {
          return 2 * random.NextDouble() - 1;
+      }
+      private double SamplePink()
+      {
+         double white = SampleWhite();
+         pinkNoiseBuffer[0] = 0.99886 * pinkNoiseBuffer[0] + white * 0.0555179;
+         pinkNoiseBuffer[1] = 0.99332 * pinkNoiseBuffer[1] + white * 0.0750759;
+         pinkNoiseBuffer[2] = 0.96900 * pinkNoiseBuffer[2] + white * 0.1538520;
+         pinkNoiseBuffer[3] = 0.86650 * pinkNoiseBuffer[3] + white * 0.3104856;
+         pinkNoiseBuffer[4] = 0.55000 * pinkNoiseBuffer[4] + white * 0.5329522;
+         pinkNoiseBuffer[5] = -0.7616 * pinkNoiseBuffer[5] - white * 0.0168980;
+         double pink = pinkNoiseBuffer[0] + pinkNoiseBuffer[1] + pinkNoiseBuffer[2] + pinkNoiseBuffer[3] + pinkNoiseBuffer[4] + pinkNoiseBuffer[5] + pinkNoiseBuffer[6] + white * 0.5362;
+         pinkNoiseBuffer[6] = white * 0.115926;
+         return pink / 5;
       }
    }
 
