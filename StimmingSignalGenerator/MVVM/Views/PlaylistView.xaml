@@ -122,10 +122,13 @@
       </ListBox>
     </DockPanel>
     <!-- Note -->
-    <TextBox Grid.Column="1" Grid.Row="1" IsVisible="{Binding IsNoteMode}"
-             FontSize="18" Background="#fef1dc"
-             Text="{Binding Note}"
-             AcceptsTab="True" AcceptsReturn="True" />
+    <DockPanel Grid.Column="1" Grid.Row="1" IsVisible="{Binding IsNoteMode}">
+      <TextBlock DockPanel.Dock="Top" Text="Note:" ToolTip.Tip="Note something to save along with playlist."/>
+      <TextBox DockPanel.Dock="Top"
+               FontSize="18" Background="#fef1dc"
+               Text="{Binding Note}"
+               AcceptsTab="True" AcceptsReturn="True" />
+    </DockPanel>
     <!-- Track -->
     <ItemsControl Grid.Column="1" Grid.Row="1" IsVisible="{Binding !IsNoteMode}"
                   Items="{Binding TrackVMs}" >
