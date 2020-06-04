@@ -35,7 +35,7 @@ namespace StimmingSignalGenerator.Generators
          // If not use ID to select AudioDevice from AudioDevices 
          // it will be different object and fail combo box initialization
          var defaultDevId = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia).ID;
-         AudioDevice = AudioDevices.SingleOrDefault(d => d.ID == defaultDevId);
+         AudioDevice = AudioDevices.FirstOrDefault(d => d.ID == defaultDevId);
 
          enumerator.Dispose();
       }
@@ -43,6 +43,9 @@ namespace StimmingSignalGenerator.Generators
       public MMDevice AudioDevice { get; set; }
 
       private ISampleProvider sampleProvider;
+      /// <summary>
+      /// Sample provider to play. Need to restart player to take effect.
+      /// </summary>
       public ISampleProvider SampleProvider
       {
          get { return sampleProvider; }
@@ -52,7 +55,11 @@ namespace StimmingSignalGenerator.Generators
             sampleProvider = value;
          }
       }
-
+      /// <summary>
+      /// Latency in milliseconds. Need to restart player to take effect.
+      /// </summary>
+      public int Latency { get; set; } = DefaultLatency;
+      public const int DefaultLatency = 50;
       public void Play()
       {
          if (AudioDevice?.State != DeviceState.Active) return;
@@ -65,9 +72,7 @@ namespace StimmingSignalGenerator.Generators
             //};
 
             //player = new DirectSoundOut(100) { };
-            //TODO expose latency to be configurable from ui
-            //TODO and persist latency setting and maybe latest playlist to load
-            player = new WasapiOut(AudioDevice, AudioClientShareMode.Exclusive, true, 50) { };
+            player = new WasapiOut(AudioDevice, AudioClientShareMode.Exclusive, true, Latency) { };
 
             player.Init(new SampleToWaveProvider(SampleProvider));
          }

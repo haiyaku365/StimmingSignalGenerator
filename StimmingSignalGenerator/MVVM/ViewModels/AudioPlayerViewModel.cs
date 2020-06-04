@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
@@ -25,29 +26,33 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    }
    public class AudioPlayerViewModel : ViewModelBase
    {
-      public MMDevice[] AudioDevices => audioPlayer.AudioDevices;
-      public MMDevice AudioDevice
-      {
-         get => audioPlayer.AudioDevice;
-         set
-         {
-            if (audioPlayer.AudioDevice == value) return;
-            this.RaisePropertyChanging(nameof(AudioDevice));
-            audioPlayer.AudioDevice = value;
-            this.RaisePropertyChanged(nameof(AudioDevice));
-         }
-      }
       public ReactiveCommand<Unit, Unit> PlayCommand { get; }
       public ReactiveCommand<Unit, Unit> StopCommand { get; }
       public ReactiveCommand<Unit, Unit> TogglePlayCommand { get; }
 
-      private readonly AudioPlayer audioPlayer;
+      public MMDevice[] AudioDevices => audioPlayer.AudioDevices;
+      public MMDevice SelectedAudioDevice { get => selectedAudioDevice; set => this.RaiseAndSetIfChanged(ref selectedAudioDevice, value); }
+      public int Latency { get => latency; set => this.RaiseAndSetIfChanged(ref latency, value); }
       public AppState AppState { get; }
+
+      private int latency;
+      private MMDevice selectedAudioDevice;
+      private readonly AudioPlayer audioPlayer;
       public AudioPlayerViewModel(ISampleProvider sampleProvider)
       {
          AppState = Locator.Current.GetService<AppState>();
 
-         audioPlayer = new AudioPlayer(sampleProvider);
+         audioPlayer = new AudioPlayer(sampleProvider).DisposeWith(Disposables);
+
+         SelectedAudioDevice = audioPlayer.AudioDevice;
+         Latency = audioPlayer.Latency;
+
+         this.WhenAnyValue(x => x.SelectedAudioDevice)
+            .Subscribe(_ => audioPlayer.AudioDevice = SelectedAudioDevice)
+            .DisposeWith(Disposables);
+         this.WhenAnyValue(x => x.Latency)
+            .Subscribe(_ => audioPlayer.Latency = Latency)
+            .DisposeWith(Disposables);
 
          PlayCommand = ReactiveCommand.Create(() => Play(), AppState.WhenAnyValue(x => x.IsPlaying, x => !x))
             .DisposeWith(Disposables);

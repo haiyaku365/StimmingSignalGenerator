@@ -11,7 +11,10 @@
              
              x:Class="StimmingSignalGenerator.MVVM.Views.AudioPlayerView">
   <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-    <ComboBox Items="{Binding AudioDevices}" SelectedItem="{Binding AudioDevice}">
+    <NumericUpDown ToolTip.Tip="Latency (mSec)" IsEnabled="{Binding !AppState.IsPlaying}"
+                   Minimum="20" Maximum="500" ClipValueToMinMax="True" Value="{Binding Latency}" />
+    <ComboBox Items="{Binding AudioDevices}" IsEnabled="{Binding !AppState.IsPlaying}"
+              SelectedItem="{Binding SelectedAudioDevice}" >
       <ComboBox.ItemTemplate>
         <DataTemplate>
           <StackPanel Orientation="Horizontal" Spacing="2">
