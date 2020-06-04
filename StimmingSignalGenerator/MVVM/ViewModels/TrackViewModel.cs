@@ -189,15 +189,20 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          this.WhenAnyValue(x => x.IsPlaying)
             .Subscribe(_ => { if (!IsPlaying) Progress = 0; })
             .DisposeWith(Disposables);
-         VolVMs[0].WhenAnyValue(vm => vm.Value)
-            .Subscribe(m => sample.MonoLeftVolume = (float)m)
-            .DisposeWith(Disposables);
-         VolVMs[1].WhenAnyValue(vm => vm.Value)
-            .Subscribe(m => sample.MonoRightVolume = (float)m)
-            .DisposeWith(Disposables);
-         VolVMs[2].WhenAnyValue(vm => vm.Value)
-            .Subscribe(m => sample.StereoVolume = (float)m)
-            .DisposeWith(Disposables);
+
+         initCompleteSignal.Amb(Observable.Timer(TimeSpan.FromMilliseconds(100)).Select(x => Unit.Default))
+            .Subscribe(_ =>
+            {
+               VolVMs[0].WhenAnyValue(vm => vm.Value)
+                  .Subscribe(m => sample.MonoLeftVolume = (float)m)
+                  .DisposeWith(Disposables);
+               VolVMs[1].WhenAnyValue(vm => vm.Value)
+                  .Subscribe(m => sample.MonoRightVolume = (float)m)
+                  .DisposeWith(Disposables);
+               VolVMs[2].WhenAnyValue(vm => vm.Value)
+                  .Subscribe(m => sample.StereoVolume = (float)m)
+                  .DisposeWith(Disposables);
+            }).DisposeWith(Disposables);
       }
 
       private void SetupSwitchingModeSignal(MultiSignalViewModel[] multiSignalVMs)
