@@ -29,15 +29,23 @@ namespace StimmingSignalGenerator.Generators
       /// <summary>
       /// Initializes a new instance for the Generator
       /// </summary>
-      public BasicSignal()
+      public BasicSignal(double initGain = 1, double initFrequency = 440.0)
       {
          WaveFormat = Constants.Wave.DefaultMonoWaveFormat;
 
          // Default
          Type = BasicSignalType.Sin;
-         Frequency = 440.0;
          ZeroCrossingPosition = 0.5;
-         Gain = 1;
+
+         CurrentGain = initGain;
+         targetGain = initGain;
+         GainStepDelta = 0;
+         seekGain = false;
+
+         CurrentPhaseStep = initFrequency;
+         TargetPhaseStep = initFrequency;
+         PhaseStepDelta = 0;
+         SeekFrequency = false;
 
          AMSignals = new List<BasicSignal>();
          FMSignals = new List<BasicSignal>();
@@ -56,7 +64,7 @@ namespace StimmingSignalGenerator.Generators
 
       #region Frequency and Phase field, prop
       /// <summary>
-      /// Frequency for the Generator. (20.0 - 20000.0 Hz)
+      /// Frequency for the Generator. (Hz)
       /// Noise ignore this
       /// </summary>
       public double Frequency

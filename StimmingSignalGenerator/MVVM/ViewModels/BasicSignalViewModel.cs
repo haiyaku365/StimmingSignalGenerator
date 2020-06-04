@@ -189,13 +189,16 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          Parent = parent ?? throw new ArgumentNullException(nameof(parent));
          BGColor = GetRandomBrush();
-         BasicSignal = new BasicSignal();
-         SignalType = BasicSignalType.Sin;
 
          FreqControlSliderViewModel = freqControlSliderViewModel;
          PhaseShiftControlSliderViewModel = phaseShiftControlSliderViewModel;
          VolControlSliderViewModel = volControlSliderViewModel;
          ZCPosControlSliderViewModel = zcPosControlSliderViewModel;
+
+         BasicSignal = new BasicSignal(
+            VolControlSliderViewModel.Value,
+            FreqControlSliderViewModel.Value);
+         SignalType = BasicSignalType.Sin;
 
          #region Prop bind
          // bind control slider to prop
