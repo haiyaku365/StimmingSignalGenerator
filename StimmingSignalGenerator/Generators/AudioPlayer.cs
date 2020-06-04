@@ -65,7 +65,9 @@ namespace StimmingSignalGenerator.Generators
             //};
 
             //player = new DirectSoundOut(100) { };
-            player = new WasapiOut(AudioDevice, AudioClientShareMode.Exclusive, false, 50) { };
+            //TODO expose latency to be configurable from ui
+            //TODO and persist latency setting and maybe latest playlist to load
+            player = new WasapiOut(AudioDevice, AudioClientShareMode.Exclusive, true, 50) { };
 
             player.Init(new SampleToWaveProvider(SampleProvider));
          }
