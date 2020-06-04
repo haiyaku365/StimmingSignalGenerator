@@ -59,6 +59,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public BasicSignalGroupViewModel AmplitudeModulationSignalsViewModel { get; }
       public BasicSignalGroupViewModel FrequencyModulationSignalsViewModel { get; }
+      public BasicSignalGroupViewModel PhaseModulationSignalsViewModel { get; }
 
       public ISignalTree Parent { get; }
       public IObservable<BasicSignalViewModel> ObservableItemAdded => DeepSourceListTracker.ObservableItemAdded;
@@ -105,7 +106,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          var basicSignalVM = new BasicSignalViewModel(
             parent,
             ControlSliderViewModel.FromPOCO(poco.Frequency),
-            // default for backward compatibility with version0.2 save file 
+            // default for backward compatibility with V0.2 save file 
             ControlSliderViewModel.FromPOCOorDefault(poco.PhaseShift, ControlSliderViewModel.Vol(0)),
             ControlSliderViewModel.FromPOCO(poco.Volume),
             ControlSliderViewModel.FromPOCO(poco.ZeroCrossingPosition))
@@ -133,13 +134,19 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          foreach (var am in poco.AMSignals)
          {
-            var amVM = FromPOCO(am, basicSignalVM);
-            basicSignalVM.AmplitudeModulationSignalsViewModel.Add(amVM);
+            var vm = FromPOCO(am, basicSignalVM);
+            basicSignalVM.AmplitudeModulationSignalsViewModel.Add(vm);
          }
          foreach (var fm in poco.FMSignals)
          {
-            var fmVM = FromPOCO(fm, basicSignalVM);
-            basicSignalVM.FrequencyModulationSignalsViewModel.Add(fmVM);
+            var vm = FromPOCO(fm, basicSignalVM);
+            basicSignalVM.FrequencyModulationSignalsViewModel.Add(vm);
+         }
+         // default for backward compatibility with V0.2 save file 
+         foreach (var pm in poco.PMSignals ?? new List<POCOs.BasicSignal>())
+         {
+            var vm = FromPOCO(pm, basicSignalVM);
+            basicSignalVM.PhaseModulationSignalsViewModel.Add(vm);
          }
 
          return basicSignalVM;
@@ -154,6 +161,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             ZeroCrossingPosition = ZCPosControlSliderViewModel.ToPOCO(),
             AMSignals = AmplitudeModulationSignalsViewModel.SignalVMs.Select(x => x.ToPOCO()).ToList(),
             FMSignals = FrequencyModulationSignalsViewModel.SignalVMs.Select(x => x.ToPOCO()).ToList(),
+            PMSignals = PhaseModulationSignalsViewModel.SignalVMs.Select(x => x.ToPOCO()).ToList(),
             FrequencySyncFrom = SelectedLinkableBasicSignalVM?.FullName
          };
 
@@ -252,7 +260,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                createVM: () =>
                   new BasicSignalViewModel(this,
                      ControlSliderViewModel.ModulationSignalFreq)
-                  { Volume = 0 , IsExpanded = true }
+                  { Volume = 0, IsExpanded = true }
             ).DisposeWith(Disposables);
          FrequencyModulationSignalsViewModel =
             new BasicSignalGroupViewModel(
@@ -266,12 +274,24 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                       new ControlSliderViewModel(0, 0, 100, 1, 1, 5))
                    { Volume = 0, IsExpanded = true }
                ).DisposeWith(Disposables);
+         PhaseModulationSignalsViewModel =
+            new BasicSignalGroupViewModel(
+               parent: this,
+               name: Constants.ViewModelName.PMName,
+               onSignalVmAdded: vm => BasicSignal.AddPMSignal(vm.BasicSignal),
+               onSignalVmRemoved: vm => BasicSignal.RemovePMSignal(vm.BasicSignal),
+               createVM: () =>
+                   new BasicSignalViewModel(this,
+                      ControlSliderViewModel.ModulationSignalFreq)
+                   { Volume = 0, IsExpanded = true }
+               ).DisposeWith(Disposables);
          #endregion
 
          DeepSourceListTracker =
             new DeepSourceListTracker<BasicSignalViewModel>(
                AmplitudeModulationSignalsViewModel.SignalVMsObservableList,
-               FrequencyModulationSignalsViewModel.SignalVMsObservableList)
+               FrequencyModulationSignalsViewModel.SignalVMsObservableList,
+               PhaseModulationSignalsViewModel.SignalVMsObservableList)
             .DisposeWith(Disposables);
 
          var RootSignalTreeAllSubBasicSignalVMs =

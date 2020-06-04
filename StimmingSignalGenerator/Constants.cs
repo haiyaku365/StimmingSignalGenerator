@@ -20,6 +20,7 @@ namespace StimmingSignalGenerator
       {
          internal const string AMName = "AM";
          internal const string FMName = "FM";
+         internal const string PMName = "PM";
          internal const string BasicSignalVMName = "Signal";
          internal const string MonoMultiSignalName = "Mono";
          internal const string LeftMultiSignalName = "Left";

@@ -49,6 +49,7 @@ namespace StimmingSignalGenerator.Generators
 
          AMSignals = new List<BasicSignal>();
          FMSignals = new List<BasicSignal>();
+         PMSignals = new List<BasicSignal>();
       }
 
       /// <summary>
@@ -100,9 +101,7 @@ namespace StimmingSignalGenerator.Generators
       /// </summary>
       public double FrequencyLog => Math.Log(Frequency);
 
-      readonly List<BasicSignal> FMSignals;
-      float[] fmBuffer;
-      float[] aggregateFMBuffer;
+
 
       /// <summary>
       /// Gain for the Generator. (0.0 to 1.0)
@@ -131,15 +130,18 @@ namespace StimmingSignalGenerator.Generators
       /// </summary>
       public double GainStepDelta { get => gainStepDelta; }
 
-      readonly List<BasicSignal> AMSignals;
-      float[] amBuffer;
-      float[] aggregateAMBuffer;
-
       /// <summary>
       /// Type of Generator.
       /// </summary>
       public BasicSignalType Type { get; set; }
 
+      float[] modulationBuffer;
+      readonly List<BasicSignal> AMSignals;
+      float[] aggregateAMBuffer;
+      readonly List<BasicSignal> FMSignals;
+      float[] aggregateFMBuffer;
+      readonly List<BasicSignal> PMSignals;
+      float[] aggregatePMBuffer;
       /// <summary>
       /// 1 Channel Signal for amplitude modulation.
       /// </summary>
@@ -158,7 +160,6 @@ namespace StimmingSignalGenerator.Generators
             AMSignals.Remove(signal);
          }
       }
-
       /// <summary>
       /// Add 1 Channel Signal for frequency modulation. Gain of signal indicate how much frequency change.
       /// </summary>
@@ -175,6 +176,24 @@ namespace StimmingSignalGenerator.Generators
          lock (FMSignals)
          {
             FMSignals.Remove(signal);
+         }
+      }
+      /// <summary>
+      /// Add 1 Channel Signal for phase modulation.
+      /// </summary>
+      /// <param name="signal">1 Channel Signal</param>
+      public void AddPMSignal(BasicSignal signal)
+      {
+         lock (PMSignals)
+         {
+            PMSignals.Add(signal);
+         }
+      }
+      public void RemovePMSignal(BasicSignal signal)
+      {
+         lock (PMSignals)
+         {
+            PMSignals.Remove(signal);
          }
       }
 
@@ -218,8 +237,8 @@ namespace StimmingSignalGenerator.Generators
          {
             foreach (var signal in AMSignals)
             {
-               amBuffer = BufferHelpers.Ensure(amBuffer, count);
-               signal.Read(amBuffer, offset, count);
+               modulationBuffer = BufferHelpers.Ensure(modulationBuffer, count);
+               signal.Read(modulationBuffer, offset, count);
                /*
                AM Signal with gain bump
                https://www.desmos.com/calculator/ya9ayr9ylc
@@ -230,9 +249,9 @@ namespace StimmingSignalGenerator.Generators
                y_{2}=\frac{\left(y_{1}+1\right)}{2}
                y=\sin\left(20\cdot2\pi x\right)\cdot y_{2}\left\{-1<y<1\right\}
                */
-               for (int i = 0; i < amBuffer.Length; i++)
+               for (int i = offset; i < count; i++)
                {
-                  aggregateAMBuffer[i] *= (amBuffer[i] + 2 - (float)signal.Gain) / 2;
+                  aggregateAMBuffer[i] *= (modulationBuffer[i] + 2 - (float)signal.Gain) / 2;
                }
             }
          }
@@ -245,15 +264,30 @@ namespace StimmingSignalGenerator.Generators
          {
             foreach (var signal in FMSignals)
             {
-               fmBuffer = BufferHelpers.Ensure(fmBuffer, count);
-               signal.Read(fmBuffer, offset, count);
-               for (int i = 0; i < fmBuffer.Length; i++)
+               modulationBuffer = BufferHelpers.Ensure(modulationBuffer, count);
+               signal.Read(modulationBuffer, offset, count);
+               for (int i = offset; i < count; i++)
                {
-                  aggregateFMBuffer[i] += fmBuffer[i];
+                  aggregateFMBuffer[i] += modulationBuffer[i];
                }
             }
          }
 
+         aggregatePMBuffer = BufferHelpers.Ensure(aggregatePMBuffer, count);
+         Array.Fill(aggregatePMBuffer, 0);
+         // read PM signal
+         lock (PMSignals)
+         {
+            foreach (var signal in PMSignals)
+            {
+               modulationBuffer = BufferHelpers.Ensure(modulationBuffer, count);
+               signal.Read(modulationBuffer, offset, count);
+               for (int i = offset; i < count; i++)
+               {
+                  aggregatePMBuffer[i] += modulationBuffer[i];
+               }
+            }
+         }
          //skip calc if gain is 0
          if (Gain == 0)
          {
@@ -270,7 +304,7 @@ namespace StimmingSignalGenerator.Generators
          for (int sampleCount = 0; sampleCount < countPerChannel; sampleCount++)
          {
             //calculate common variable
-            x = (Phase + (PhaseShift * Period)) % Period;
+            x = (Phase + ((PhaseShift + aggregatePMBuffer[sampleCount]) * Period)) % Period;
 
             bool isBeforeCrossingZero = 0 <= x && x < zeroCrossingPoint;
             //bool isAfterCrossingZero = zeroCrossingPoint <= x && x < period;

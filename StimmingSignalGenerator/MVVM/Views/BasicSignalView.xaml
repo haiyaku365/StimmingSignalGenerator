@@ -111,6 +111,7 @@
       <DockPanel Grid.Row="1">
         <v:BasicSignalGroupView DockPanel.Dock="Top" DataContext="{Binding AmplitudeModulationSignalsViewModel}" />
         <v:BasicSignalGroupView DockPanel.Dock="Top" DataContext="{Binding FrequencyModulationSignalsViewModel}" />
+        <v:BasicSignalGroupView DockPanel.Dock="Top" DataContext="{Binding PhaseModulationSignalsViewModel}" />
       </DockPanel>
     </Grid>
   </Expander>
