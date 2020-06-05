@@ -2,6 +2,7 @@
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
+using Splat;
 using StimmingSignalGenerator.Generators;
 using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.MVVM.UiHelper;
@@ -24,6 +25,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          get
          {
+            PrepareAppState();
             var track = new TrackViewModel();
             var mod = new BasicSignalGroupViewModel(
                track,
@@ -45,6 +47,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public IObservableList<BasicSignalViewModel> SignalVMsObservableList
          => SignalVMsSourceList.AsObservableList();
       public ISignalTree Parent { get; }
+      public AppState AppState { get; }
 
       private readonly ObservableAsPropertyHelper<string> header;
       private bool isExpanded;
@@ -59,6 +62,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          Action<BasicSignalViewModel> onSignalVmRemoved,
          Func<BasicSignalViewModel> createVM)
       {
+         AppState = Locator.Current.GetService<AppState>();
+
          Parent = parent;
          Name = name;
          CreateVM = createVM;

@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
 
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             d:DataContext="{x:Static vm:DesignSignalGroupViewModel.Data}"
+             d:DataContext="{x:Static vm:DesignBasicSignalGroupViewModel.Data}"
              x:Class="StimmingSignalGenerator.MVVM.Views.BasicSignalGroupView">
 
   <!-- IsExpanded initial in code behind -->
@@ -30,9 +30,10 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
-      <Button DockPanel.Dock="Top" HorizontalAlignment="Left" Classes="Green"
-                  Width="{Binding $parent.Width,Mode=OneWay}" Height="30" Margin="2"
-                  Content="{Binding Name,StringFormat={}+{0}}" Command="{Binding Add}">
+      <Button DockPanel.Dock="Top" HorizontalAlignment="Left" Classes="Green" 
+              Name="AddButton"
+              Width="{Binding $parent.Width,Mode=OneWay}" Height="30" Margin="2"
+              Content="{Binding Name,StringFormat={}+{0}}" Command="{Binding Add}">
         <Button.ContextMenu>
           <ContextMenu>
             <MenuItem Header="Add from clipboard" Classes="Paste"

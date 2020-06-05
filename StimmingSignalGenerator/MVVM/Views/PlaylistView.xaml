@@ -130,7 +130,12 @@
                AcceptsTab="True" AcceptsReturn="True" />
     </DockPanel>
     <!-- Track -->
-    <ItemsControl Grid.Column="1" Grid.Row="1" IsVisible="{Binding !IsNoteMode}"
+    <ToggleButton Grid.Column="1" Grid.Row="1" Margin="3"
+                  HorizontalAlignment="Right" VerticalAlignment="Top"
+                  Content="Hide empty modulation" IsVisible="{Binding !IsNoteMode}"
+                  IsChecked="{Binding AppState.IsHideZeroModulation}" />
+    <ItemsControl Grid.Column="1" Grid.Row="1" 
+                  IsVisible="{Binding !IsNoteMode}"
                   Items="{Binding TrackVMs}" >
       <ItemsControl.ItemTemplate>
         <DataTemplate>
