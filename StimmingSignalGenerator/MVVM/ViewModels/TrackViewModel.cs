@@ -42,7 +42,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public float Progress { get => progress; set => this.RaiseAndSetIfChanged(ref progress, value); }
       public double TimeSpanSecond { get => timeSpanSecond; set => this.RaiseAndSetIfChanged(ref timeSpanSecond, Math.Round(value, 2)); }
 
+      /// <summary>
+      /// 0 is mono, 1,2 are stereo
+      /// </summary>
       public ReadOnlyObservableCollection<MultiSignalViewModel> MultiSignalVMs => multiSignalVMs;
+
+      /// <summary>
+      /// 0,1 are L,R mono , 2 is stereo
+      /// </summary>
       public List<ControlSliderViewModel> VolVMs { get; }
       public GeneratorModeType GeneratorMode { get => generatorMode; set => this.RaiseAndSetIfChanged(ref generatorMode, value); }
       public IObservable<BasicSignalViewModel> ObservableBasicSignalViewModelsAdded
@@ -190,14 +197,15 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          initCompleteSignal
             .Subscribe(_ =>
             {
+               sample.SetInitVolume(VolVMs[0].Value, VolVMs[1].Value, VolVMs[2].Value);
                VolVMs[0].WhenAnyValue(vm => vm.Value)
-                  .Subscribe(m => sample.MonoLeftVolume = (float)m)
+                  .Subscribe(m => sample.MonoLeftVolume = m)
                   .DisposeWith(Disposables);
                VolVMs[1].WhenAnyValue(vm => vm.Value)
-                  .Subscribe(m => sample.MonoRightVolume = (float)m)
+                  .Subscribe(m => sample.MonoRightVolume = m)
                   .DisposeWith(Disposables);
                VolVMs[2].WhenAnyValue(vm => vm.Value)
-                  .Subscribe(m => sample.StereoVolume = (float)m)
+                  .Subscribe(m => sample.StereoVolume = m)
                   .DisposeWith(Disposables);
             }).DisposeWith(Disposables);
 
@@ -208,7 +216,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private void SignalInitCompleted()
       {
          initCompleteSignal.OnNext(Unit.Default);
-         initCompleteSignal.OnCompleted(); 
+         initCompleteSignal.OnCompleted();
          initCompleteSignal.Dispose();
       }
 

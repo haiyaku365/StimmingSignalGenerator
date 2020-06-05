@@ -29,13 +29,20 @@ namespace StimmingSignalGenerator.Generators
 
       private bool seekGain;
       private double targetGain;
-      private readonly TimeSpan rampTimeSpan;
 
       public RampGain(double initGain = 1)
       {
-         this.rampTimeSpan = TimeSpan.FromMilliseconds(100);
-         CurrentGain = initGain;
-         targetGain = initGain;
+         ForceSetGain(initGain);
+      }
+
+      /// <summary>
+      /// Set gain immediately without ramp
+      /// </summary>
+      /// <param name="gain"></param>
+      public void ForceSetGain(double gain)
+      {
+         CurrentGain = gain;
+         targetGain = gain;
          GainStepDelta = 0;
          seekGain = false;
       }

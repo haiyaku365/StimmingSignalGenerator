@@ -81,7 +81,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private string note;
       private readonly TimingSwitchSampleProvider timingSwitchSampleProvider;
       private readonly SwitchingSampleProvider switchingSampleProvider;
-      private readonly VolumeSampleProvider volumeSampleProvider;
+      private readonly VolumeSampleProviderEx volumeSampleProvider;
       public PlaylistViewModel()
       {
          AppState = Locator.Current.GetService<AppState>();
@@ -120,7 +120,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          timingSwitchSampleProvider = new TimingSwitchSampleProvider();
          switchingSampleProvider = new SwitchingSampleProvider { SampleProvider = timingSwitchSampleProvider };
-         volumeSampleProvider = new VolumeSampleProvider(switchingSampleProvider);
+         volumeSampleProvider = new VolumeSampleProviderEx(switchingSampleProvider);
 
          MasterVolVM = ControlSliderViewModel.BasicVol.DisposeWith(Disposables);
          MasterVolVM.WhenAnyValue(vm => vm.Value)

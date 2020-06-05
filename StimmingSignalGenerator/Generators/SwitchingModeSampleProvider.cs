@@ -13,42 +13,22 @@ namespace StimmingSignalGenerator.Generators
       /// <summary>
       /// Multiplier for mono right channel (default is 1.0)
       /// </summary>
-      public float MonoRightVolume
-      {
-         get
-         {
-            return monoSample.RightVolume;
-         }
-         set
-         {
-            monoSample.RightVolume = value;
-         }
-      }
+      public double MonoRightVolume { get => monoSample.RightVolume; set => monoSample.RightVolume = value; }
       /// <summary>
       /// Multiplier for mono left channel (default is 1.0)
       /// </summary>
-      public float MonoLeftVolume
-      {
-         get
-         {
-            return monoSample.LeftVolume;
-         }
-         set
-         {
-            monoSample.LeftVolume = value;
-         }
-      }
+      public double MonoLeftVolume { get => monoSample.LeftVolume; set => monoSample.LeftVolume = value; }
       /// <summary>
       /// Multiplier for stereo channels (default is 1.0)
       /// </summary>
-      public float StereoVolume { get; set; } = 1.0f;
+      public double StereoVolume { get => stereoRampGain.Gain; set => stereoRampGain.Gain = value; }
       public ISampleProvider MonoSampleProvider
       {
          get => monoSampleProvider;
          set
          {
             monoSampleProvider = value;
-            monoSample = new MonoToStereoSampleProvider(monoSampleProvider);
+            monoSample = new MonoToStereoSampleProviderEx(monoSampleProvider);
          }
       }
       public IEnumerable<ISampleProvider> StereoSampleProviders
@@ -62,15 +42,21 @@ namespace StimmingSignalGenerator.Generators
       }
 
       private MultiplexingSampleProvider stereoSample;
-      private MonoToStereoSampleProvider monoSample;
+      private MonoToStereoSampleProviderEx monoSample;
       private IEnumerable<ISampleProvider> stereoSampleProviders;
       private ISampleProvider monoSampleProvider;
-
+      private readonly RampGain stereoRampGain;
       public SwitchingModeSampleProvider()
       {
          WaveFormat = Constants.Wave.DefaultStereoWaveFormat;
+         stereoRampGain = new RampGain();
       }
 
+      public void SetInitVolume(double monoLeft, double monoRight, double stereo)
+      {
+         monoSample.ForceSetVolume(monoLeft, monoRight);
+         stereoRampGain.ForceSetGain(stereo);
+      }
       public int Read(float[] buffer, int offset, int count)
       {
          int read;
@@ -81,9 +67,11 @@ namespace StimmingSignalGenerator.Generators
                break;
             case GeneratorModeType.Stereo:
                read = stereoSample.Read(buffer, offset, count);
+               stereoRampGain.CalculateGainStepDelta(count);
                for (int i = 0; i < count; i++)
                {
-                  buffer[i] *= StereoVolume;
+                  buffer[i] *= (float)stereoRampGain.CurrentGain;
+                  stereoRampGain.CalculateNextGain();
                }
                break;
             default:

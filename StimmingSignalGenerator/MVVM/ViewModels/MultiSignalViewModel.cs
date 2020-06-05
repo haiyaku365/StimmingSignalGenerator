@@ -74,8 +74,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public MultiSignalViewModel(ISignalTree parent) : this(parent, new MultiSignal())
       {
          //init vm
-         SignalsViewModel.Add();
-         SignalsViewModel.SignalVMs.First().Volume = 1;
+         SignalsViewModel.Add(new BasicSignalViewModel(
+            this,
+            ControlSliderViewModel.BasicSignalFreq,
+            ControlSliderViewModel.Vol(1))
+         );
       }
       public MultiSignalViewModel(ISignalTree parent, MultiSignal multiSignal)
       {
@@ -87,7 +90,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             name: Constants.ViewModelName.BasicSignalVMName,
             onSignalVmAdded: vm => multiSignal.AddSignal(vm.BasicSignal),
             onSignalVmRemoved: vm => multiSignal.RemoveSignal(vm.BasicSignal),
-            createVM: () => new BasicSignalViewModel(this) { Volume = 0 }
+            createVM: () => new BasicSignalViewModel(
+               this,
+               ControlSliderViewModel.BasicSignalFreq,
+               ControlSliderViewModel.Vol(0))
             ).DisposeWith(Disposables);
 
          DeepSourceListTracker =

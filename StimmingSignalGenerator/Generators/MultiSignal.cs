@@ -18,7 +18,8 @@ namespace StimmingSignalGenerator.Generators
       /// <summary>
       /// Gain for the Generator. (0.0 to 1.0)
       /// </summary>
-      public double Gain { get; set; }
+      public double Gain { get => rampGain.Gain; set => rampGain.Gain = value; }
+      private readonly RampGain rampGain;
 
       private readonly MixingSampleProvider mixingSampleProvider;
       private readonly List<BasicSignal> sources;
@@ -27,6 +28,7 @@ namespace StimmingSignalGenerator.Generators
       {
          WaveFormat = Constants.Wave.DefaultMonoWaveFormat;
 
+         rampGain = new RampGain(1);
          mixingSampleProvider = new MixingSampleProvider(WaveFormat);
          sources = new List<BasicSignal>();
       }
@@ -53,28 +55,28 @@ namespace StimmingSignalGenerator.Generators
       {
          int read;
          int outIndex = offset;
-         float sumCurrentGain, sumGainStepDelta;
+         double sumCurrentGain, sumGainStepDelta;
+
 
          lock (sources)
          {
-            var enableSource = sources.Where(s => s.Gain != 0).ToList();
-
+            var enableSource = sources.Where(s => s.CurrentGain != 0).ToList();
             if (enableSource.Any(s => s.Gain != s.CurrentGain))
             {
-               sumCurrentGain = (float)enableSource.Sum(s => s.CurrentGain);
+               sumCurrentGain = enableSource.Sum(s => s.CurrentGain);
                read = mixingSampleProvider.Read(buffer, offset, count);
-               sumGainStepDelta = (float)enableSource.Sum(s => s.GainStepDelta);
+               sumGainStepDelta = enableSource.Sum(s => s.GainStepDelta);
             }
             else
             {
-               sumCurrentGain = (float)enableSource.Sum(s => s.Gain);
+               sumCurrentGain = enableSource.Sum(s => s.Gain);
                read = mixingSampleProvider.Read(buffer, offset, count);
                sumGainStepDelta = 0;
             }
          }
 
          int countPerChannel = count / WaveFormat.Channels;
-
+         rampGain.CalculateGainStepDelta(countPerChannel);
          var sumGain = sumCurrentGain;
          for (int sampleCount = 0; sampleCount < countPerChannel; sampleCount++)
          {
@@ -82,9 +84,10 @@ namespace StimmingSignalGenerator.Generators
             {
                // mixingSampleProvider cause gain overdrive
                // need to correct to 0-1 level
-               buffer[outIndex++] *= (sumGain == 0) ? 0 : (float)Gain / sumGain;
+               buffer[outIndex++] *= (sumGain == 0) ? 0 : (float)(rampGain.CurrentGain / sumGain);
             }
             sumGain += sumGainStepDelta;
+            rampGain.CalculateNextGain();
          }
          return read;
       }

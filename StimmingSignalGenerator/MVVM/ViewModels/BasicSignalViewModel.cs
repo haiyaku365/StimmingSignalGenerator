@@ -262,8 +262,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                onSignalVmRemoved: vm => BasicSignal.RemoveAMSignal(vm.BasicSignal),
                createVM: () =>
                   new BasicSignalViewModel(this,
-                     ControlSliderViewModel.ModulationSignalFreq)
-                  { Volume = 0, IsExpanded = true }
+                     ControlSliderViewModel.ModulationSignalFreq,
+                     ControlSliderViewModel.Vol(0))
+                  { IsExpanded = true }
             ).DisposeWith(Disposables);
          FrequencyModulationSignalsViewModel =
             new BasicSignalGroupViewModel(
@@ -275,7 +276,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                    new BasicSignalViewModel(this,
                       ControlSliderViewModel.ModulationSignalFreq,
                       new ControlSliderViewModel(0, 0, 100, 1, 1, 5))
-                   { Volume = 0, IsExpanded = true }
+                   { IsExpanded = true }
                ).DisposeWith(Disposables);
          PhaseModulationSignalsViewModel =
             new BasicSignalGroupViewModel(
@@ -285,8 +286,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                onSignalVmRemoved: vm => BasicSignal.RemovePMSignal(vm.BasicSignal),
                createVM: () =>
                    new BasicSignalViewModel(this,
-                      ControlSliderViewModel.ModulationSignalFreq)
-                   { Volume = 0, IsExpanded = true }
+                      ControlSliderViewModel.ModulationSignalFreq,
+                      ControlSliderViewModel.Vol(0))
+                   { IsExpanded = true }
                ).DisposeWith(Disposables);
          #endregion
 
