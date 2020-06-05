@@ -37,10 +37,7 @@ namespace StimmingSignalGenerator.Generators
          Type = BasicSignalType.Sin;
          ZeroCrossingPosition = 0.5;
 
-         CurrentGain = initGain;
-         targetGain = initGain;
-         GainStepDelta = 0;
-         seekGain = false;
+         rampGain = new RampGain(initGain);
 
          CurrentPhaseStep = initFrequency;
          TargetPhaseStep = initFrequency;
@@ -103,29 +100,19 @@ namespace StimmingSignalGenerator.Generators
       #endregion
 
       #region Amplitude field, Prop, Method
+      private readonly RampGain rampGain;
       /// <summary>
       /// Gain for the Generator. (0.0 to 1.0)
       /// </summary>
-      public double Gain
-      {
-         get => targetGain;
-         set
-         {
-            targetGain = value;
-            seekGain = true;
-         }
-      }
-
-      private bool seekGain;
-      private double targetGain;
+      public double Gain { get => rampGain.Gain; set => rampGain.Gain = value; }
       /// <summary>
       /// Gain before seek to target gain.
       /// </summary>
-      public double CurrentGain { get; private set; }
+      public double CurrentGain => rampGain.CurrentGain;
       /// <summary>
       /// Gain step delta of latest read.
       /// </summary>
-      public double GainStepDelta { get; private set; }
+      public double GainStepDelta => rampGain.GainStepDelta;
       #endregion
 
       #region Modulation field, Prop, Add, Remove method
@@ -215,11 +202,8 @@ namespace StimmingSignalGenerator.Generators
          double x, frequencyFactor, shift;
 
          // Calc gainStepDelta
-         if (seekGain) // process Gain change only once per call to Read
-         {
-            GainStepDelta = (targetGain - CurrentGain) / count;
-            seekGain = false;
-         }
+         rampGain.CalculateGainStepDelta(count);
+
          // Calc frequencyStepDelta
          if (SeekFrequency) // process frequency change only once per call to Read
          {
@@ -285,14 +269,16 @@ namespace StimmingSignalGenerator.Generators
             }
          }
          //skip calc if gain is 0
-         if (Gain == 0)
+         if (CurrentGain == 0)
          {
             Array.Fill(buffer, 0, offset, count);
 
             //prevent out of phase when mixing multi signal
             for (int i = offset; i < count; i++)
+            {
                CalculateNextPhase(aggregateFMBuffer[i]);
-
+               rampGain.CalculateNextGain();
+            }
             return count;
          }
 
@@ -373,21 +359,11 @@ namespace StimmingSignalGenerator.Generators
             }
             // also CalculateNextPhase when do noise to avoid out of phase when sync with another signal
             CalculateNextPhase(aggregateFMBuffer[sampleCount]);
-            CalculateNextGain();
+            rampGain.CalculateNextGain();
             // apply AM signal
             buffer[sampleCount] = (float)sampleValue * aggregateAMBuffer[sampleCount];
          }
          return count;
-      }
-
-      private void CalculateNextGain()
-      {
-         //calculate currentGain
-         CurrentGain += GainStepDelta;
-         //correct if value exceed target
-         if (GainStepDelta > 0 && CurrentGain > targetGain ||
-             GainStepDelta < 0 && CurrentGain < targetGain)
-            CurrentGain = targetGain;
       }
 
       private void CalculateNextPhase(float fmValue)
