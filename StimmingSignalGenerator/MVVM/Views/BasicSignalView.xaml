@@ -34,10 +34,13 @@
       <StackPanel Orientation="Horizontal" Spacing="5">
         <TextBlock Text="{Binding FullName}" />
         <TextBlock Text="{Binding SignalType}" />
+        <!-- Freq text when not sync -->
         <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}"
                    Text="{Binding Frequency, StringFormat={}F:{0:N2}Hz}"/>
+        <!-- Freq text when sync -->
         <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}"
                    Text="{Binding SelectedLinkableBasicSignalVM.Frequency, StringFormat={}F:{0:N2}Hz}" />
+        <!-- Phase shift text when sync -->
         <TextBlock IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}"
                    Text="{Binding PhaseShift, StringFormat={}PS:{0:P1}}" />
         <TextBlock Text="{Binding Volume, StringFormat={}V:{0:P1}}" />
@@ -53,7 +56,7 @@
       </Grid.RowDefinitions>
       <Grid Grid.Row="0" Grid.IsSharedSizeScope="True">
         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="35" />
+          <ColumnDefinition Width="32" />
           <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>

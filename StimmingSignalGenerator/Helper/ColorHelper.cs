@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StimmingSignalGenerator.Helper
 {
-   public class ColorHelper
+   public static class ColorHelper
    {
       // https://www.splinter.com.au/converting-hsv-to-rgb-colour-using-c/
       /// <summary>

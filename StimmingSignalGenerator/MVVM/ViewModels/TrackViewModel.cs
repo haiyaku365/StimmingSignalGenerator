@@ -222,7 +222,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private void SetupSwitchingModeSignal(MultiSignalViewModel[] multiSignalVMs)
       {
-         var multiSignalVMsCount = multiSignalVMs.Count();
+         var multiSignalVMsCount = multiSignalVMs.Length;
          switch (multiSignalVMsCount)
          {
             case 1:

@@ -55,7 +55,7 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
       {
          int maxNum = 0;
          Regex nameRegex = new Regex($@"(?:{prefix})(\d*)$");
-         if (sourceList.Items.Count() > 0)
+         if (sourceList.Items.Any())
          {
             maxNum = sourceList.Items
                      .Max(x => int.TryParse(nameRegex.Match(x.Name ?? "0").Groups[1].Value, out int num) ? num : 0);
