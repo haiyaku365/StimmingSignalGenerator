@@ -286,9 +286,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             case 1://stereo
                VolVMs.AddRange(
                   new[] {
-                     controlSliderVMs[0],
                      ControlSliderViewModel.BasicVol,
-                     ControlSliderViewModel.BasicVol
+                     ControlSliderViewModel.BasicVol,
+                     controlSliderVMs[0]
                   });
                break;
             case 3://load all
