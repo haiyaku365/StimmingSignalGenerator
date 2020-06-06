@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          
+             mc:Ignorable="d"
+             d:DesignWidth="1000" d:DesignHeight="1000"
+             
+             x:Class="StimmingSignalGenerator.MVVM.Views.EditableTextBlock">
+  <!--<UserControl.Text>
+    The design text
+  </UserControl.Text>-->
+  <Panel Name="Panel" ToolTip.Tip="Enter to commit, Esc to cancel.">
+    <TextBlock Name="TextBlock"
+               Margin="5" />
+    <TextBox Name="TextBox" />
+  </Panel>
+</UserControl>

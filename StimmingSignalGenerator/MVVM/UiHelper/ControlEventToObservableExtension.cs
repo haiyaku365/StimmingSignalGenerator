@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.Generators;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -25,7 +26,16 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
          => Observable.FromEventPattern<PointerPressedEventArgs>(
             h => control.PointerPressed += h,
             h => control.PointerPressed -= h);
-
+      public static IObservable<EventPattern<VisualTreeAttachmentEventArgs>> ObservableAttachedToVisualTree
+         (this IControl control)
+         => Observable.FromEventPattern<VisualTreeAttachmentEventArgs>(
+            h => control.AttachedToVisualTree += h,
+            h => control.AttachedToVisualTree -= h);
+      public static IObservable<EventPattern<VisualTreeAttachmentEventArgs>> ObservableDetachedFromVisualTree
+         (this IControl control)
+         => Observable.FromEventPattern<VisualTreeAttachmentEventArgs>(
+            h => control.DetachedFromVisualTree += h,
+            h => control.DetachedFromVisualTree -= h);
 
       public static IObservable<EventPattern<ItemContainerEventArgs>> ObservableMaterialized
          (this IItemContainerGenerator itemContainerGenerator)
