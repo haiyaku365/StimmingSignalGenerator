@@ -36,9 +36,12 @@
       </Button>
 
       <!-- Tools -->
-      <StackPanel DockPanel.Dock="Top" Margin="0 0 0 2" Spacing="5" Orientation="Horizontal">
-        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-        <Button Content="Save" Command="{Binding SaveAsync}" />
+      <TextBlock DockPanel.Dock="Top" Text="{Binding Name}" Margin="3"/>
+      <StackPanel DockPanel.Dock="Top" Margin="0 0 0 3" Spacing="5" Orientation="Horizontal">
+        <Button Content="Save as..." Command="{Binding SaveAsAsync}" 
+                HotKey="Ctrl+Shift+S" ToolTip.Tip="Hotkey:Ctrl+Shift+S"/>
+        <Button Content="Save" Command="{Binding SaveCommand}" 
+                HotKey="Ctrl+S" ToolTip.Tip="Hotkey:Ctrl+S"/>
         <Button Content="Load" Command="{Binding LoadAsync}" />
       </StackPanel>
       <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5">
@@ -134,7 +137,7 @@
                   HorizontalAlignment="Right" VerticalAlignment="Top"
                   Content="Hide empty modulation" IsVisible="{Binding !IsNoteMode}"
                   IsChecked="{Binding AppState.IsHideZeroModulation}" />
-    <ItemsControl Grid.Column="1" Grid.Row="1" 
+    <ItemsControl Grid.Column="1" Grid.Row="1"
                   IsVisible="{Binding !IsNoteMode}"
                   Items="{Binding TrackVMs}" >
       <ItemsControl.ItemTemplate>

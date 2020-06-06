@@ -15,13 +15,26 @@ namespace StimmingSignalGenerator.FileService
 {
    static class PlaylistFile
    {
-      public static async Task SaveAsync(this Playlist playlist)
+      /// <summary>
+      /// Show save file dialog user select save path then save playlist and return save path.
+      /// </summary>
+      /// <param name="playlist">playlist to save</param>
+      /// <returns>Save path</returns>
+      public static async Task<string> SaveAsAsync(this Playlist playlist)
       {
          CreatePlaylistDir();
          saveFileDialog.Directory = PlaylistPath;
          saveFileDialog.InitialFileName = string.IsNullOrWhiteSpace(playlist.Name) ? GetNextFileName() : playlist.Name;
          var savePath = await saveFileDialog.ShowAsync(Window);
-         if (savePath == null) return;
+         if (savePath == null) return string.Empty;
+         await playlist.SaveAsync(savePath);
+         return savePath;
+      }
+
+      public static async Task SaveAsync(this Playlist playlist, string savePath)
+      {
+         CreatePlaylistDir();
+
          File.Delete(savePath);
          using (FileStream fs = File.OpenWrite(savePath))
          {
@@ -29,24 +42,24 @@ namespace StimmingSignalGenerator.FileService
          };
       }
 
-      public static async Task<Playlist> LoadAsync()
+      public static async Task<(Playlist playlist, string path)> LoadAsync()
       {
          CreatePlaylistDir();
          openFileDialog.Directory = PlaylistPath;
          var loadPath = await openFileDialog.ShowAsync(Window);
-         if (loadPath.Length == 0) return null;
-         return await LoadAsync(loadPath[0]);
+         if (loadPath.Length == 0) return (null, string.Empty);
+         return (await LoadAsync(loadPath[0]), loadPath[0]);
       }
 
-      public static async Task<Playlist> LoadFirstFileAsync()
+      public static async Task<(Playlist playlist, string path)> LoadFirstFileAsync()
       {
          CreatePlaylistDir();
-         var loadPath = 
+         var loadPath =
             Directory
                .GetFiles(PlaylistPath, "*.json")
-               .OrderBy(x=>x)
+               .OrderBy(x => x)
                .FirstOrDefault();
-         return await LoadAsync(loadPath);
+         return (await LoadAsync(loadPath), loadPath);
       }
 
       public static async Task<Playlist> LoadAsync(string path)
@@ -59,8 +72,8 @@ namespace StimmingSignalGenerator.FileService
             return poco;
          }
       }
-      
-      private static readonly Regex defaultFileRegex = 
+
+      private static readonly Regex defaultFileRegex =
          new Regex(@$"(?:{Constants.File.PlaylistNamePrefix})(\d*)(?:.json)$");
       private static string GetNextFileName()
       {
@@ -92,8 +105,8 @@ namespace StimmingSignalGenerator.FileService
 
       private static void CreatePlaylistDir() => Directory.CreateDirectory(PlaylistPath);
 
-      
-      private static string PlaylistPath => 
+
+      private static string PlaylistPath =>
          Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Constants.File.PlaylistDirectoryName);
    }
 }

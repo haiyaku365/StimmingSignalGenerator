@@ -10,6 +10,7 @@ using StimmingSignalGenerator.MVVM.UiHelper;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -61,6 +62,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReadOnlyObservableCollection<TrackViewModel> TrackVMs => trackVMs;
       public ControlSliderViewModel MasterVolVM { get; }
       public TrackViewModel SelectedTrackVM { get => selectedTrackVM; set => this.RaiseAndSetIfChanged(ref selectedTrackVM, value); }
+      public ReactiveCommand<Unit, Unit> SaveCommand { get; }
       /// <summary>
       /// Current track that play manually
       /// </summary>
@@ -82,6 +84,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private readonly TimingSwitchSampleProvider timingSwitchSampleProvider;
       private readonly SwitchingSampleProvider switchingSampleProvider;
       private readonly VolumeSampleProviderEx volumeSampleProvider;
+      private string SavePath;
       public PlaylistViewModel()
       {
          AppState = Locator.Current.GetService<AppState>();
@@ -169,6 +172,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                UpdateIsPlaying(autoplayingTrackVM);
             })
             .DisposeWith(Disposables);
+
+         SaveCommand = ReactiveCommand.CreateFromTask(
+            SaveAsync,
+            canExecute: this.WhenAnyValue(x => x.Name, x => !string.IsNullOrWhiteSpace(x))
+            ).DisposeWith(Disposables);
       }
 
       /// <summary>
@@ -180,7 +188,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          if (trackVM == null) return;
          PlayingTrackVM = trackVM;
       }
-      private void SwitchPlayingTrackByIndex(int trackVmIndex) 
+      private void SwitchPlayingTrackByIndex(int trackVmIndex)
          => SwitchPlayingTrack(TrackVMsSourceList.Items.ElementAtOrDefault(trackVmIndex));
 
       // Issue CommandParameter not passing when using Hotkey 
@@ -227,16 +235,33 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             Tracks = TrackVMsSourceList.Items.Select(x => x.ToPOCO()).ToList()
          };
       }
-      public async Task SaveAsync() => await this.ToPOCO().SaveAsync();
-      public async Task LoadDefaultAsync() => LoadFromPoco(await PlaylistFile.LoadFirstFileAsync());
-      public async Task LoadAsync() => LoadFromPoco(await PlaylistFile.LoadAsync());
-      private void LoadFromPoco(POCOs.Playlist poco)
+      public async Task SaveAsync() => await this.ToPOCO().SaveAsync(SavePath);
+      public async Task SaveAsAsync()
+      {
+         SavePath = await this.ToPOCO().SaveAsAsync();
+         this.Name = Path.GetFileName(SavePath);
+      }
+
+      public async Task LoadDefaultAsync()
+      {
+         var (playlist, savePath) = await PlaylistFile.LoadFirstFileAsync();
+         LoadFromPoco(playlist, savePath);
+      }
+
+      public async Task LoadAsync()
+      {
+         var (playlist, savePath) = await PlaylistFile.LoadAsync();
+         LoadFromPoco(playlist, savePath);
+      }
+
+      private void LoadFromPoco(POCOs.Playlist poco, string savePath)
       {
          if (poco == null) return;
          //Clean old stuff
          TrackVMsSourceList.Clear();
          //Load to vm
          Name = poco.Name;
+         SavePath = savePath;
          Note = poco.Note;
          for (int i = 0; i < poco.Tracks.Count; i++)
          {
