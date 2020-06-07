@@ -3,7 +3,7 @@ using NAudio.Wave;
 using ReactiveUI;
 using Splat;
 using StimmingSignalGenerator.FileService;
-using StimmingSignalGenerator.Generators;
+using StimmingSignalGenerator.NAudio;
 using StimmingSignalGenerator.MVVM.ViewModels.Interface;
 using System;
 using System.Collections.Generic;

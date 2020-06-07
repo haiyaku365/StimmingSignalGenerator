@@ -2,7 +2,7 @@
 using NAudio.Wave;
 using ReactiveUI;
 using Splat;
-using StimmingSignalGenerator.Generators;
+using StimmingSignalGenerator.NAudio;
 using System;
 using System.Collections.Generic;
 using System.Linq;

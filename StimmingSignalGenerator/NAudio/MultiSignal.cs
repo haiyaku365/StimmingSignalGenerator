@@ -1,12 +1,9 @@
-﻿using NAudio.Utils;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace StimmingSignalGenerator.Generators
+namespace StimmingSignalGenerator.NAudio
 {
    /// <summary>
    /// Generate signal from multiple BasicSignal

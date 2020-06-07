@@ -6,7 +6,7 @@
              xmlns:helper="clr-namespace:StimmingSignalGenerator.MVVM.UiHelper;assembly=StimmingSignalGenerator"
              xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
              xmlns:v="clr-namespace:StimmingSignalGenerator.MVVM.Views;assembly=StimmingSignalGenerator"
-             xmlns:p="clr-namespace:StimmingSignalGenerator.Generators;assembly=StimmingSignalGenerator"
+             xmlns:p="clr-namespace:StimmingSignalGenerator.NAudio;assembly=StimmingSignalGenerator"
              
              mc:Ignorable="d"
              d:DesignWidth="1000" d:DesignHeight="1000"

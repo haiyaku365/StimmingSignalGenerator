@@ -1,5 +1,5 @@
 ﻿using ReactiveUI;
-using StimmingSignalGenerator.Generators;
+using StimmingSignalGenerator.NAudio;
 using System;
 using System.Collections.Generic;
 using System.Reflection;

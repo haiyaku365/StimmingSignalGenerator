@@ -2,7 +2,7 @@
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
-using StimmingSignalGenerator.Generators;
+using StimmingSignalGenerator.NAudio;
 using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.MVVM.UiHelper;
 using StimmingSignalGenerator.MVVM.ViewModels.Interface;

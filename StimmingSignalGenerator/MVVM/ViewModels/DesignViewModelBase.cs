@@ -1,5 +1,5 @@
 ﻿using Splat;
-using StimmingSignalGenerator.Generators;
+using StimmingSignalGenerator.NAudio;
 using StimmingSignalGenerator.Helper;
 using System;
 using System.Collections.Generic;

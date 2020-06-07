@@ -2,7 +2,8 @@
 using NAudio.Wave;
 using OxyPlot;
 using ReactiveUI;
-using StimmingSignalGenerator.Generators;
+using StimmingSignalGenerator.NAudio;
+using StimmingSignalGenerator.NAudio.OxyPlot;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;

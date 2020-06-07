@@ -1,5 +1,5 @@
 ﻿using NAudio.Wave;
-using StimmingSignalGenerator.Generators;
+using StimmingSignalGenerator.NAudio;
 using StimmingSignalGenerator.MVVM.ViewModels;
 using System;
 using System.Collections.Generic;

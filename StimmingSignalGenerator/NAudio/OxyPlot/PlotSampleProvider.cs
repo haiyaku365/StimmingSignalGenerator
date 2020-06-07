@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace StimmingSignalGenerator.Generators
+namespace StimmingSignalGenerator.NAudio.OxyPlot
 {
    public class PlotSampleProvider : ISampleProvider
    {

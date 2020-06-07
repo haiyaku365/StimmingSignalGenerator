@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace StimmingSignalGenerator.Generators
+namespace StimmingSignalGenerator.NAudio
 {
    // https://raw.githubusercontent.com/naudio/NAudio/master/NAudio/Wave/SampleProviders/SignalGenerator.cs
    /// <summary>

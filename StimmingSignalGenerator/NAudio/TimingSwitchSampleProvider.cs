@@ -6,7 +6,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
 
-namespace StimmingSignalGenerator.Generators
+namespace StimmingSignalGenerator.NAudio
 {
    /// <summary>
    /// Switch SampleProvider base on time

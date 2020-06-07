@@ -1,6 +1,6 @@
 ﻿using NAudio.Wave;
 
-namespace StimmingSignalGenerator.Generators
+namespace StimmingSignalGenerator.NAudio
 {
    /// <summary>
    /// Sample provider supporting adjustable gain

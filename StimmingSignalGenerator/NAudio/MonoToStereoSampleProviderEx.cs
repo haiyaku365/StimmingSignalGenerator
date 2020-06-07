@@ -1,8 +1,7 @@
-﻿using NAudio.Utils;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using System;
 
-namespace StimmingSignalGenerator.Generators
+namespace StimmingSignalGenerator.NAudio
 {
    /// <summary>
    /// Mono to stereo provider with ramp gain
