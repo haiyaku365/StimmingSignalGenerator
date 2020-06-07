@@ -120,16 +120,20 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             basicSignalVM.RootSignalTree.AllSubBasicSignalVMs
                .Connect()
                .Filter(x => x.FullName == poco.FrequencySyncFrom)
+               .Timeout(TimeSpan.FromMinutes(1)) //cancel in 1 min if not find any
                .Take(1)
                .ToCollection()
-               .Subscribe(x =>
-               {
-                  basicSignalVM.IsSyncFreq = true;
-                  basicSignalVM.SelectedLinkableBasicSignalVM = x.First();
-               },
-               //cancel in 1 min if not find any
-               token: new System.Threading.CancellationTokenSource(TimeSpan.FromMinutes(1)).Token
-               );
+               .Subscribe(
+                  onNext: x =>
+                  {
+                     basicSignalVM.IsSyncFreq = true;
+                     basicSignalVM.SelectedLinkableBasicSignalVM = x.First();
+                  },
+                  onError: x =>
+                  {
+                     if (x is TimeoutException) return;
+                     throw x;
+                  });
          }
 
          foreach (var am in poco.AMSignals)

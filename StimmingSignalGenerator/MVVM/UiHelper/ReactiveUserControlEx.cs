@@ -16,9 +16,18 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
       /// </summary>
       /// <param name="action"></param>
       protected void SafeViewModel(Action<TViewModel> action)
-         => this.WhenAnyValue(x => x.ViewModel)
+      {
+         this.WhenAnyValue(x => x.ViewModel)
             .Where(x => x != null)
+            .Timeout(TimeSpan.FromMinutes(1)) //cancel in 1 min if not find any
             .Take(1)
-            .Subscribe(x => action(x), token: new CancellationTokenSource(TimeSpan.FromMinutes(1)).Token);
+            .Subscribe(
+               onNext: x => action(x),
+               onError: x =>
+               {
+                  if (x is TimeoutException) return;
+                  throw x;
+               });
+      }
    }
 }
