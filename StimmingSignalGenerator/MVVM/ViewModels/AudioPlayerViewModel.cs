@@ -1,5 +1,6 @@
 ﻿using NAudio.CoreAudioApi;
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using ReactiveUI;
 using Splat;
 using StimmingSignalGenerator.NAudio;
@@ -30,58 +31,44 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReactiveCommand<Unit, Unit> StopCommand { get; }
       public ReactiveCommand<Unit, Unit> TogglePlayCommand { get; }
 
-      public MMDevice[] AudioDevices => audioPlayer.AudioDevices;
-      public MMDevice SelectedAudioDevice { get => selectedAudioDevice; set => this.RaiseAndSetIfChanged(ref selectedAudioDevice, value); }
-      public int Latency { get => latency; set => this.RaiseAndSetIfChanged(ref latency, value); }
+      public IAudioPlayer AudioPlayer { get; }
       public AppState AppState { get; }
 
-      private int latency;
-      private MMDevice selectedAudioDevice;
-      private readonly AudioPlayer audioPlayer;
       public AudioPlayerViewModel(ISampleProvider sampleProvider)
       {
          AppState = Locator.Current.GetService<AppState>();
 
-         audioPlayer = new AudioPlayer(sampleProvider).DisposeWith(Disposables);
-
-         SelectedAudioDevice = audioPlayer.AudioDevice;
-         Latency = audioPlayer.Latency;
-
-         this.WhenAnyValue(x => x.SelectedAudioDevice)
-            .Subscribe(_ => audioPlayer.AudioDevice = SelectedAudioDevice)
-            .DisposeWith(Disposables);
-         this.WhenAnyValue(x => x.Latency)
-            .Subscribe(_ => audioPlayer.Latency = Latency)
+         AudioPlayer = new WasapiAudioPlayer(sampleProvider.ToWaveProvider16()).DisposeWith(Disposables);
+         this.WhenAnyValue(x => x.AudioPlayer.PlayerStatus)
+            .Subscribe(x => AppState.IsPlaying = x == PlayerStatus.Play)
             .DisposeWith(Disposables);
 
-         PlayCommand = ReactiveCommand.Create(() => Play(), AppState.WhenAnyValue(x => x.IsPlaying, x => !x))
+         PlayCommand = ReactiveCommand.Create(Play,
+            canExecute: AppState.WhenAnyValue(x => x.IsPlaying, selector: x => !x))
             .DisposeWith(Disposables);
-         StopCommand = ReactiveCommand.Create(() => Stop(), AppState.WhenAnyValue(x => x.IsPlaying))
+         StopCommand = ReactiveCommand.Create(Stop,
+            canExecute: AppState.WhenAnyValue(x => x.IsPlaying))
             .DisposeWith(Disposables);
-         TogglePlayCommand = ReactiveCommand.Create(() =>
-         {
-            if (AppState.IsPlaying)
-            {
-               Stop();
-            }
-            else
-            {
-               Play();
-            }
-         }).DisposeWith(Disposables);
+         TogglePlayCommand = ReactiveCommand.Create(TogglePlay,
+            canExecute: this.WhenAnyValue(x => x.AudioPlayer.SelectedAudioDevice, selector: x => !string.IsNullOrEmpty(x)))
+            .DisposeWith(Disposables);
+      }
 
+      public void TogglePlay()
+      {
+         if (AppState.IsPlaying)
+            Stop();
+         else
+            Play();
       }
 
       public void Play()
       {
-         AppState.IsPlaying = true;
-         audioPlayer.Play();
+         AudioPlayer.Play();
       }
-
       public void Stop()
       {
-         AppState.IsPlaying = false;
-         audioPlayer.Stop();
+         AudioPlayer.Stop();
       }
    }
 }
