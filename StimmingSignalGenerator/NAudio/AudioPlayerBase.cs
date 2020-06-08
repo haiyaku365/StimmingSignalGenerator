@@ -16,7 +16,7 @@ namespace StimmingSignalGenerator.NAudio
    public abstract class AudioPlayerBase : ReactiveObject, IAudioPlayer, IDisposable
    {
       /// <summary>
-      /// Sample provider to play. Need to restart player to take effect.
+      /// Wave provider to play. Need to restart player to take effect.
       /// </summary>
       public IWaveProvider WaveProvider { get => waveProvider; set => this.RaiseAndSetIfChanged(ref waveProvider, value); }
       public abstract ReadOnlyObservableCollection<string> AudioDevices { get; }

@@ -38,7 +38,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          AppState = Locator.Current.GetService<AppState>();
 
-         AudioPlayer = new WasapiAudioPlayer(sampleProvider.ToWaveProvider16()).DisposeWith(Disposables);
+         //AudioPlayer = new WasapiAudioPlayer(sampleProvider.ToWaveProvider()).DisposeWith(Disposables);
+         AudioPlayer = new ALAudioPlayer(sampleProvider.ToWaveProvider16()).DisposeWith(Disposables);
          this.WhenAnyValue(x => x.AudioPlayer.PlayerStatus)
             .Subscribe(x => AppState.IsPlaying = x == PlayerStatus.Play)
             .DisposeWith(Disposables);
