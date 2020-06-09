@@ -136,7 +136,7 @@ namespace StimmingSignalGenerator.NAudio.OxyPlot
             }
          }
          xIdx += read;
-         synchronizationContext.Post(_ => PlotModel.InvalidatePlot(true), null);
+         synchronizationContext.Post(_ => PlotModel.InvalidatePlot(false), null);
 
          return read;
       }
@@ -151,7 +151,7 @@ namespace StimmingSignalGenerator.NAudio.OxyPlot
          else
          {
             lineSeries.Decimator = Decimator.Decimate;
-            lineSeries.MinimumSegmentLength = 4;
+            lineSeries.MinimumSegmentLength = 3;
             lineSeries.Aliased = true;
          }
       }
