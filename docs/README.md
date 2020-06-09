@@ -1,6 +1,40 @@
 # StimmingSignalGenerator
 This software basically generate real-time audio signal.  
+### screenshot
+![Window1](v0.3.0.0_1.PNG)
 
+![Window2](v0.3.0.0_2.PNG)
+
+## Running StimmingSignalGenerator
+#### To run on Windows
+1. Install [.NET Core 3.1 Desktop Runtime](https://dot.net).
+2. Download binary in [releases page](https://github.com/haiyaku365/StimmingSignalGenerator/releases)
+3. run exe
+
+#### To run on Linux
+1. Install [.NET Core 3.1 runtime](https://dot.net)
+2. Install OpenAL lib
+```
+sudo apt install libopenal1
+```
+3. Download binary in [releases page](https://github.com/haiyaku365/StimmingSignalGenerator/releases)
+4. run
+```
+dotnet PathToApp/StimmingSignalGenerator.dll
+```
+#### To run from source
+1. Install [.NET Core 3.1 SDK](https://dot.net)
+2. clone
+```
+git clone https://github.com/haiyaku365/StimmingSignalGenerator.git
+```
+3. run
+```
+cd StimmingSignalGenerator/StimmingSignalGenerator
+dotnet run
+```
+
+## Using StimmingSignalGenerator
 #### Basic signal 
 Basic signal can control frequency, gain, 
 zero crossing position and add FM, AM and PM.
@@ -47,7 +81,4 @@ Note that save along with playlist.
 #### Default playlist
 When startup it will load first playlist file sort by file name.
 
-### screenshot
-![Window1](v0.3.0.0_1.PNG)
 
-![Window2](v0.3.0.0_2.PNG)
