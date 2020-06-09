@@ -10,7 +10,13 @@
              d:DataContext="{x:Static vm:DesignAudioPlayerViewModel.Data}"
              
              x:Class="StimmingSignalGenerator.MVVM.Views.AudioPlayerView">
-  <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+  <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Background="Transparent">
+    <StackPanel.ContextMenu>
+      <ContextMenu>
+        <MenuItem Header="Switch to Wasapi (Windows only)" Command="{Binding SwitchToWasapiAudioPlayerCommand}" />
+        <MenuItem Header="Switch to OpenAL (Beta)" Command="{Binding SwitchToALAudioPlayerCommand}"/>
+      </ContextMenu>
+    </StackPanel.ContextMenu>
     <NumericUpDown ToolTip.Tip="Latency (mSec)" IsEnabled="{Binding !AppState.IsPlaying}"
                    Minimum="20" Maximum="500" ClipValueToMinMax="True" Value="{Binding AudioPlayer.Latency}" />
     <ComboBox Items="{Binding AudioPlayer.AudioDevices}" IsEnabled="{Binding !AppState.IsPlaying}"
