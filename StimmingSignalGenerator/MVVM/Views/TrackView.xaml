@@ -16,12 +16,12 @@
     <!--<Binding Source="{x:Static vm:DesignTrackViewModel.StereoData}" />-->
   </Design.DataContext>
   <DockPanel>
-    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5" Margin="0 0 0 5">
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="5" Margin="3 3 0 5">
       <ComboBox Items="{Binding Source={helper:EnumBindingSource {x:Type p:GeneratorModeType}}}"
                 SelectedItem="{Binding GeneratorMode}"/>
       <v:EditableTextBlock Text="{Binding Name}" />
     </StackPanel>
-    <DockPanel DockPanel.Dock="Top">
+    <DockPanel DockPanel.Dock="Top" Margin="0 0 0 1">
       <!-- Mono -->
       <Border DockPanel.Dock="Top" IsVisible="{Binding !GeneratorMode}"
               BorderBrush="Goldenrod" BorderThickness="1" CornerRadius="2">

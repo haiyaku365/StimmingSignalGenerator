@@ -27,7 +27,7 @@
         </oxy:PlotView.DefaultTrackerTemplate>
       </oxy:PlotView>
     </Border>
-    <ToggleButton Grid.Column="0" Margin="5 0 0 0" Content="HD Plot" IsChecked="{Binding IsHighDefinition}" />
+    <ToggleButton Grid.Column="0" Margin="0 0 0 0" Content="HD Plot" IsChecked="{Binding IsHighDefinition}" />
     <ToggleButton Grid.Column="1" Margin="5 0 0 0" Content="Plot enable" IsChecked="{Binding IsPlotEnable}" />
   </Grid>
 </UserControl>

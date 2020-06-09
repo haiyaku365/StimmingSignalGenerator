@@ -106,13 +106,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          {
             case AudioPlayerType.OpenAL:
                if (AudioPlayer != null && AudioPlayer is ALAudioPlayer) return;
-               AudioPlayer = CreateAudioPlayer(audioPlayerType);
                break;
             case AudioPlayerType.Wasapi:
                if (AudioPlayer != null && AudioPlayer is WasapiAudioPlayer) return;
-               AudioPlayer = CreateAudioPlayer(audioPlayerType);
                break;
+            case AudioPlayerType.None:
+               return;
          }
+         AudioPlayer = CreateAudioPlayer(audioPlayerType);
       }
 
       public AudioPlayerType GetAudioPlayerType(IAudioPlayer audioPlayer)
@@ -128,7 +129,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return audioPlayerType switch
          {
             AudioPlayerType.Wasapi => new WasapiAudioPlayer(sampleProvider.ToWaveProvider()).DisposeWith(Disposables),
-            AudioPlayerType.OpenAL => new ALAudioPlayer(sampleProvider.ToWaveProvider16()).DisposeWith(Disposables)
+            AudioPlayerType.OpenAL => new ALAudioPlayer(sampleProvider.ToWaveProvider16()).DisposeWith(Disposables),
+            AudioPlayerType.None => null,
+            _ => throw new NotImplementedException()
          };
       }
 
