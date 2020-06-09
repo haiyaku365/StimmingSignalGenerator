@@ -18,17 +18,13 @@
   </Design.DataContext>
   <DockPanel Margin="10">
     <Grid DockPanel.Dock="Top" Margin="0 5"
-          ColumnDefinitions="auto,auto,auto,*,auto,auto">
-      <ToggleButton Grid.Column="0" Margin="5 0"
-                    Content="HD Plot" IsChecked="{Binding AppState.IsHDPlot}" />
-      <ToggleButton Grid.Column="1" Margin="5 0"
-                    Content="Plot enable" IsChecked="{Binding AppState.IsPlotEnable}" />
-      <v:PlotSampleView Grid.Column="2"
-                        Height="32" Width="200"
+          ColumnDefinitions="auto,*,auto,auto">
+      <v:PlotSampleView Grid.Column="0"
+                        Height="32" 
                         DataContext="{Binding PlotSampleViewModel}" />
-      <v:AudioPlayerView Grid.Column="4" DataContext="{Binding AudioPlayerViewModel}"
+      <v:AudioPlayerView Grid.Column="2" DataContext="{Binding AudioPlayerViewModel}"
                          VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
-      <Menu Grid.Column="5" Margin="10 0 0 0">
+      <Menu Grid.Column="3" Margin="10 0 0 0">
         <MenuItem Width="28" Height="28">
           <MenuItem.Header>
             <Viewbox Margin="-3">

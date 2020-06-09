@@ -50,14 +50,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             new PlotSampleViewModel(new PlotSampleProvider(PlaylistViewModel.FinalSample))
             .DisposeWith(Disposables);
 
-         AppState
-            .WhenAnyValue(x => x.IsHDPlot)
-            .Subscribe(x => PlotSampleViewModel.IsHighDefinition = x)
-            .DisposeWith(Disposables);
-         AppState
-            .WhenAnyValue(x => x.IsPlotEnable)
-            .Subscribe(x => PlotSampleViewModel.IsPlotEnable = x)
-            .DisposeWith(Disposables);
          AudioPlayerViewModel =
             new AudioPlayerViewModel(PlotSampleViewModel.SampleSignal)
             .DisposeWith(Disposables);

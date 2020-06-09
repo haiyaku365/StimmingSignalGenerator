@@ -16,10 +16,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       protected static void PrepareAppState()
       {
          Locator.CurrentMutable.RegisterConstant(
-            new AppState
-            {
-               IsPlotEnable = true
-            });
+            new AppState { });
       }
    }
 }

@@ -13,17 +13,21 @@
     <Binding Source="{x:Static vm:DesignPlotSampleViewModel.MonoData}" />
     <!--<Binding Source="{x:Static vm:DesignPlotSampleViewModel.StereoData}" />-->
   </Design.DataContext>
-  <Border  Margin="0 -20" >
-    <oxy:PlotView Grid.Column="2" Margin="-25 0 1 -25"
-                  Width="{Binding $parent.Bounds.Width}"
-                  Height="{Binding $parent.Bounds.Height}"
-                  Model="{Binding PlotModel}">
-      <!-- use empty template to diable tracker -->
-      <oxy:PlotView.DefaultTrackerTemplate>
-        <ControlTemplate>
-          <Panel />
-        </ControlTemplate>
-      </oxy:PlotView.DefaultTrackerTemplate>
-    </oxy:PlotView>
-  </Border>
+  <Grid ColumnDefinitions="auto,auto,auto">
+    <Border Grid.Column="2" Margin="0 -20"  Width="200" Height="70">
+      <oxy:PlotView Grid.Column="2" Margin="-20 0 0 -25"
+                    Width="{Binding $parent.Bounds.Width}"
+                    Height="{Binding $parent.Bounds.Height}"
+                    Model="{Binding PlotModel}">
+        <!-- use empty template to diable tracker -->
+        <oxy:PlotView.DefaultTrackerTemplate>
+          <ControlTemplate>
+            <Panel />
+          </ControlTemplate>
+        </oxy:PlotView.DefaultTrackerTemplate>
+      </oxy:PlotView>
+    </Border>
+    <ToggleButton Grid.Column="0" Margin="5 0 0 0" Content="HD Plot" IsChecked="{Binding IsHighDefinition}" />
+    <ToggleButton Grid.Column="1" Margin="5 0 0 0" Content="Plot enable" IsChecked="{Binding IsPlotEnable}" />
+  </Grid>
 </UserControl>
