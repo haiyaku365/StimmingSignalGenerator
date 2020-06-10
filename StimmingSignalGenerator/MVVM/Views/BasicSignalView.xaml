@@ -54,7 +54,9 @@
         <RowDefinition />
         <RowDefinition />
       </Grid.RowDefinitions>
-      <Grid Grid.Row="0" Grid.IsSharedSizeScope="True">
+      <Grid Grid.Row="0" >
+        <!-- Grid.IsSharedSizeScope is buggy and cause size swing. -->
+        <!--<Grid.IsSharedSizeScope>True</Grid.IsSharedSizeScope>-->
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="32" />
           <ColumnDefinition />
@@ -90,15 +92,15 @@
         <!-- Freq -->
         <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}"
                    Text="Freq" ToolTip.Tip="Frequency" />
-        <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}">
+        <Panel Grid.Row="2" Grid.Column="1" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNull}}">
           <v:ControlSliderView DataContext="{Binding FreqControlSliderViewModel}"/>
-        </Grid>
+        </Panel>
         <!-- PShift -->
         <TextBlock Grid.Row="2" Grid.Column="0" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}"
                    Text="PShift" ToolTip.Tip="Phase shift" />
-        <Grid Grid.Row="2" Grid.Column="1" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}">
+        <Panel Grid.Row="2" Grid.Column="1" IsVisible="{Binding SelectedLinkableBasicSignalVM, Converter={x:Static ObjectConverters.IsNotNull}}">
           <v:ControlSliderView DataContext="{Binding PhaseShiftControlSliderViewModel}"/>
-        </Grid>
+        </Panel>
         <!-- Vol -->
         <TextBlock Grid.Row="3" Grid.Column="0"
                    Text="Vol" ToolTip.Tip="Volume" />
