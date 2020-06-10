@@ -302,7 +302,9 @@ namespace StimmingSignalGenerator.NAudio
                case BasicSignalType.SawTooth:
                case BasicSignalType.Triangle:
                case BasicSignalType.Square:
-                  x %= Period;
+                  //Canot use % here x < 0 will cause SampleSaw calc error
+                  if (x < 0) x += Period; //phase shift to the past
+                  else if (x > Period) x -= Period; // phase shift to the future
 
                   isBeforeCrossingZero = 0 <= x && x < zeroCrossingPoint;
                   //bool isAfterCrossingZero = zeroCrossingPoint <= x && x < period;
