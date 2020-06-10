@@ -47,6 +47,12 @@ namespace StimmingSignalGenerator.NAudio
          AMSignals = new List<BasicSignal>();
          FMSignals = new List<BasicSignal>();
          PMSignals = new List<BasicSignal>();
+
+         //init noise
+         for (int i = 0; i < noiseValue.Length; i++)
+         {
+            noiseValue[i] = SampleWhite();
+         }
       }
 
       /// <summary>
@@ -62,7 +68,6 @@ namespace StimmingSignalGenerator.NAudio
       #region Frequency and Phase field, prop
       /// <summary>
       /// Frequency for the Generator. (Hz)
-      /// Noise ignore this
       /// </summary>
       public double Frequency
       {
@@ -92,6 +97,7 @@ namespace StimmingSignalGenerator.NAudio
       public double PhaseStepDelta { get; private set; }
       public double Phase { get; private set; }
       private double Period => WaveFormat.SampleRate;
+      private bool isPeriodCycle;
       /// <summary>
       /// Position when signal cross zero default 0.5 (0.0 to 1.0)
       /// Noise ignore this
@@ -183,6 +189,7 @@ namespace StimmingSignalGenerator.NAudio
       // Random Number for the White Noise & Pink Noise Generator
       private readonly Random random = new Random();
       private readonly double[] pinkNoiseBuffer = new double[7];
+      private readonly double[] noiseValue = new double[4];
       #endregion
 
       /// <summary>
@@ -199,7 +206,9 @@ namespace StimmingSignalGenerator.NAudio
          double beforeZCShift = 0;
          double afterZCFrequencyFactor = 1 / (1 - ZeroCrossingPosition);
          double afterZCShift = -Period;
-         double x, frequencyFactor, shift;
+         double x = 0, frequencyFactor = 0, shift = 0;
+         bool isBeforeCrossingZero = true;
+         double noisePre, noisePost;
 
          // Calc gainStepDelta
          rampGain.CalculateGainStepDelta(count);
@@ -286,40 +295,48 @@ namespace StimmingSignalGenerator.NAudio
          for (int sampleCount = offset; sampleCount < count; sampleCount++)
          {
             //calculate common variable
-            x = (Phase + ((PhaseShift + aggregatePMBuffer[sampleCount]) * Period)) % Period;
+            x = Phase + ((PhaseShift + aggregatePMBuffer[sampleCount]) * Period);
+            switch (Type)
+            {
+               case BasicSignalType.Sin:
+               case BasicSignalType.SawTooth:
+               case BasicSignalType.Triangle:
+               case BasicSignalType.Square:
+                  x %= Period;
 
-            bool isBeforeCrossingZero = 0 <= x && x < zeroCrossingPoint;
-            //bool isAfterCrossingZero = zeroCrossingPoint <= x && x < period;
-            if (isBeforeCrossingZero)
-            {
-               frequencyFactor = beforeZCFrequencyFactor;
-               shift = beforeZCShift;
-            }
-            else //if (isAfterCrossingZero)
-            {
-               frequencyFactor = afterZCFrequencyFactor;
-               shift = afterZCShift;
+                  isBeforeCrossingZero = 0 <= x && x < zeroCrossingPoint;
+                  //bool isAfterCrossingZero = zeroCrossingPoint <= x && x < period;
+                  if (isBeforeCrossingZero)
+                  {
+                     frequencyFactor = beforeZCFrequencyFactor;
+                     shift = beforeZCShift;
+                  }
+                  else //if (isAfterCrossingZero)
+                  {
+                     frequencyFactor = afterZCFrequencyFactor;
+                     shift = afterZCShift;
+                  }
+                  break;
+               case BasicSignalType.Pink:
+               case BasicSignalType.White:
+               default:
+                  break;
             }
 
             switch (Type)
             {
                case BasicSignalType.Sin:
-
                   // Sinus Generator
                   sampleValue = CurrentGain * SampleSin(x, frequencyFactor, shift);
                   break;
 
                case BasicSignalType.SawTooth:
-
                   // SawTooth Generator
-
                   sampleValue = CurrentGain * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
                   break;
 
                case BasicSignalType.Triangle:
-
                   // Triangle Generator
-
                   sampleValue = -2 * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
                   if (sampleValue > 1)
                      sampleValue = 2 - sampleValue;
@@ -327,13 +344,10 @@ namespace StimmingSignalGenerator.NAudio
                      sampleValue = -2 - sampleValue;
 
                   sampleValue *= CurrentGain;
-
                   break;
 
                case BasicSignalType.Square:
-
                   // Square Generator
-
                   sampleValue =
                      SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero) < 0 ?
                         CurrentGain : -CurrentGain;
@@ -341,16 +355,46 @@ namespace StimmingSignalGenerator.NAudio
                   break;
 
                case BasicSignalType.Pink:
-
-                  // Pink Noise Generator
-
-                  sampleValue = CurrentGain * SamplePink();
-                  break;
-
                case BasicSignalType.White:
-
+                  // Pink Noise Generator
                   // White Noise Generator
-                  sampleValue = CurrentGain * SampleWhite();
+#pragma warning disable CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
+
+                  // only get new random point when reach new period
+                  if (isPeriodCycle)
+                  {
+                     //keep history for phase shift beyond period
+                     noiseValue[0] = noiseValue[1];
+                     noiseValue[1] = noiseValue[2];
+                     noiseValue[2] = noiseValue[3];
+                     noiseValue[3] = Type switch
+                     {
+                        BasicSignalType.White => SampleWhite(),
+                        BasicSignalType.Pink => SamplePink()
+                     };
+                  }
+
+#pragma warning restore CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
+
+                  if (x < 0) //phase shift to the past
+                  {
+                     x += Period;
+                     noisePre = noiseValue[0];
+                     noisePost = noiseValue[1];
+                  }
+                  else if (x > Period) // phase shift to the future
+                  {
+                     x -= Period;
+                     noisePre = noiseValue[2];
+                     noisePost = noiseValue[3];
+                  }
+                  else
+                  {
+                     noisePre = noiseValue[1];
+                     noisePost = noiseValue[2];
+                  }
+                  // Interpolate between random point
+                  sampleValue = CurrentGain * ((noisePost - noisePre) / Period * x + noisePre);
                   break;
 
                default:
@@ -369,8 +413,25 @@ namespace StimmingSignalGenerator.NAudio
       private void CalculateNextPhase(float fmValue)
       {
          // move to next phase and apply FM
-         Phase += CurrentPhaseStep + fmValue;
-         if (Phase > Period) Phase -= Period;
+         var nextPhaseStep = CurrentPhaseStep + fmValue;
+         switch (Type)
+         {
+            case BasicSignalType.Sin:
+            case BasicSignalType.SawTooth:
+            case BasicSignalType.Triangle:
+            case BasicSignalType.Square:
+               Phase += nextPhaseStep;
+               break;
+            case BasicSignalType.Pink:
+            case BasicSignalType.White:
+               // Noise Phase only go forward if it go backward then freeze
+               Phase += nextPhaseStep > 0 ? nextPhaseStep : 0;
+               break;
+            default:
+               break;
+         }
+         isPeriodCycle = Phase >= Period;
+         if (isPeriodCycle) Phase -= Period;
          if (CurrentPhaseStep != TargetPhaseStep)
          {
             //calculate currentPhaseStep
