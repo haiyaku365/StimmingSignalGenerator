@@ -1,12 +1,14 @@
-﻿using NAudio.Wave;
+﻿using Avalonia.Threading;
+using NAudio.Wave;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading;
+using System.Reactive.Linq;
+
 
 namespace StimmingSignalGenerator.NAudio.OxyPlot
 {
@@ -33,19 +35,26 @@ namespace StimmingSignalGenerator.NAudio.OxyPlot
       }
 
       public WaveFormat WaveFormat => InputSample.WaveFormat;
+      public event EventHandler<OnInvalidatePlotPostedEventArgs> OnInvalidatePlotPosted;
+
+      public int MinPlotUpdateIntervalMilliseconds
+      {
+         get => minPlotUpdateIntervalMilliseconds;
+         set
+         {
+            minPlotUpdateIntervalMilliseconds = value;
+            if (minPlotUpdateIntervalMilliseconds < absoluteMinPlotUpdateIntervalMilliseconds)
+               minPlotUpdateIntervalMilliseconds = absoluteMinPlotUpdateIntervalMilliseconds;
+         }
+      }
 
       private bool isHighDefinition;
       private readonly AliasedLineSeries[] lineSeries;
       private readonly int lineCount;
-      private readonly SynchronizationContext synchronizationContext;
       private static readonly Random rand = new Random();
-      public PlotSampleProvider(
-         ISampleProvider inputSample)
-         : this(inputSample, SynchronizationContext.Current) { }
-
-      public PlotSampleProvider(
-      ISampleProvider inputSample,
-      SynchronizationContext synchronizationContext)
+      private int minPlotUpdateIntervalMilliseconds = absoluteMinPlotUpdateIntervalMilliseconds;
+      public const int absoluteMinPlotUpdateIntervalMilliseconds = 33;
+      public PlotSampleProvider(ISampleProvider inputSample)
       {
          InputSample = inputSample;
          lineCount = inputSample.WaveFormat.Channels;
@@ -96,8 +105,6 @@ namespace StimmingSignalGenerator.NAudio.OxyPlot
               TextColor = OxyColor.FromArgb(0, 0, 0, 0)
            });
 
-         this.synchronizationContext = synchronizationContext;
-
          foreach (var line in lineSeries)
          {
             SetLineHD(line, IsHighDefinition);
@@ -106,6 +113,7 @@ namespace StimmingSignalGenerator.NAudio.OxyPlot
       }
 
       int xIdx;
+
       public int Read(float[] buffer, int offset, int count)
       {
          var read = InputSample.Read(buffer, offset, count);
@@ -136,9 +144,28 @@ namespace StimmingSignalGenerator.NAudio.OxyPlot
             }
          }
          xIdx += read;
-         synchronizationContext.Post(_ => PlotModel.InvalidatePlot(false), null);
+
+         // Only update when time pass to prevent over update and cause ui unresponsive
+         if (stopwatch.ElapsedMilliseconds > MinPlotUpdateIntervalMilliseconds)
+         {
+            Dispatcher.UIThread.Post(() => PlotModel.InvalidatePlot(false));
+            OnInvalidatePlotPosted?.Invoke(this, new OnInvalidatePlotPostedEventArgs(stopwatch.ElapsedMilliseconds));
+            stopwatch.Restart();
+         }
 
          return read;
+      }
+
+      private readonly Stopwatch stopwatch = Stopwatch.StartNew();
+      public class OnInvalidatePlotPostedEventArgs : EventArgs
+      {
+         public OnInvalidatePlotPostedEventArgs(long elapsedMilliseconds)
+         {
+            ElapsedMilliseconds = elapsedMilliseconds;
+         }
+
+         public long ElapsedMilliseconds { get; }
+
       }
       private void SetLineHD(AliasedLineSeries lineSeries, bool isHD)
       {
@@ -155,36 +182,36 @@ namespace StimmingSignalGenerator.NAudio.OxyPlot
             lineSeries.Aliased = true;
          }
       }
-   }
 
-   // Performance friendly LineSeries
-   //https://github.com/oxyplot/oxyplot/issues/1286
-   public class AliasedLineSeries : LineSeries
-   {
-
-      List<ScreenPoint> outputBuffer = null;
-
-      public bool Aliased { get; set; } = true;
-
-      protected override void RenderLine(IRenderContext rc, OxyRect clippingRect, IList<ScreenPoint> pointsToRender)
+      // Performance friendly LineSeries
+      //https://github.com/oxyplot/oxyplot/issues/1286
+      public class AliasedLineSeries : LineSeries
       {
-         var dashArray = this.ActualDashArray;
 
-         if (this.outputBuffer == null)
+         List<ScreenPoint> outputBuffer = null;
+
+         public bool Aliased { get; set; } = true;
+
+         protected override void RenderLine(IRenderContext rc, OxyRect clippingRect, IList<ScreenPoint> pointsToRender)
          {
-            this.outputBuffer = new List<ScreenPoint>(pointsToRender.Count);
+            var dashArray = this.ActualDashArray;
+
+            if (this.outputBuffer == null)
+            {
+               this.outputBuffer = new List<ScreenPoint>(pointsToRender.Count);
+            }
+
+            rc.DrawClippedLine(clippingRect,
+                               pointsToRender,
+                               this.MinimumSegmentLength * this.MinimumSegmentLength,
+                               this.GetSelectableColor(this.ActualColor),
+                               this.StrokeThickness,
+                               dashArray,
+                               this.LineJoin,
+                               this.Aliased,
+                               this.outputBuffer);
+
          }
-
-         rc.DrawClippedLine(clippingRect,
-                            pointsToRender,
-                            this.MinimumSegmentLength * this.MinimumSegmentLength,
-                            this.GetSelectableColor(this.ActualColor),
-                            this.StrokeThickness,
-                            dashArray,
-                            this.LineJoin,
-                            this.Aliased,
-                            this.outputBuffer);
-
       }
    }
 }

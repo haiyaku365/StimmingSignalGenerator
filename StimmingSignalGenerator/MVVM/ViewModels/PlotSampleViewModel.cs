@@ -7,7 +7,8 @@ using StimmingSignalGenerator.NAudio.OxyPlot;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
-using System.Text;
+using System.Reactive.Linq;
+using static StimmingSignalGenerator.NAudio.OxyPlot.PlotSampleProvider;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
@@ -41,10 +42,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public bool IsPlotEnable { get => isPlotEnable; set => this.RaiseAndSetIfChanged(ref isPlotEnable, value); }
       public bool IsHighDefinition { get => isHighDefinition; set => this.RaiseAndSetIfChanged(ref isHighDefinition, value); }
       public ISampleProvider SampleSignal => plotSampleProvider;
+      public long InvalidatePlotPostedElapsedMilliseconds => invalidatePlotPostedElapsedMilliseconds.Value;
+      public int MinPlotUpdateIntervalMilliseconds { get => minPlotUpdateIntervalMilliseconds; set => this.RaiseAndSetIfChanged(ref minPlotUpdateIntervalMilliseconds, value); }
 
       private bool isPlotEnable;
       private bool isHighDefinition;
       private readonly PlotSampleProvider plotSampleProvider;
+      private readonly ObservableAsPropertyHelper<long> invalidatePlotPostedElapsedMilliseconds;
+      private int minPlotUpdateIntervalMilliseconds;
       public PlotSampleViewModel(PlotSampleProvider plotSampleProvider)
       {
          this.plotSampleProvider = plotSampleProvider;
@@ -55,6 +60,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
          this.ObservableForProperty(x => x.IsHighDefinition)
             .Subscribe(x => plotSampleProvider.IsHighDefinition = x.Value)
+            .DisposeWith(Disposables);
+
+         Observable.FromEventPattern<OnInvalidatePlotPostedEventArgs>(
+            h => plotSampleProvider.OnInvalidatePlotPosted += h,
+            h => plotSampleProvider.OnInvalidatePlotPosted -= h)
+            .Select(x => x.EventArgs.ElapsedMilliseconds)
+            .ToProperty(this, nameof(InvalidatePlotPostedElapsedMilliseconds),
+               out invalidatePlotPostedElapsedMilliseconds)
+            .DisposeWith(Disposables);
+         this.ObservableForProperty(x => x.MinPlotUpdateIntervalMilliseconds)
+            .Subscribe(x => plotSampleProvider.MinPlotUpdateIntervalMilliseconds = x.Value)
             .DisposeWith(Disposables);
       }
    }

@@ -13,7 +13,7 @@
     <Binding Source="{x:Static vm:DesignPlotSampleViewModel.MonoData}" />
     <!--<Binding Source="{x:Static vm:DesignPlotSampleViewModel.StereoData}" />-->
   </Design.DataContext>
-  <Grid ColumnDefinitions="auto,auto,auto">
+  <Grid ColumnDefinitions="auto,auto,auto,auto">
     <Border Grid.Column="2" Margin="0 -20"  Width="200" Height="70">
       <oxy:PlotView Grid.Column="2" Margin="-20 0 0 -25"
                     Width="{Binding $parent.Bounds.Width}"
@@ -29,5 +29,6 @@
     </Border>
     <ToggleButton Grid.Column="0" Margin="0 0 0 0" Content="HD Plot" IsChecked="{Binding IsHighDefinition}" />
     <ToggleButton Grid.Column="1" Margin="5 0 0 0" Content="Plot enable" IsChecked="{Binding IsPlotEnable}" />
+    <TextBlock Grid.Column="3" Margin="-15 0 0 0" Foreground="Red" FontWeight="Bold" Name="FpsBlock" />
   </Grid>
 </UserControl>
