@@ -1,9 +1,9 @@
 # StimmingSignalGenerator
 This software basically generate real-time audio signal.  
 ### screenshot
-![Window1](v0.3.0.0_1.PNG)
+![Window1](v0.3.1.0_1.png)
 
-![Window2](v0.3.0.0_2.PNG)
+![Window2](v0.3.1.0_2.png)
 
 ## Running StimmingSignalGenerator
 #### To run on Windows
