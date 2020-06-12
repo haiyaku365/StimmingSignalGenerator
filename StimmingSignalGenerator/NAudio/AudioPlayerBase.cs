@@ -52,14 +52,17 @@ namespace StimmingSignalGenerator.NAudio
          PlayerStatus = PlayerStatus.Play;
          if (player == null)
          {
-            if (!playerStopDisposable?.IsDisposed ?? false) { playerStopDisposable.Dispose(); }
+            playerStopDisposable?.Dispose();
             playerStopDisposable = new CompositeDisposable(2).DisposeWith(Disposables);
 
             player = CreateWavePlayer().DisposeWith(playerStopDisposable);
 
             player.Init(WaveProvider);
             ObservablePlaybackStopped
-               .Subscribe(_ => Stop())
+               .Subscribe(_ => {
+                  playerStopDisposable.Dispose();
+                  player = null;
+               })
                .DisposeWith(playerStopDisposable);
          }
          player.Play();
@@ -74,11 +77,7 @@ namespace StimmingSignalGenerator.NAudio
       virtual public void Stop()
       {
          PlayerStatus = PlayerStatus.Stop;
-         if (player == null)
-            return;
-         playerStopDisposable.Dispose();
-         player.Dispose();
-         player = null;
+         player.Stop();
       }
 
       private CompositeDisposable playerStopDisposable;

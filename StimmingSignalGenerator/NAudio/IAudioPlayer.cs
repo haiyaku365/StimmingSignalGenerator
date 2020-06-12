@@ -13,7 +13,7 @@ namespace StimmingSignalGenerator.NAudio
       ReadOnlyObservableCollection<string> AudioDevices { get; }
       string SelectedAudioDevice { get; set; }
       int Latency { get; set; }
-      public PlayerStatus PlayerStatus { get; }
+      PlayerStatus PlayerStatus { get; }
 
       void Play();
       void Pause();

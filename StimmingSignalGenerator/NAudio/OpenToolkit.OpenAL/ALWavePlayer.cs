@@ -37,29 +37,29 @@ namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
 
       private ALDevice device;
       private ALContext context;
+      private ALFormat sourceALFormat;
       private IWaveProvider sourceProvider;
 
       private readonly SynchronizationContext syncContext;
-      private AutoResetEvent callbackEvent;
+      private AutoResetEvent eventWaitHandle;
 
       private int alSource;
       private int[] alBuffers;
+      private byte[] sourceBuffer;
       public ALWavePlayer(string deviceName)
       {
          DeviceName = deviceName;
 
          syncContext = SynchronizationContext.Current;
       }
+
       public void Init(IWaveProvider waveProvider)
       {
-         if (waveProvider.WaveFormat.Encoding != WaveFormatEncoding.Pcm)
-            throw new ArgumentException("Input wave provider must be PCM", "sourceProvider");
-         if (waveProvider.WaveFormat.BitsPerSample != 16)
-            throw new ArgumentException("Input wave provider must be 16 bit", "sourceProvider");
+         sourceProvider = waveProvider;
+         sourceALFormat = sourceProvider.WaveFormat.ToALFormat();
+         bufferSizeByte = sourceProvider.WaveFormat.ConvertLatencyToByteSize(DesiredLatency);
 
-         callbackEvent = new AutoResetEvent(false);
-
-         bufferSizeByte = waveProvider.WaveFormat.ConvertLatencyToByteSize(DesiredLatency);
+         eventWaitHandle = new AutoResetEvent(false);
 
          CheckAndRaiseStopOnALError();
 
@@ -78,14 +78,13 @@ namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
          AL.Source(alSource, ALSourcef.Gain, 1f);
          CheckAndRaiseStopOnALError();
 
-         sourceProvider = waveProvider;
-
          alBuffers = new int[NumberOfBuffers];
          for (int i = 0; i < NumberOfBuffers; i++)
          {
             AL.GenBuffer(out alBuffers[i]);
             CheckAndRaiseStopOnALError();
          }
+         sourceBuffer = new byte[bufferSizeByte];
          ReadAndQueueBuffers(alBuffers);
       }
 
@@ -94,13 +93,12 @@ namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
          for (int i = 0; i < _alBuffers.Length; i++)
          {
             //read source
-            byte[] buffer = new byte[bufferSizeByte];
-            sourceProvider.Read(buffer, 0, buffer.Length);
+            sourceProvider.Read(sourceBuffer, 0, sourceBuffer.Length);
 
             CheckAndRaiseStopOnALError();
 
             //fill and queue buffer
-            AL.BufferData(_alBuffers[i], ALFormat.Stereo16, buffer, buffer.Length, sourceProvider.WaveFormat.SampleRate);
+            AL.BufferData(_alBuffers[i], sourceALFormat, sourceBuffer, sourceBuffer.Length, sourceProvider.WaveFormat.SampleRate);
             CheckAndRaiseStopOnALError();
             AL.SourceQueueBuffer(alSource, _alBuffers[i]);
             CheckAndRaiseStopOnALError();
@@ -122,14 +120,14 @@ namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
          {
             if (PlaybackState == PlaybackState.Stopped)
             {
-               callbackEvent.Set(); // give the thread a kick
-               ThreadPool.QueueUserWorkItem(state => PlaybackThread(), null);
                PlaybackState = PlaybackState.Playing;
+               eventWaitHandle.Set();
+               ThreadPool.QueueUserWorkItem(state => PlaybackThread(), null);
             }
             else
             {
                PlaybackState = PlaybackState.Playing;
-               callbackEvent.Set(); // give the thread a kick
+               eventWaitHandle.Set();
             }
          }
       }
@@ -139,26 +137,7 @@ namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
          if (PlaybackState != PlaybackState.Stopped)
          {
             PlaybackState = PlaybackState.Stopped;
-
-            callbackEvent.Set();
-
-            CheckAndRaiseStopOnALError();
-
-            AL.SourceStop(alSource);
-            CheckAndRaiseStopOnALError();
-
-            //detach buffer to be able to delete
-            AL.Source(alSource, ALSourcei.Buffer, 0);
-            CheckAndRaiseStopOnALError();
-
-            AL.DeleteBuffers(alBuffers);
-            CheckAndRaiseStopOnALError();
-
-            alBuffers = null;
-
-            AL.DeleteSource(alSource);
-            CheckAndRaiseStopOnALError();
-
+            eventWaitHandle.Set();
          }
       }
 
@@ -199,11 +178,8 @@ namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
                //unqueue
                int[] unqueueBuffers = AL.SourceUnqueueBuffers(alSource, processed);
                CheckAndRaiseStopOnALError();
-               if (PlaybackState == PlaybackState.Playing)
-               {
-                  //refill it back in
-                  ReadAndQueueBuffers(unqueueBuffers);
-               }
+               //refill it back in
+               ReadAndQueueBuffers(unqueueBuffers);
             }
 
             if ((ALSourceState)state != ALSourceState.Playing)
@@ -212,8 +188,24 @@ namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
                CheckAndRaiseStopOnALError();
             }
 
-            callbackEvent.WaitOne(1);
+            eventWaitHandle.WaitOne(1);
          }
+
+         // Stop playing do clean up
+         AL.SourceStop(alSource);
+         CheckAndRaiseStopOnALError();
+
+         //detach buffer to be able to delete
+         AL.Source(alSource, ALSourcei.Buffer, 0);
+         CheckAndRaiseStopOnALError();
+
+         AL.DeleteBuffers(alBuffers);
+         CheckAndRaiseStopOnALError();
+
+         alBuffers = null;
+
+         AL.DeleteSource(alSource);
+         CheckAndRaiseStopOnALError();
       }
 
       /// <summary>
@@ -261,7 +253,7 @@ namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
             if (disposing)
             {
                // dispose managed state (managed objects)
-               Stop();
+               eventWaitHandle.Dispose();
                ALC.MakeContextCurrent(ALContext.Null);
                ALC.DestroyContext(context);
                ALC.CloseDevice(device);
