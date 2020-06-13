@@ -103,10 +103,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          VolControlSliderViewModel = ControlSliderViewModel.BasicVol.DisposeWith(Disposables);
          VolControlSliderViewModel
-            .ObservableForProperty(x => x.Value, skipInitial: false)
-            .Subscribe(x => Volume = x.Value)
+            .WhenAnyValue(x => x.Value)
+            .Subscribe(x => Volume = x)
             .DisposeWith(Disposables);
-         this.ObservableForProperty(x => x.Volume, skipInitial: false)
+         this.WhenAnyValue(x => x.Volume)
             .Subscribe(_ =>
             {
                VolControlSliderViewModel.Value = Volume;

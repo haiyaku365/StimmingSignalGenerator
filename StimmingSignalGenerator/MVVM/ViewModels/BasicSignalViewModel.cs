@@ -207,48 +207,48 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          #region Prop bind
          // bind control slider to prop
          FreqControlSliderViewModel
-            .ObservableForProperty(x => x.Value, skipInitial: false)
-            .Subscribe(x => Frequency = x.Value)
+            .WhenAnyValue(x => x.Value)
+            .Subscribe(x => Frequency = x)
             .DisposeWith(Disposables);
          PhaseShiftControlSliderViewModel
-            .ObservableForProperty(x => x.Value, skipInitial: false)
-            .Subscribe(x => PhaseShift = x.Value)
+            .WhenAnyValue(x => x.Value)
+            .Subscribe(x => PhaseShift = x)
             .DisposeWith(Disposables);
          VolControlSliderViewModel
-            .ObservableForProperty(x => x.Value, skipInitial: false)
-            .Subscribe(x => Volume = x.Value)
+            .WhenAnyValue(x => x.Value)
+            .Subscribe(x => Volume = x)
             .DisposeWith(Disposables);
          ZCPosControlSliderViewModel
-            .ObservableForProperty(x => x.Value, skipInitial: false)
-            .Subscribe(x => ZeroCrossingPosition = x.Value)
+            .WhenAnyValue(x => x.Value)
+            .Subscribe(x => ZeroCrossingPosition = x)
             .DisposeWith(Disposables);
 
          // bind prop to control slider and generator
-         this.ObservableForProperty(x => x.SignalType, skipInitial: false)
+         this.WhenAnyValue(x => x.SignalType)
             .Subscribe(_ => BasicSignal.Type = SignalType)
             .DisposeWith(Disposables);
-         this.ObservableForProperty(x => x.Frequency, skipInitial: false)
+         this.WhenAnyValue(x => x.Frequency)
             .Subscribe(_ =>
             {
                FreqControlSliderViewModel.Value = Frequency;
                BasicSignal.Frequency = Frequency;
             })
             .DisposeWith(Disposables);
-         this.ObservableForProperty(x => x.PhaseShift, skipInitial: false)
+         this.WhenAnyValue(x => x.PhaseShift)
             .Subscribe(_ =>
             {
                PhaseShiftControlSliderViewModel.Value = PhaseShift;
                BasicSignal.PhaseShift = PhaseShift;
             })
             .DisposeWith(Disposables);
-         this.ObservableForProperty(x => x.Volume, skipInitial: false)
+         this.WhenAnyValue(x => x.Volume)
             .Subscribe(_ =>
             {
                VolControlSliderViewModel.Value = Volume;
                BasicSignal.Gain = Volume;
             })
             .DisposeWith(Disposables);
-         this.ObservableForProperty(x => x.ZeroCrossingPosition, skipInitial: false)
+         this.WhenAnyValue(x => x.ZeroCrossingPosition)
             .Subscribe(_ =>
             {
                ZCPosControlSliderViewModel.Value = ZeroCrossingPosition;
