@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Serilog;
 using Splat;
+using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.MVVM.ViewModels;
 using StimmingSignalGenerator.MVVM.Views;
 using System;
@@ -14,6 +15,8 @@ namespace StimmingSignalGenerator
 {
    public class App : Application
    {
+      private static AppState appState;
+
       public override void Initialize()
       {
          AvaloniaXamlLoader.Load(this);
@@ -25,10 +28,17 @@ namespace StimmingSignalGenerator
 
          if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
          {
+            appState = new AppState().DisposeWith(Disposables);
+            Locator.CurrentMutable.RegisterConstant(appState);
+
             desktop.MainWindow = new MainWindow()
             {
                DataContext = new MainWindowViewModel().DisposeWith(Disposables)
             };
+
+            // write setting to file after main window dispose
+            ConfigurationHelper.SaveAppSettingsOnDispose().DisposeWith(Disposables);
+
             Locator.CurrentMutable.RegisterConstant(desktop.MainWindow);
             desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnMainWindowClose;
 

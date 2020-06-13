@@ -1,7 +1,9 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using Avalonia;
 using ReactiveUI;
 using Splat;
+using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.NAudio;
 using StimmingSignalGenerator.NAudio.OxyPlot;
 using System;
@@ -21,7 +23,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       static MainWindowViewModel CreateMainWindowViewModel(GeneratorModeType generatorModeType)
       {
          PrepareAppState();
-         var mainWindowVM = new MainWindowViewModel(loadDefaultPlaylist: false);
+         var mainWindowVM = new MainWindowViewModel(loadDefaultPlaylist: false)
+         {
+            WindowWidth = 900,
+            WindowHeight = 600
+         };
          mainWindowVM.PlaylistViewModel.AddNewTrack();
          mainWindowVM.PlaylistViewModel.TrackVMs[0].GeneratorMode = generatorModeType;
          return mainWindowVM;
@@ -33,10 +39,30 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public PlotSampleViewModel PlotSampleViewModel { get; }
       public PlaylistViewModel PlaylistViewModel { get; }
       public AppState AppState { get; }
+
+      public double WindowWidth { get => windowWidth; set => this.RaiseAndSetIfChanged(ref windowWidth, value); }
+      public double WindowHeight { get => windowHeight; set => this.RaiseAndSetIfChanged(ref windowHeight, value); }
+      
+      // WindowPosition get, set is unlikely
+      // Unable to bind to Window.Position https://github.com/AvaloniaUI/Avalonia/issues/3494
+      // Add binding to Window.Position https://github.com/AvaloniaUI/Avalonia/pull/3521
+
       public string Title => $"Stimming Signal Generator {AppState.Version}";
 
+      private double windowWidth;
+      private double windowHeight;
       public MainWindowViewModel(bool loadDefaultPlaylist = true)
       {
+         WindowWidth = ConfigurationHelper.GetConfigOrDefault(nameof(WindowWidth), 900d);
+         ConfigurationHelper
+            .AddUpdateAppSettingsOnDispose(nameof(WindowWidth), () => WindowWidth.ToString())
+            .DisposeWith(Disposables);
+
+         WindowHeight = ConfigurationHelper.GetConfigOrDefault(nameof(WindowHeight), 600d);
+         ConfigurationHelper
+            .AddUpdateAppSettingsOnDispose(nameof(WindowHeight), () => WindowHeight.ToString())
+            .DisposeWith(Disposables);
+
          AppState = Locator.Current.GetService<AppState>();
          PlaylistViewModel = new PlaylistViewModel().DisposeWith(Disposables);
          if (loadDefaultPlaylist)

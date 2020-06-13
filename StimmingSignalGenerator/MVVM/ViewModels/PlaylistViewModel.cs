@@ -18,6 +18,8 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using StimmingSignalGenerator.Helper;
+using System.Text.Json;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
@@ -87,6 +89,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private string SavePath;
       public PlaylistViewModel()
       {
+         IsTimingMode = ConfigurationHelper.GetConfigOrDefault(nameof(IsTimingMode), false);
+         ConfigurationHelper
+            .AddUpdateAppSettingsOnDispose(nameof(IsTimingMode), () => IsTimingMode.ToString())
+            .DisposeWith(Disposables);
+
          AppState = Locator.Current.GetService<AppState>();
 
          TrackVMsSourceList = new SourceList<TrackViewModel>().DisposeWith(Disposables);
@@ -128,6 +135,15 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          MasterVolVM = ControlSliderViewModel.BasicVol.DisposeWith(Disposables);
          MasterVolVM.WhenAnyValue(vm => vm.Value)
             .Subscribe(m => volumeSampleProvider.Volume = (float)m)
+            .DisposeWith(Disposables);
+
+         var MasterVolVMPocoStr = ConfigurationHelper.GetConfigOrDefault(nameof(MasterVolVM), string.Empty);
+         if (!string.IsNullOrEmpty(MasterVolVMPocoStr))
+         {
+            MasterVolVM.SetToPOCO(JsonSerializer.Deserialize<POCOs.ControlSlider>(MasterVolVMPocoStr));
+         }
+         ConfigurationHelper
+            .AddUpdateAppSettingsOnDispose(nameof(MasterVolVM), () => JsonSerializer.Serialize(MasterVolVM.ToPOCO()))
             .DisposeWith(Disposables);
 
          this.WhenAnyValue(x => x.IsTimingMode, x => x.PlayingTrackVM)

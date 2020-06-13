@@ -9,8 +9,7 @@
         mc:Ignorable="d"
         x:Class="StimmingSignalGenerator.MVVM.Views.MainWindow"
         
-        d:DesignHeight="1000"
-        Width="900"
+        Width="{Binding WindowWidth,Mode=TwoWay}" Height="{Binding WindowHeight,Mode=TwoWay}"
         Title="{Binding Title}">
   <Design.DataContext>
     <Binding Source="{x:Static vm:DesignMainWindowViewModel.MonoData}" />
@@ -20,7 +19,7 @@
     <Grid DockPanel.Dock="Top" Margin="0 0 0 5"
           ColumnDefinitions="auto,*,auto,auto">
       <v:PlotSampleView Grid.Column="0"
-                        Height="32" 
+                        Height="32"
                         DataContext="{Binding PlotSampleViewModel}" />
       <v:AudioPlayerView Grid.Column="2" DataContext="{Binding AudioPlayerViewModel}"
                          VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>

@@ -3,6 +3,7 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using ReactiveUI;
 using Splat;
+using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.NAudio;
 using System;
 using System.Collections.Generic;
@@ -48,9 +49,17 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          AppState = Locator.Current.GetService<AppState>();
 
+         ConfigurationHelper
+            .AddUpdateAppSettingsOnDispose(nameof(CurrentAudioPlayerType), () => CurrentAudioPlayerType.ToString())
+            .DisposeWith(Disposables);
+
          if (AppState.OSPlatform == OSPlatform.Windows)
          {
-            SwitchAudioPlayer(AudioPlayerType.Wasapi);
+            var audioPlayerType = 
+               ConfigurationHelper.GetConfigOrDefault(
+                  nameof(CurrentAudioPlayerType),
+                  AudioPlayerType.Wasapi);
+            SwitchAudioPlayer(audioPlayerType);
          }
          else
          {
