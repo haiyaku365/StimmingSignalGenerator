@@ -1,12 +1,7 @@
-﻿using NAudio.CoreAudioApi;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
+﻿using NAudio.Wave;
 using StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL;
-using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
 namespace StimmingSignalGenerator.NAudio

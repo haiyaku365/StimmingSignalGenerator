@@ -29,7 +29,7 @@ namespace StimmingSignalGenerator.NAudio
          WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(source.WaveFormat.SampleRate, 2);
       }
 
-      public void ForceSetVolume(double leftVol,double rightVol)
+      public void ForceSetVolume(double leftVol, double rightVol)
       {
          leftRampGain.ForceSetGain(leftVol);
          rightRampGain.ForceSetGain(rightVol);

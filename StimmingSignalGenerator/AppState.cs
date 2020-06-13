@@ -1,12 +1,9 @@
 ﻿using ReactiveUI;
 using StimmingSignalGenerator.Helper;
-using StimmingSignalGenerator.NAudio;
 using System;
-using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace StimmingSignalGenerator
 {

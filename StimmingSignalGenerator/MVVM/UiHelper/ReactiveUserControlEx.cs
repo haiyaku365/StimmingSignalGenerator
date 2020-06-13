@@ -1,10 +1,7 @@
 ﻿using Avalonia.ReactiveUI;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading;
 
 namespace StimmingSignalGenerator.MVVM.UiHelper
 {

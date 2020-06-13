@@ -1,15 +1,10 @@
-﻿using DynamicData;
-using NAudio.CoreAudioApi;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
+﻿using NAudio.Wave;
 using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 
 namespace StimmingSignalGenerator.NAudio
 {
@@ -59,7 +54,8 @@ namespace StimmingSignalGenerator.NAudio
 
             player.Init(WaveProvider);
             ObservablePlaybackStopped
-               .Subscribe(_ => {
+               .Subscribe(_ =>
+               {
                   playerStopDisposable.Dispose();
                   player = null;
                })

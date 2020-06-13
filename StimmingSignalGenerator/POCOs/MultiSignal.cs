@@ -1,9 +1,4 @@
-﻿using NAudio.Wave;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
 
 namespace StimmingSignalGenerator.POCOs
 {

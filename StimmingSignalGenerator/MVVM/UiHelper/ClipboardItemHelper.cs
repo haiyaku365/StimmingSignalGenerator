@@ -9,8 +9,8 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
    static class ClipboardItemHelper
    {
       public static async Task AddFromClipboard(
-         this SourceList<BasicSignalViewModel> sourceList, 
-         ISignalTree parent, 
+         this SourceList<BasicSignalViewModel> sourceList,
+         ISignalTree parent,
          string namePrefix,
          CompositeDisposable disposable)
       {

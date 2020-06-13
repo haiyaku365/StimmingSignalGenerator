@@ -3,13 +3,10 @@ using Avalonia.Controls;
 using Avalonia.Controls.Generators;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using ReactiveUI;
 using System;
-using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.UiHelper
 {

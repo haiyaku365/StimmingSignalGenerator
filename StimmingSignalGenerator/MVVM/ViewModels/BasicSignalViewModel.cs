@@ -1,11 +1,10 @@
 ﻿using Avalonia.Media;
 using DynamicData;
-using DynamicData.Binding;
 using ReactiveUI;
-using StimmingSignalGenerator.NAudio;
 using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.MVVM.UiHelper;
 using StimmingSignalGenerator.MVVM.ViewModels.Interface;
+using StimmingSignalGenerator.NAudio;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

@@ -1,24 +1,21 @@
 ﻿using Avalonia;
+using DynamicData;
 using NAudio.Wave;
 using ReactiveUI;
 using Splat;
-using StimmingSignalGenerator.FileService;
-using StimmingSignalGenerator.NAudio;
+using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.MVVM.ViewModels.Interface;
+using StimmingSignalGenerator.NAudio;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
-using System.Reactive.Threading.Tasks;
-using System.Text;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text.Json;
 using System.Threading.Tasks;
-using StimmingSignalGenerator.Helper;
-using System.Reactive.Linq;
-using DynamicData;
-using System.Collections.ObjectModel;
-using System.Reactive.Subjects;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {

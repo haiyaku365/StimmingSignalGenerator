@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ReactiveUI;
+using StimmingSignalGenerator.Helper;
+using System;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using ReactiveUI;
-using Splat;
-using StimmingSignalGenerator.Helper;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {

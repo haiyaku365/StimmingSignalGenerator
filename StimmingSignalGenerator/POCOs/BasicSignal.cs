@@ -1,9 +1,5 @@
-﻿using NAudio.Wave;
-using StimmingSignalGenerator.NAudio;
-using StimmingSignalGenerator.MVVM.ViewModels;
-using System;
+﻿using StimmingSignalGenerator.NAudio;
 using System.Collections.Generic;
-using System.Text;
 
 namespace StimmingSignalGenerator.POCOs
 {

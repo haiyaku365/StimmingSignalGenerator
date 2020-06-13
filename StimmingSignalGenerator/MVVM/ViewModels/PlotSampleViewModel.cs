@@ -6,7 +6,6 @@ using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.NAudio;
 using StimmingSignalGenerator.NAudio.OxyPlot;
 using System;
-using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using static StimmingSignalGenerator.NAudio.OxyPlot.PlotSampleProvider;

@@ -1,11 +1,10 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using ReactiveUI;
+using StimmingSignalGenerator.MVVM.UiHelper;
+using StimmingSignalGenerator.MVVM.ViewModels;
 using System;
 using System.Reactive.Disposables;
-using StimmingSignalGenerator.MVVM.ViewModels;
-using StimmingSignalGenerator.MVVM.UiHelper;
 
 namespace StimmingSignalGenerator.MVVM.Views
 {

@@ -3,7 +3,6 @@ using StimmingSignalGenerator.MVVM.ViewModels.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace StimmingSignalGenerator.MVVM.UiHelper
@@ -25,7 +24,7 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
          vm.SetName(namePrefix, sourceList);
       }
 
-      public static void RemoveAndMaintainName<T>(this T vm, 
+      public static void RemoveAndMaintainName<T>(this T vm,
          string namePrefix, SourceList<T> sourceList)
          where T : INamable
       {

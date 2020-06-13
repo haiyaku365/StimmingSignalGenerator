@@ -1,18 +1,12 @@
-﻿using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
-using Avalonia;
+﻿using Avalonia;
 using ReactiveUI;
 using Splat;
 using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.NAudio;
 using StimmingSignalGenerator.NAudio.OxyPlot;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Text;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {
@@ -42,7 +36,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public double WindowWidth { get => windowWidth; set => this.RaiseAndSetIfChanged(ref windowWidth, value); }
       public double WindowHeight { get => windowHeight; set => this.RaiseAndSetIfChanged(ref windowHeight, value); }
-      
+
       // WindowPosition get, set is unlikely
       // Unable to bind to Window.Position https://github.com/AvaloniaUI/Avalonia/issues/3494
       // Add binding to Window.Position https://github.com/AvaloniaUI/Avalonia/pull/3521

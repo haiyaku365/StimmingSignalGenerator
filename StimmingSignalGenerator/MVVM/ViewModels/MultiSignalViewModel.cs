@@ -1,20 +1,12 @@
-﻿using DynamicData;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
+﻿using NAudio.Wave;
 using ReactiveUI;
-using StimmingSignalGenerator.NAudio;
-using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.MVVM.UiHelper;
 using StimmingSignalGenerator.MVVM.ViewModels.Interface;
+using StimmingSignalGenerator.NAudio;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
 {

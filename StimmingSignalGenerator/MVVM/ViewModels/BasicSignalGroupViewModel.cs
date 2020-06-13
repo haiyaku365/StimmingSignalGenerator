@@ -1,20 +1,13 @@
-﻿using Avalonia.Media;
-using DynamicData;
-using DynamicData.Binding;
+﻿using DynamicData;
 using ReactiveUI;
 using Splat;
-using StimmingSignalGenerator.NAudio;
-using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.MVVM.UiHelper;
 using StimmingSignalGenerator.MVVM.ViewModels.Interface;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels

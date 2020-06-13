@@ -1,10 +1,6 @@
-﻿using NAudio.Wave;
-using ReactiveUI;
+﻿using ReactiveUI;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Reactive;
-using System.Text;
 
 namespace StimmingSignalGenerator.NAudio
 {

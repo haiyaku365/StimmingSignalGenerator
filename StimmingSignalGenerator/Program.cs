@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Logging.Serilog;
 using Avalonia.ReactiveUI;
-using Splat;
 
 namespace StimmingSignalGenerator
 {
