@@ -48,6 +48,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          ConfigurationHelper
             .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.CurrentAudioPlayerType, () => CurrentAudioPlayerType.ToString())
             .DisposeWith(Disposables);
+         ConfigurationHelper
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.Latency, () => AudioPlayer.Latency.ToString())
+            .DisposeWith(Disposables);
 
          if (AppState.OSPlatform == OSPlatform.Windows)
          {
@@ -107,6 +110,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public void SwitchAudioPlayer(AudioPlayerType audioPlayerType)
       {
+         // Not switch if already is that type
          switch (audioPlayerType)
          {
             case AudioPlayerType.OpenAL:
@@ -116,9 +120,24 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                if (AudioPlayer != null && AudioPlayer is WasapiAudioPlayer) return;
                break;
             case AudioPlayerType.None:
+            default:
                return;
          }
+
+         int latency;
+         if (AudioPlayer == null)
+         {
+            // Load form config if init
+            latency = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.Latency, AudioPlayerBase.DefaultLatency);
+         }
+         else
+         {
+            // Load from previous AudioPlayer
+            latency = AudioPlayer.Latency;
+         }
+
          AudioPlayer = CreateAudioPlayer(audioPlayerType);
+         AudioPlayer.Latency = latency;
       }
 
       public AudioPlayerType GetAudioPlayerType(IAudioPlayer audioPlayer)

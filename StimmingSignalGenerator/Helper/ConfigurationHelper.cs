@@ -12,6 +12,9 @@ namespace StimmingSignalGenerator.Helper
       public static double GetConfigOrDefault(string key, double defaultValue)
          => double.TryParse(ConfigurationManager.AppSettings[key], out double confValue) ?
             confValue : defaultValue;
+      public static int GetConfigOrDefault(string key, int defaultValue)
+         => int.TryParse(ConfigurationManager.AppSettings[key], out int confValue) ?
+            confValue : defaultValue;
       public static TEnum GetConfigOrDefault<TEnum>(string key, TEnum defaultValue) where TEnum : struct
          => Enum.TryParse(ConfigurationManager.AppSettings[key], out TEnum confValue) ?
             confValue :

@@ -42,6 +42,7 @@ namespace StimmingSignalGenerator
          internal const string IsHighDefinition = "HighDefinition";
          internal const string CurrentAudioPlayerType = "AudioPlayerType";
          internal const string MasterVolumeVM = "MasterVolume";
+         internal const string Latency = "Latency";
       }
    }
 }
