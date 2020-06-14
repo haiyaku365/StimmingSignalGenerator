@@ -257,7 +257,21 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public async Task LoadDefaultAsync()
       {
-         var (playlist, savePath) = await PlaylistFile.LoadFirstFileAsync();
+         POCOs.Playlist playlist;
+         // Try load playlist before exit if exist
+         string savePath = ConfigurationHelper.GetConfigOrDefault(nameof(PlaylistViewModel), string.Empty);
+
+         // Save playlist path when exit
+         ConfigurationHelper
+            .AddUpdateAppSettingsOnDispose(nameof(PlaylistViewModel), () => SavePath?.ToString() ?? string.Empty)
+            .DisposeWith(Disposables);
+
+         playlist = await PlaylistFile.LoadAsync(savePath);
+         if (playlist == null)
+         {
+            // Load first file if failed
+            (playlist, savePath) = await PlaylistFile.LoadFirstFileAsync();
+         }
          LoadFromPoco(playlist, savePath);
       }
 
