@@ -30,5 +30,18 @@ namespace StimmingSignalGenerator
          internal const string PlaylistNamePrefix = "Playlist";
          internal const string PlaylistDirectoryName = "Playlists";
       }
+
+      internal static class ConfigKey
+      {
+         internal const string PlaylistVM = "Playlist";
+         internal const string IsHideZeroModulation = "HideZeroModulation";
+         internal const string WindowWidth = "WindowWidth";
+         internal const string WindowHeight = "WindowHeight";
+         internal const string IsTimingMode = "TimingMode";
+         internal const string IsPlotEnable = "PlotEnable";
+         internal const string IsHighDefinition = "HighDefinition";
+         internal const string CurrentAudioPlayerType = "AudioPlayerType";
+         internal const string MasterVolumeVM = "MasterVolume";
+      }
    }
 }

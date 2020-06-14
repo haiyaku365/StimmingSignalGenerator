@@ -46,14 +46,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          AppState = Locator.Current.GetService<AppState>();
 
          ConfigurationHelper
-            .AddUpdateAppSettingsOnDispose(nameof(CurrentAudioPlayerType), () => CurrentAudioPlayerType.ToString())
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.CurrentAudioPlayerType, () => CurrentAudioPlayerType.ToString())
             .DisposeWith(Disposables);
 
          if (AppState.OSPlatform == OSPlatform.Windows)
          {
             var audioPlayerType =
                ConfigurationHelper.GetConfigOrDefault(
-                  nameof(CurrentAudioPlayerType),
+                  Constants.ConfigKey.CurrentAudioPlayerType,
                   AudioPlayerType.Wasapi);
             SwitchAudioPlayer(audioPlayerType);
          }

@@ -19,9 +19,9 @@ namespace StimmingSignalGenerator
 
       public AppState()
       {
-         IsHideZeroModulation = ConfigurationHelper.GetConfigOrDefault(nameof(IsHideZeroModulation), false);
+         IsHideZeroModulation = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.IsHideZeroModulation, false);
          ConfigurationHelper
-            .AddUpdateAppSettingsOnDispose(nameof(IsHideZeroModulation), () => IsHideZeroModulation.ToString())
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.IsHideZeroModulation, () => IsHideZeroModulation.ToString())
             .DisposeWith(Disposables);
 
          var platforms = new[] { OSPlatform.Windows, OSPlatform.Linux, OSPlatform.FreeBSD, OSPlatform.OSX };

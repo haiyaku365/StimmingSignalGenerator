@@ -55,13 +55,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          this.plotSampleProvider = plotSampleProvider;
          PlotModel = plotSampleProvider.PlotModel;
 
-         IsPlotEnable = ConfigurationHelper.GetConfigOrDefault(nameof(IsPlotEnable), false);
+         IsPlotEnable = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.IsPlotEnable, false);
          ConfigurationHelper
-            .AddUpdateAppSettingsOnDispose(nameof(IsPlotEnable), () => IsPlotEnable.ToString())
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.IsPlotEnable, () => IsPlotEnable.ToString())
             .DisposeWith(Disposables);
-         IsHighDefinition = ConfigurationHelper.GetConfigOrDefault(nameof(IsHighDefinition), false);
+         IsHighDefinition = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.IsHighDefinition, false);
          ConfigurationHelper
-            .AddUpdateAppSettingsOnDispose(nameof(IsHighDefinition), () => IsHighDefinition.ToString())
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.IsHighDefinition, () => IsHighDefinition.ToString())
             .DisposeWith(Disposables);
 
          this.WhenAnyValue(x => x.IsPlotEnable)

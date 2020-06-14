@@ -47,14 +47,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private double windowHeight;
       public MainWindowViewModel(bool loadDefaultPlaylist = true)
       {
-         WindowWidth = ConfigurationHelper.GetConfigOrDefault(nameof(WindowWidth), 900d);
+         WindowWidth = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.WindowWidth, 900d);
          ConfigurationHelper
-            .AddUpdateAppSettingsOnDispose(nameof(WindowWidth), () => WindowWidth.ToString())
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.WindowWidth, () => WindowWidth.ToString())
             .DisposeWith(Disposables);
 
-         WindowHeight = ConfigurationHelper.GetConfigOrDefault(nameof(WindowHeight), 600d);
+         WindowHeight = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.WindowHeight, 600d);
          ConfigurationHelper
-            .AddUpdateAppSettingsOnDispose(nameof(WindowHeight), () => WindowHeight.ToString())
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.WindowHeight, () => WindowHeight.ToString())
             .DisposeWith(Disposables);
 
          AppState = Locator.Current.GetService<AppState>();

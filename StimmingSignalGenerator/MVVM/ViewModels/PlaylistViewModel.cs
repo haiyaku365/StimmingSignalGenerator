@@ -86,9 +86,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private string SavePath;
       public PlaylistViewModel()
       {
-         IsTimingMode = ConfigurationHelper.GetConfigOrDefault(nameof(IsTimingMode), false);
+         IsTimingMode = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.IsTimingMode, false);
          ConfigurationHelper
-            .AddUpdateAppSettingsOnDispose(nameof(IsTimingMode), () => IsTimingMode.ToString())
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.IsTimingMode, () => IsTimingMode.ToString())
             .DisposeWith(Disposables);
 
          AppState = Locator.Current.GetService<AppState>();
@@ -134,13 +134,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Subscribe(m => volumeSampleProvider.Volume = (float)m)
             .DisposeWith(Disposables);
 
-         var MasterVolVMPocoStr = ConfigurationHelper.GetConfigOrDefault(nameof(MasterVolVM), string.Empty);
+         var MasterVolVMPocoStr = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.MasterVolumeVM, string.Empty);
          if (!string.IsNullOrEmpty(MasterVolVMPocoStr))
          {
             MasterVolVM.SetToPOCO(JsonSerializer.Deserialize<POCOs.ControlSlider>(MasterVolVMPocoStr));
          }
          ConfigurationHelper
-            .AddUpdateAppSettingsOnDispose(nameof(MasterVolVM), () => JsonSerializer.Serialize(MasterVolVM.ToPOCO()))
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.MasterVolumeVM, () => JsonSerializer.Serialize(MasterVolVM.ToPOCO()))
             .DisposeWith(Disposables);
 
          this.WhenAnyValue(x => x.IsTimingMode, x => x.PlayingTrackVM)
@@ -259,11 +259,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       {
          POCOs.Playlist playlist;
          // Try load playlist before exit if exist
-         string savePath = ConfigurationHelper.GetConfigOrDefault(nameof(PlaylistViewModel), string.Empty);
+         string savePath = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.PlaylistVM, string.Empty);
 
          // Save playlist path when exit
          ConfigurationHelper
-            .AddUpdateAppSettingsOnDispose(nameof(PlaylistViewModel), () => SavePath?.ToString() ?? string.Empty)
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.PlaylistVM, () => SavePath?.ToString() ?? string.Empty)
             .DisposeWith(Disposables);
 
          playlist = await PlaylistFile.LoadAsync(savePath);
