@@ -78,7 +78,8 @@ Use mouse scroll to zoom in, out.
 #### Note
 Note that save along with playlist.
 
-#### Default playlist
-When startup it will load first playlist file sort by file name.
-
+#### ~~Default playlist~~
+~~When startup it will load first playlist file sort by file name.~~  
+No default playlist anymore.  
+When startup it will load playlist you open before exit.
 
