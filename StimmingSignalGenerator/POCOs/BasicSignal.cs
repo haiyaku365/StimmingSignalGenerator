@@ -13,6 +13,7 @@ namespace StimmingSignalGenerator.POCOs
       public List<BasicSignal> AMSignals { get; set; }
       public List<BasicSignal> FMSignals { get; set; }
       public List<BasicSignal> PMSignals { get; set; }
+      public List<BasicSignal> ZMSignals { get; set; }
       public string FrequencySyncFrom { get; set; }
    }
 }

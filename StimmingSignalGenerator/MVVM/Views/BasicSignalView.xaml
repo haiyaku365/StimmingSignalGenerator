@@ -117,6 +117,7 @@
         <v:BasicSignalGroupView DockPanel.Dock="Top" DataContext="{Binding AmplitudeModulationSignalsViewModel}" />
         <v:BasicSignalGroupView DockPanel.Dock="Top" DataContext="{Binding FrequencyModulationSignalsViewModel}" />
         <v:BasicSignalGroupView DockPanel.Dock="Top" DataContext="{Binding PhaseModulationSignalsViewModel}" />
+        <v:BasicSignalGroupView DockPanel.Dock="Top" DataContext="{Binding ZCPModulationSignalsViewModel}" />
       </DockPanel>
     </Grid>
   </Expander>

@@ -54,6 +54,7 @@ namespace StimmingSignalGenerator.NAudio
          AMSignals = new AggregableSignals(1, (current, next, signal) => current * (next + 2 - (float)signal.Gain) / 2);
          FMSignals = new AggregableSignals(0, (current, next, _) => current + next);
          PMSignals = new AggregableSignals(0, (current, next, _) => current + next);
+         ZMSignals = new AggregableSignals(0, (current, next, _) => current + next);
 
          //init noise
          for (int i = 0; i < noiseValue.Length; i++)
@@ -132,10 +133,12 @@ namespace StimmingSignalGenerator.NAudio
       readonly AggregableSignals AMSignals;
       readonly AggregableSignals FMSignals;
       readonly AggregableSignals PMSignals;
+      readonly AggregableSignals ZMSignals;
 
       float[] aggregateAMBuffer;
       float[] aggregateFMBuffer;
       float[] aggregatePMBuffer;
+      float[] aggregateZMBuffer;
       /// <summary>
       /// 1 Channel Signal for amplitude modulation.
       /// </summary>
@@ -154,6 +157,13 @@ namespace StimmingSignalGenerator.NAudio
       /// <param name="signal">1 Channel Signal</param>
       public void AddPMSignal(BasicSignal signal) => PMSignals.Add(signal);
       public void RemovePMSignal(BasicSignal signal) => PMSignals.Remove(signal);
+
+      /// <summary>
+      /// Add 1 Channel Signal for ZCP modulation.
+      /// </summary>
+      /// <param name="signal">1 Channel Signal</param>
+      public void AddZMSignal(BasicSignal signal) => ZMSignals.Add(signal);
+      public void RemoveZMSignal(BasicSignal signal) => ZMSignals.Remove(signal);
       #endregion
 
       #region Noise generator field, prop, method
@@ -172,11 +182,11 @@ namespace StimmingSignalGenerator.NAudio
          double sampleValue;
 
          // Once per Read variable
-         double zeroCrossingPoint = ZeroCrossingPosition * Period;
-         double beforeZCFrequencyFactor = 1 / ZeroCrossingPosition;
          double beforeZCShift = 0;
-         double afterZCFrequencyFactor = 1 / (1 - ZeroCrossingPosition);
          double afterZCShift = -Period;
+
+         double zeroCrossingPoint;
+         double moddedZeroCrossingPosition;
          double x = 0, frequencyFactor = 0, shift = 0;
          bool isBeforeCrossingZero = true;
          double noisePre, noisePost;
@@ -201,6 +211,8 @@ namespace StimmingSignalGenerator.NAudio
          aggregatePMBuffer = BufferHelpers.Ensure(aggregatePMBuffer, count);
          PMSignals.Read(aggregatePMBuffer, offset, count);
 
+         aggregateZMBuffer = BufferHelpers.Ensure(aggregateZMBuffer, count);
+         ZMSignals.Read(aggregateZMBuffer, offset, count);
 
          //skip calc if gain is 0
          if (CurrentGain == 0)
@@ -219,6 +231,9 @@ namespace StimmingSignalGenerator.NAudio
          // Complete Buffer
          for (int sampleCount = offset; sampleCount < count; sampleCount++)
          {
+            moddedZeroCrossingPosition = ZeroCrossingPosition + aggregateZMBuffer[sampleCount];
+            zeroCrossingPoint = moddedZeroCrossingPosition * Period;
+
             //calculate common variable
             x = Phase + ((PhaseShift + aggregatePMBuffer[sampleCount]) * Period);
             switch (Type)
@@ -235,12 +250,12 @@ namespace StimmingSignalGenerator.NAudio
                   //bool isAfterCrossingZero = zeroCrossingPoint <= x && x < period;
                   if (isBeforeCrossingZero)
                   {
-                     frequencyFactor = beforeZCFrequencyFactor;
+                     frequencyFactor = 1 / moddedZeroCrossingPosition;
                      shift = beforeZCShift;
                   }
                   else //if (isAfterCrossingZero)
                   {
-                     frequencyFactor = afterZCFrequencyFactor;
+                     frequencyFactor = 1 / (1 - moddedZeroCrossingPosition);
                      shift = afterZCShift;
                   }
                   break;
