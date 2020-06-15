@@ -1,7 +1,6 @@
 ﻿using NAudio.Utils;
 using NAudio.Wave;
 using System;
-using System.Collections.Generic;
 
 namespace StimmingSignalGenerator.NAudio
 {
@@ -42,9 +41,19 @@ namespace StimmingSignalGenerator.NAudio
          PhaseStepDelta = 0;
          SeekFrequency = false;
 
-         AMSignals = new List<BasicSignal>();
-         FMSignals = new List<BasicSignal>();
-         PMSignals = new List<BasicSignal>();
+         /*
+            AM Signal with gain bump
+            https://www.desmos.com/calculator/ya9ayr9ylc
+            f_{1}=1
+            g_{0}=0.25
+            y_{0}=g_{0}\sin\left(f_{1}\cdot2\pi x\right)
+            y_{1}=y_{0}+1-g_{0}
+            y_{2}=\frac{\left(y_{1}+1\right)}{2}
+            y=\sin\left(20\cdot2\pi x\right)\cdot y_{2}\left\{-1<y<1\right\}
+         */
+         AMSignals = new AggregableSignals(1, (current, next, signal) => current * (next + 2 - (float)signal.Gain) / 2);
+         FMSignals = new AggregableSignals(0, (current, next, _) => current + next);
+         PMSignals = new AggregableSignals(0, (current, next, _) => current + next);
 
          //init noise
          for (int i = 0; i < noiseValue.Length; i++)
@@ -120,67 +129,31 @@ namespace StimmingSignalGenerator.NAudio
       #endregion
 
       #region Modulation field, Prop, Add, Remove method
-      float[] modulationBuffer;
-      readonly List<BasicSignal> AMSignals;
+      readonly AggregableSignals AMSignals;
+      readonly AggregableSignals FMSignals;
+      readonly AggregableSignals PMSignals;
+
       float[] aggregateAMBuffer;
-      readonly List<BasicSignal> FMSignals;
       float[] aggregateFMBuffer;
-      readonly List<BasicSignal> PMSignals;
       float[] aggregatePMBuffer;
       /// <summary>
       /// 1 Channel Signal for amplitude modulation.
       /// </summary>
       /// <param name="signal">1 Channel Signal</param>
-      public void AddAMSignal(BasicSignal signal)
-      {
-         lock (AMSignals)
-         {
-            AMSignals.Add(signal);
-         }
-      }
-      public void RemoveAMSignal(BasicSignal signal)
-      {
-         lock (AMSignals)
-         {
-            AMSignals.Remove(signal);
-         }
-      }
+      public void AddAMSignal(BasicSignal signal) => AMSignals.Add(signal);
+      public void RemoveAMSignal(BasicSignal signal) => AMSignals.Remove(signal);
       /// <summary>
       /// Add 1 Channel Signal for frequency modulation. Gain of signal indicate how much frequency change.
       /// </summary>
       /// <param name="signal">1 Channel Signal</param>
-      public void AddFMSignal(BasicSignal signal)
-      {
-         lock (FMSignals)
-         {
-            FMSignals.Add(signal);
-         }
-      }
-      public void RemoveFMSignal(BasicSignal signal)
-      {
-         lock (FMSignals)
-         {
-            FMSignals.Remove(signal);
-         }
-      }
+      public void AddFMSignal(BasicSignal signal) => FMSignals.Add(signal);
+      public void RemoveFMSignal(BasicSignal signal) => FMSignals.Remove(signal);
       /// <summary>
       /// Add 1 Channel Signal for phase modulation.
       /// </summary>
       /// <param name="signal">1 Channel Signal</param>
-      public void AddPMSignal(BasicSignal signal)
-      {
-         lock (PMSignals)
-         {
-            PMSignals.Add(signal);
-         }
-      }
-      public void RemovePMSignal(BasicSignal signal)
-      {
-         lock (PMSignals)
-         {
-            PMSignals.Remove(signal);
-         }
-      }
+      public void AddPMSignal(BasicSignal signal) => PMSignals.Add(signal);
+      public void RemovePMSignal(BasicSignal signal) => PMSignals.Remove(signal);
       #endregion
 
       #region Noise generator field, prop, method
@@ -218,63 +191,17 @@ namespace StimmingSignalGenerator.NAudio
             SeekFrequency = false;
          }
 
+         // read modulation signal
          aggregateAMBuffer = BufferHelpers.Ensure(aggregateAMBuffer, count);
-         Array.Fill(aggregateAMBuffer, 1);
-         // read AM signal
-         lock (AMSignals)
-         {
-            foreach (var signal in AMSignals)
-            {
-               modulationBuffer = BufferHelpers.Ensure(modulationBuffer, count);
-               signal.Read(modulationBuffer, offset, count);
-               /*
-               AM Signal with gain bump
-               https://www.desmos.com/calculator/ya9ayr9ylc
-               f_{1}=1
-               g_{0}=0.25
-               y_{0}=g_{0}\sin\left(f_{1}\cdot2\pi x\right)
-               y_{1}=y_{0}+1-g_{0}
-               y_{2}=\frac{\left(y_{1}+1\right)}{2}
-               y=\sin\left(20\cdot2\pi x\right)\cdot y_{2}\left\{-1<y<1\right\}
-               */
-               for (int i = offset; i < count; i++)
-               {
-                  aggregateAMBuffer[i] *= (modulationBuffer[i] + 2 - (float)signal.Gain) / 2;
-               }
-            }
-         }
+         AMSignals.Read(aggregateAMBuffer, offset, count);
 
          aggregateFMBuffer = BufferHelpers.Ensure(aggregateFMBuffer, count);
-         Array.Fill(aggregateFMBuffer, 0);
-         // read FM signal
-         lock (FMSignals)
-         {
-            foreach (var signal in FMSignals)
-            {
-               modulationBuffer = BufferHelpers.Ensure(modulationBuffer, count);
-               signal.Read(modulationBuffer, offset, count);
-               for (int i = offset; i < count; i++)
-               {
-                  aggregateFMBuffer[i] += modulationBuffer[i];
-               }
-            }
-         }
-
+         FMSignals.Read(aggregateFMBuffer, offset, count);
+         
          aggregatePMBuffer = BufferHelpers.Ensure(aggregatePMBuffer, count);
-         Array.Fill(aggregatePMBuffer, 0);
-         // read PM signal
-         lock (PMSignals)
-         {
-            foreach (var signal in PMSignals)
-            {
-               modulationBuffer = BufferHelpers.Ensure(modulationBuffer, count);
-               signal.Read(modulationBuffer, offset, count);
-               for (int i = offset; i < count; i++)
-               {
-                  aggregatePMBuffer[i] += modulationBuffer[i];
-               }
-            }
-         }
+         PMSignals.Read(aggregatePMBuffer, offset, count);
+
+
          //skip calc if gain is 0
          if (CurrentGain == 0)
          {
