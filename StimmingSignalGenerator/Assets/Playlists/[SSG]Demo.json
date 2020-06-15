@@ -1,0 +1,1199 @@
+{
+  "Note": "Demo signal\r\nPlay, Enable plot and use mouse wheel on plot to zoom in, out.",
+  "Tracks": [
+    {
+      "Name": "Mono",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 0.4,
+          "Min": 0,
+          "Max": 1
+        },
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    },
+    {
+      "Name": "Stereo",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 0.4,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 442,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        },
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    },
+    {
+      "Name": "Sync\u0026PhaseShift",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        },
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0.25,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": "Left.Signal1"
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    },
+    {
+      "Name": "AM",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [
+                {
+                  "Type": 0,
+                  "Frequency": {
+                    "Value": 1,
+                    "Min": 0,
+                    "Max": 6
+                  },
+                  "PhaseShift": {
+                    "Value": 0,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "Volume": {
+                    "Value": 0.6,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "ZeroCrossingPosition": {
+                    "Value": 0.5,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "AMSignals": [],
+                  "FMSignals": [],
+                  "PMSignals": [],
+                  "ZMSignals": [],
+                  "FrequencySyncFrom": null
+                }
+              ],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        },
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    },
+    {
+      "Name": "FM",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [
+                {
+                  "Type": 0,
+                  "Frequency": {
+                    "Value": 1,
+                    "Min": 0,
+                    "Max": 6
+                  },
+                  "PhaseShift": {
+                    "Value": 0,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "Volume": {
+                    "Value": 100,
+                    "Min": 0,
+                    "Max": 100
+                  },
+                  "ZeroCrossingPosition": {
+                    "Value": 0.5,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "AMSignals": [],
+                  "FMSignals": [],
+                  "PMSignals": [],
+                  "ZMSignals": [],
+                  "FrequencySyncFrom": null
+                }
+              ],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        },
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    },
+    {
+      "Name": "PM",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [
+                {
+                  "Type": 0,
+                  "Frequency": {
+                    "Value": 1,
+                    "Min": 0,
+                    "Max": 6
+                  },
+                  "PhaseShift": {
+                    "Value": 0,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "Volume": {
+                    "Value": 0.5,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "ZeroCrossingPosition": {
+                    "Value": 0.5,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "AMSignals": [],
+                  "FMSignals": [],
+                  "PMSignals": [],
+                  "ZMSignals": [],
+                  "FrequencySyncFrom": null
+                }
+              ],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        },
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": "Left.Signal1"
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    },
+    {
+      "Name": "ZM",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 3,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [
+                {
+                  "Type": 0,
+                  "Frequency": {
+                    "Value": 1,
+                    "Min": 0,
+                    "Max": 6
+                  },
+                  "PhaseShift": {
+                    "Value": 0,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "Volume": {
+                    "Value": 0.5,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "ZeroCrossingPosition": {
+                    "Value": 0.5,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "AMSignals": [],
+                  "FMSignals": [],
+                  "PMSignals": [],
+                  "ZMSignals": [],
+                  "FrequencySyncFrom": null
+                }
+              ],
+              "FrequencySyncFrom": null
+            }
+          ]
+        },
+        {
+          "Volume": {
+            "Value": 0.8,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 3,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": "Left.Signal1"
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    },
+    {
+      "Name": "Noise",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 5,
+              "Frequency": {
+                "Value": 5000,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [
+                {
+                  "Type": 0,
+                  "Frequency": {
+                    "Value": 0.25,
+                    "Min": 0,
+                    "Max": 6
+                  },
+                  "PhaseShift": {
+                    "Value": 0,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "Volume": {
+                    "Value": 5000,
+                    "Min": 0,
+                    "Max": 5000
+                  },
+                  "ZeroCrossingPosition": {
+                    "Value": 0.5,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "AMSignals": [],
+                  "FMSignals": [],
+                  "PMSignals": [],
+                  "ZMSignals": [],
+                  "FrequencySyncFrom": null
+                }
+              ],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        },
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    },
+    {
+      "Name": "DoubleHelix",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 0.8,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            },
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 80,
+                "Min": 0,
+                "Max": 100
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        },
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 0.8,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": "Left.Signal1"
+            },
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": "Left.Signal2"
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    },
+    {
+      "Name": "2AM",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 4400,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [
+                {
+                  "Type": 3,
+                  "Frequency": {
+                    "Value": 100,
+                    "Min": 0,
+                    "Max": 100
+                  },
+                  "PhaseShift": {
+                    "Value": 0,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "Volume": {
+                    "Value": 1,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "ZeroCrossingPosition": {
+                    "Value": 0.1,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "AMSignals": [],
+                  "FMSignals": [],
+                  "PMSignals": [],
+                  "ZMSignals": [],
+                  "FrequencySyncFrom": null
+                },
+                {
+                  "Type": 3,
+                  "Frequency": {
+                    "Value": 1,
+                    "Min": 0,
+                    "Max": 6
+                  },
+                  "PhaseShift": {
+                    "Value": 0,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "Volume": {
+                    "Value": 1,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "ZeroCrossingPosition": {
+                    "Value": 0.75,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "AMSignals": [],
+                  "FMSignals": [],
+                  "PMSignals": [],
+                  "ZMSignals": [],
+                  "FrequencySyncFrom": null
+                }
+              ],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        },
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    },
+    {
+      "Name": "AM.ZM",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 4400,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [
+                {
+                  "Type": 3,
+                  "Frequency": {
+                    "Value": 100,
+                    "Min": 0,
+                    "Max": 100
+                  },
+                  "PhaseShift": {
+                    "Value": 0,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "Volume": {
+                    "Value": 1,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "ZeroCrossingPosition": {
+                    "Value": 0.2,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "AMSignals": [],
+                  "FMSignals": [],
+                  "PMSignals": [],
+                  "ZMSignals": [
+                    {
+                      "Type": 0,
+                      "Frequency": {
+                        "Value": 1,
+                        "Min": 0,
+                        "Max": 6
+                      },
+                      "PhaseShift": {
+                        "Value": 0,
+                        "Min": 0,
+                        "Max": 1
+                      },
+                      "Volume": {
+                        "Value": 0.1,
+                        "Min": 0,
+                        "Max": 1
+                      },
+                      "ZeroCrossingPosition": {
+                        "Value": 0.5,
+                        "Min": 0,
+                        "Max": 1
+                      },
+                      "AMSignals": [],
+                      "FMSignals": [],
+                      "PMSignals": [],
+                      "ZMSignals": [],
+                      "FrequencySyncFrom": null
+                    }
+                  ],
+                  "FrequencySyncFrom": null
+                }
+              ],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        },
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    },
+    {
+      "Name": "RandomFreqAM",
+      "MultiSignals": [
+        {
+          "Volume": {
+            "Value": 1,
+            "Min": 0,
+            "Max": 1
+          },
+          "BasicSignals": [
+            {
+              "Type": 0,
+              "Frequency": {
+                "Value": 440,
+                "Min": 300,
+                "Max": 8000
+              },
+              "PhaseShift": {
+                "Value": 0,
+                "Min": 0,
+                "Max": 1
+              },
+              "Volume": {
+                "Value": 1,
+                "Min": 0,
+                "Max": 1
+              },
+              "ZeroCrossingPosition": {
+                "Value": 0.5,
+                "Min": 0,
+                "Max": 1
+              },
+              "AMSignals": [
+                {
+                  "Type": 0,
+                  "Frequency": {
+                    "Value": 1,
+                    "Min": 0,
+                    "Max": 6
+                  },
+                  "PhaseShift": {
+                    "Value": 0,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "Volume": {
+                    "Value": 0.6,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "ZeroCrossingPosition": {
+                    "Value": 0.5,
+                    "Min": 0,
+                    "Max": 1
+                  },
+                  "AMSignals": [],
+                  "FMSignals": [
+                    {
+                      "Type": 4,
+                      "Frequency": {
+                        "Value": 3,
+                        "Min": 0,
+                        "Max": 6
+                      },
+                      "PhaseShift": {
+                        "Value": 0,
+                        "Min": 0,
+                        "Max": 1
+                      },
+                      "Volume": {
+                        "Value": 2,
+                        "Min": 0,
+                        "Max": 100
+                      },
+                      "ZeroCrossingPosition": {
+                        "Value": 0.5,
+                        "Min": 0,
+                        "Max": 1
+                      },
+                      "AMSignals": [],
+                      "FMSignals": [],
+                      "PMSignals": [],
+                      "ZMSignals": [],
+                      "FrequencySyncFrom": null
+                    }
+                  ],
+                  "PMSignals": [],
+                  "ZMSignals": [],
+                  "FrequencySyncFrom": null
+                }
+              ],
+              "FMSignals": [],
+              "PMSignals": [],
+              "ZMSignals": [],
+              "FrequencySyncFrom": null
+            }
+          ]
+        }
+      ],
+      "Volumes": [
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        },
+        {
+          "Value": 1,
+          "Min": 0,
+          "Max": 1
+        }
+      ],
+      "TimeSpanSecond": 1
+    }
+  ]
+}

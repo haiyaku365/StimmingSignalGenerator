@@ -17,10 +17,10 @@
     <!--<AvaloniaResource Remove="**\<<RemovedFile.xaml>>" />-->
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="TODO.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="TODO.cs" />
+    <ContentWithTargetPath Include="Assets\Playlists\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>Playlists\%(Filename)%(Extension)</TargetPath>
+    </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.10" />
