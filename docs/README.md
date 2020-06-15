@@ -37,7 +37,7 @@ dotnet run
 ## Using StimmingSignalGenerator
 #### Basic signal 
 Basic signal can control frequency, gain, 
-zero crossing position and add FM, AM and PM.
+zero crossing position and add FM, AM, PM and ZM.
 
 #### Zero Crossing Position(ZCP)
 zero crossing position(ZCP) is for control signal positive, negative period.  
