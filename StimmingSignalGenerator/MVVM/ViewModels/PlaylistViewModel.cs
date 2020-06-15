@@ -42,13 +42,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             vm.AddNewTrack();
 
             vm.TrackVMs[0].TimeSpanSecond = 1;
+            vm.TrackVMs[1].TimeSpanSecond = 7200;
             vm.TrackVMs[1].GeneratorMode = GeneratorModeType.Stereo;
-
-            var count = Constants.Wave.DefaultSampleRate / 4;
-            float[] buffer = Array.Empty<float>();
-            buffer = BufferHelpers.Ensure(buffer, count);
-
-            vm.FinalSample.Read(buffer, 0, count);
+            vm.TrackVMs[2].Name = "DesignTrackName3";
 
             return vm;
          }

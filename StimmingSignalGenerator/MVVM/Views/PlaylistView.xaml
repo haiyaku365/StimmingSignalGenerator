@@ -38,9 +38,9 @@
       <!-- Tools -->
       <TextBlock DockPanel.Dock="Top" Text="{Binding Name}" Margin="3 5"/>
       <StackPanel DockPanel.Dock="Top" Margin="0 0 0 5" Spacing="5" Orientation="Horizontal">
-        <Button Content="Save as..." Command="{Binding SaveAsAsync}" 
+        <Button Content="Save as..." Command="{Binding SaveAsAsync}"
                 HotKey="Ctrl+Shift+S" ToolTip.Tip="Hotkey:Ctrl+Shift+S"/>
-        <Button Content="Save" Command="{Binding SaveCommand}" 
+        <Button Content="Save" Command="{Binding SaveCommand}"
                 HotKey="Ctrl+S" ToolTip.Tip="Hotkey:Ctrl+S"/>
         <Button Content="Load" Command="{Binding LoadAsync}" />
       </StackPanel>
@@ -67,7 +67,7 @@
       <!-- Track List -->
       <ListBox DockPanel.Dock="Top" Margin="0 2" Name="TrackList"
                Items="{ Binding TrackVMs }" SelectedItem="{Binding SelectedTrackVM}"
-               SelectionMode="Single" Grid.IsSharedSizeScope="True">
+               SelectionMode="Single" >
         <ListBox.ItemTemplate>
           <DataTemplate>
             <Border BorderBrush="Gray" Background="Transparent"
@@ -78,32 +78,30 @@
                             Command="{Binding CopyToClipboard}" />
                 </ContextMenu>
               </Border.ContextMenu>
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition SharedSizeGroup="0" MinWidth="15"/>
-                  <ColumnDefinition SharedSizeGroup="1" />
-                  <ColumnDefinition  />
-                  <ColumnDefinition SharedSizeGroup="3" />
-                  <ColumnDefinition SharedSizeGroup="4" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                  <RowDefinition />
-                  <RowDefinition />
-                </Grid.RowDefinitions>
-                <ProgressBar Grid.Row="1" Grid.ColumnSpan="5"
+
+              <DockPanel>
+                <ProgressBar DockPanel.Dock="Bottom"
                              Height="2" MinHeight="0" MinWidth="0"
                              Value="{Binding Progress}" Minimum="0" Maximum="1"/>
-                <TextBlock Grid.Column="0" IsVisible="{Binding IsPlaying}"
-                           Margin="0 0 5 0" VerticalAlignment="Center"
-                           Text=">"/>
-                <TextBlock Grid.Column="1"
+                <Panel DockPanel.Dock="Left" Width="15">
+                  <TextBlock IsVisible="{Binding IsPlaying}"
+                             Margin="0 0 5 0" VerticalAlignment="Center"
+                             Text=">"/>
+                </Panel>
+                <TextBlock DockPanel.Dock="Left"
                            Margin="0 0 5 0" VerticalAlignment="Center"
                            Text="{Binding Name}"/>
-                <NumericUpDown Grid.Column="3" IsVisible="{Binding $parent[UserControl].DataContext.IsTimingMode}"
+
+                <Button DockPanel.Dock="Right" Classes="Red Remove"
+                        Margin="2 0"
+                        Command="{Binding $parent[UserControl].DataContext.RemoveTrack}"
+                        CommandParameter="{Binding }" />
+                <NumericUpDown DockPanel.Dock="Right" IsVisible="{Binding $parent[UserControl].DataContext.IsTimingMode}"
                                ToolTip.Tip="Duration (second)"
-                               Increment="0.1" Minimum="0" Maximum="86400" AllowSpin="True"
+                               Increment="0.1" Minimum="0" Maximum="7200" AllowSpin="True"
                                Value="{Binding TimeSpanSecond}" FormatString="{}{0:N1}"/>
-                <Button Grid.Column="3" IsVisible="{Binding !$parent[UserControl].DataContext.IsTimingMode}"
+                <Button DockPanel.Dock="Right" HorizontalAlignment="Right"
+                        IsVisible="{Binding !$parent[UserControl].DataContext.IsTimingMode}"
                         Background="Transparent" BorderThickness="0"
                         Command="{Binding $parent[UserControl].DataContext.SwitchPlayingTrack}"
                         CommandParameter="{Binding }"
@@ -114,11 +112,7 @@
                     </Viewbox>
                   </Button.Content>
                 </Button>
-                <Button Grid.Column="4" Classes="Red Remove"
-                        Margin="2 0"
-                        Command="{Binding $parent[UserControl].DataContext.RemoveTrack}"
-                        CommandParameter="{Binding }" />
-              </Grid>
+              </DockPanel>
             </Border>
           </DataTemplate>
         </ListBox.ItemTemplate>
