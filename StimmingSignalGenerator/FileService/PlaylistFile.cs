@@ -25,14 +25,16 @@ namespace StimmingSignalGenerator.FileService
          saveFileDialog.InitialFileName = string.IsNullOrWhiteSpace(playlist.Name) ? GetNextFileName() : playlist.Name;
          var savePath = await saveFileDialog.ShowAsync(Window);
          if (savePath == null) return string.Empty;
-         await playlist.SaveAsync(savePath);
+         playlist.SavePath = savePath;
+         await playlist.SaveAsync();
          return savePath;
       }
 
-      public static async Task SaveAsync(this Playlist playlist, string savePath)
+      public static async Task SaveAsync(this Playlist playlist)
       {
          CreatePlaylistDir();
-
+         var savePath = playlist.SavePath;
+         if (string.IsNullOrWhiteSpace(savePath)) return;
          File.Delete(savePath);
          using (FileStream fs = File.OpenWrite(savePath))
          {
@@ -40,16 +42,16 @@ namespace StimmingSignalGenerator.FileService
          };
       }
 
-      public static async Task<(Playlist playlist, string path)> LoadAsync()
+      public static async Task<Playlist> LoadAsync()
       {
          CreatePlaylistDir();
          openFileDialog.Directory = PlaylistPath;
          var loadPath = await openFileDialog.ShowAsync(Window);
-         if (loadPath.Length == 0) return (null, string.Empty);
-         return (await LoadAsync(loadPath[0]), loadPath[0]);
+         if (loadPath.Length == 0) return null;
+         return await LoadAsync(loadPath[0]);
       }
 
-      public static async Task<(Playlist playlist, string path)> LoadFirstFileAsync()
+      public static async Task<Playlist> LoadFirstFileAsync()
       {
          CreatePlaylistDir();
          var loadPath =
@@ -57,7 +59,7 @@ namespace StimmingSignalGenerator.FileService
                .GetFiles(PlaylistPath, "*.json")
                .OrderBy(x => x)
                .FirstOrDefault();
-         return (await LoadAsync(loadPath), loadPath);
+         return await LoadAsync(loadPath);
       }
 
       public static async Task<Playlist> LoadAsync(string path)
@@ -66,6 +68,7 @@ namespace StimmingSignalGenerator.FileService
          using (FileStream fs = File.OpenRead(path))
          {
             var poco = await JsonSerializer.DeserializeAsync<Playlist>(fs);
+            poco.SavePath = path;
             poco.Name = Path.GetFileNameWithoutExtension(path);
             return poco;
          }

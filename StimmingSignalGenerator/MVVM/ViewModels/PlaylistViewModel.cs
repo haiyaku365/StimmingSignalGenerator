@@ -16,6 +16,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
@@ -53,6 +54,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    public class PlaylistViewModel : ViewModelBase
    {
       public string Name { get => name; set => this.RaiseAndSetIfChanged(ref name, value); }
+      public string SavePath { get => savePath; set => this.RaiseAndSetIfChanged(ref savePath, value); }
       public string Note { get => note; set => this.RaiseAndSetIfChanged(ref note, value); }
       public ReadOnlyObservableCollection<TrackViewModel> TrackVMs => trackVMs;
       public ControlSliderViewModel MasterVolVM { get; }
@@ -81,7 +83,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private readonly TimingSwitchSampleProvider timingSwitchSampleProvider;
       private readonly SwitchingSampleProvider switchingSampleProvider;
       private readonly VolumeSampleProviderEx volumeSampleProvider;
-      private string SavePath;
+      private string savePath;
+
       public PlaylistViewModel()
       {
          IsTimingMode = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.IsTimingMode, false);
@@ -193,7 +196,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          SaveCommand = ReactiveCommand.CreateFromTask(
             SaveAsync,
-            canExecute: this.WhenAnyValue(x => x.Name, x => !string.IsNullOrWhiteSpace(x))
+            canExecute: this.WhenAnyValue(x => x.SavePath, x => !string.IsNullOrWhiteSpace(x))
             ).DisposeWith(Disposables);
       }
 
@@ -256,14 +259,37 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return new POCOs.Playlist
          {
             Name = Name,
+            SavePath = SavePath,
             Note = Note,
             Tracks = TrackVMsSourceList.Items.Select(x => x.ToPOCO()).ToList()
          };
       }
-      public async Task SaveAsync() => await this.ToPOCO().SaveAsync(SavePath);
+
+      public Task CopyAsCompressedText()
+      {
+         var compressedJson = CompressionBase64.Compress(JsonSerializer.Serialize(this.ToPOCO()));
+         return Avalonia.Application.Current.Clipboard.SetTextAsync($"{Name}.json{compressedJson}");
+      }
+
+      private readonly Regex compressedTextRegex = new Regex(@"^(.*).json(.*)");
+      public async Task PasteCompressedText()
+      {
+         var compressedJson = (await Avalonia.Application.Current.Clipboard.GetTextAsync()).Trim();
+         var match = compressedTextRegex.Match(compressedJson);
+         if (!match.Success) return;
+
+         LoadFromPoco(
+            JsonSerializer.Deserialize<POCOs.Playlist>(
+               CompressionBase64.Decompress(match.Groups[2].Value)));
+         Name = match.Groups[1].Value;
+      }
+
+      public async Task SaveAsync() => await this.ToPOCO().SaveAsync();
       public async Task SaveAsAsync()
       {
-         SavePath = await this.ToPOCO().SaveAsAsync();
+         var savePath = await this.ToPOCO().SaveAsAsync();
+         if (string.IsNullOrWhiteSpace(savePath) || savePath == this.SavePath) return;
+         this.SavePath = savePath;
          this.Name = Path.GetFileName(SavePath);
       }
 
@@ -282,25 +308,25 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          if (playlist == null)
          {
             // Load first file if failed
-            (playlist, savePath) = await PlaylistFile.LoadFirstFileAsync();
+            playlist = await PlaylistFile.LoadFirstFileAsync();
          }
-         LoadFromPoco(playlist, savePath);
+         LoadFromPoco(playlist);
       }
 
       public async Task LoadAsync()
       {
-         var (playlist, savePath) = await PlaylistFile.LoadAsync();
-         LoadFromPoco(playlist, savePath);
+         var playlist = await PlaylistFile.LoadAsync();
+         LoadFromPoco(playlist);
       }
 
-      private void LoadFromPoco(POCOs.Playlist poco, string savePath)
+      private void LoadFromPoco(POCOs.Playlist poco)
       {
          if (poco == null) return;
          //Clean old stuff
          TrackVMsSourceList.Clear();
          //Load to vm
          Name = poco.Name;
-         SavePath = savePath;
+         SavePath = poco.SavePath;
          Note = poco.Note;
          for (int i = 0; i < poco.Tracks.Count; i++)
          {

@@ -56,9 +56,12 @@ Input value in box commit when hit enter or lost focus and cancel when hit esc.
 When focus input box using mouse scroll will change it value.
 
 #### Right click to copy, paste
-Signal and Track can be copy to clipboard (right click on signal header) and paste (right click on add signal button).  
-Control slider can also do copy paste value.  
-Copy value is basically text(json) and can paste across playlist.
+Playlist, Track, Signal and Control slider can be copy to clipboard.  
+Copy value is basically text(json) and can paste across playlist.  
+**Playlist:** right click on save, load button. (playlist copy as json compressed base64 text)  
+**Track:** right click on list to copy right click on add button to paste.  
+**Signal:** right click on header to copy right click on add button to paste.  
+**Control slider:** right click on control slider.  
 
 #### Mono, Stereo
 Mono mode use one signal for both L,R but can control volume of each channel.  

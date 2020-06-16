@@ -38,11 +38,26 @@
       <!-- Tools -->
       <TextBlock DockPanel.Dock="Top" Text="{Binding Name}" Margin="3 5"/>
       <StackPanel DockPanel.Dock="Top" Margin="0 0 0 5" Spacing="5" Orientation="Horizontal">
-        <Button Content="Save as..." Command="{Binding SaveAsAsync}"
-                HotKey="Ctrl+Shift+S" ToolTip.Tip="Hotkey:Ctrl+Shift+S"/>
-        <Button Content="Save" Command="{Binding SaveCommand}"
-                HotKey="Ctrl+S" ToolTip.Tip="Hotkey:Ctrl+S"/>
-        <Button Content="Load" Command="{Binding LoadAsync}" />
+        <StackPanel Spacing="5" Orientation="Horizontal">
+          <StackPanel.ContextMenu>
+            <ContextMenu>
+              <MenuItem Header="Copy as compressed text" Classes="Copy"
+                        Command="{Binding CopyAsCompressedText}"/>
+            </ContextMenu>
+          </StackPanel.ContextMenu>
+          <Button Content="Save as..." Command="{Binding SaveAsAsync}"
+                  HotKey="Ctrl+Shift+S" ToolTip.Tip="Hotkey:Ctrl+Shift+S"/>
+          <Button Content="Save" Command="{Binding SaveCommand}"
+                  HotKey="Ctrl+S" ToolTip.Tip="Hotkey:Ctrl+S"/>
+        </StackPanel>
+        <Button Content="Load" Command="{Binding LoadAsync}" >
+          <Button.ContextMenu>
+            <ContextMenu>
+              <MenuItem Header="Paste compressed text" Classes="Paste"
+                        Command="{Binding PasteCompressedText}"/>
+            </ContextMenu>
+          </Button.ContextMenu>
+        </Button>
       </StackPanel>
       <StackPanel DockPanel.Dock="Top" Margin="0 0 0 3" Orientation="Horizontal" Spacing="5">
         <ToggleButton Content="Note" IsChecked="{Binding IsNoteMode}"/>
