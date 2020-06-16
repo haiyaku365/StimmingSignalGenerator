@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{605873EF-3522-46ED-8FB5-2841BF723E61}"
 	ProjectSection(SolutionItems) = preProject
 		docs\README.md = docs\README.md
+		docs\TODO.md = docs\TODO.md
 		docs\v0.3.1.0_1.png = docs\v0.3.1.0_1.png
 		docs\v0.3.1.0_2.png = docs\v0.3.1.0_2.png
 	EndProjectSection
