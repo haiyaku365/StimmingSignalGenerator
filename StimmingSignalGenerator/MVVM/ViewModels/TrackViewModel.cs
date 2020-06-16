@@ -188,7 +188,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
 
          this.WhenAnyValue(x => x.IsPlaying)
-            .Subscribe(_ => { if (!IsPlaying) Progress = 0; })
+            .Where(x => !x)
+            .Subscribe(_ => Progress = 0)
             .DisposeWith(Disposables);
 
          initCompleteSignal

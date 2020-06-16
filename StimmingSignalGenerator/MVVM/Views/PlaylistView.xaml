@@ -76,6 +76,9 @@
                 <ContextMenu>
                   <MenuItem Header="Copy to clipboard" Classes="Copy"
                             Command="{Binding CopyToClipboard}" />
+                  <MenuItem Header="Force Switch" IsVisible="{Binding $parent[UserControl].DataContext.IsTimingMode}"
+                            Command="{Binding $parent[UserControl].DataContext.SwitchPlayingTrack}"
+                            CommandParameter="{Binding }" />
                 </ContextMenu>
               </Border.ContextMenu>
 

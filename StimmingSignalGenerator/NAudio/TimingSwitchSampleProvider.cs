@@ -106,6 +106,21 @@ namespace StimmingSignalGenerator.NAudio
          ProcessInvokeQueue();
       }
 
+      public void ForceSwitch(ISampleProvider sampleProvider)
+         => ForceSwitch(GetTimeSpanSampleProviderIndex(sampleProvider));
+      public void ForceSwitch(int index)
+      {
+         lock (timeSpanSampleProviders)
+         {
+            currentSampleIndex = index;
+            currentSampleSpanEndPosition = timeSpanSampleProviders[index].SampleSpan;
+            currentSampleSpanPosition = 0;
+            QueueInvokeSampleProviderChanged(
+               timeSpanSampleProviders[index].SampleProvider);
+         }
+         ProcessInvokeQueue();
+      }
+
       private TimeSpanSampleProvider GetTimeSpanSampleProvider(ISampleProvider sampleProvider)
          => timeSpanSampleProviders.SingleOrDefault(x => x.SampleProvider == sampleProvider);
       private int GetTimeSpanSampleProviderIndex(ISampleProvider sampleProvider)

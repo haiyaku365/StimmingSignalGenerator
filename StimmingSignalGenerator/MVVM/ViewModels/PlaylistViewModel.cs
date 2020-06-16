@@ -195,7 +195,14 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public void SwitchPlayingTrack(TrackViewModel trackVM)
       {
          if (trackVM == null) return;
-         PlayingTrackVM = trackVM;
+         if (IsTimingMode)
+         {
+            timingSwitchSampleProvider.ForceSwitch(trackVM.FinalSample);
+         }
+         else
+         {
+            PlayingTrackVM = trackVM;
+         }
       }
       private void SwitchPlayingTrackByIndex(int trackVmIndex)
          => SwitchPlayingTrack(TrackVMsSourceList.Items.ElementAtOrDefault(trackVmIndex));
