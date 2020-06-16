@@ -63,6 +63,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       /// </summary>
       public TrackViewModel PlayingTrackVM { get => playingTrackVM; set => this.RaiseAndSetIfChanged(ref playingTrackVM, value); }
       public bool IsTimingMode { get => isTimingMode; set => this.RaiseAndSetIfChanged(ref isTimingMode, value); }
+      public bool IsShuffleMode { get => isShuffleMode; set => this.RaiseAndSetIfChanged(ref isShuffleMode, value); }
       public bool IsNoteMode { get => isNoteMode; set => this.RaiseAndSetIfChanged(ref isNoteMode, value); }
       public ISampleProvider FinalSample => volumeSampleProvider;
       public AppState AppState { get; }
@@ -73,6 +74,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private TrackViewModel playingTrackVM;
       private TrackViewModel autoplayingTrackVM;
       private bool isTimingMode;
+      private bool isShuffleMode;
       private bool isNoteMode;
       private string name = string.Empty;
       private string note;
@@ -85,6 +87,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          IsTimingMode = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.IsTimingMode, false);
          ConfigurationHelper
             .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.IsTimingMode, () => IsTimingMode.ToString())
+            .DisposeWith(Disposables);
+         IsShuffleMode = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.IsShuffleMode, false);
+         ConfigurationHelper
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.IsShuffleMode, () => IsShuffleMode.ToString())
             .DisposeWith(Disposables);
 
          AppState = Locator.Current.GetService<AppState>();
@@ -153,6 +159,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                   UpdateIsPlaying(PlayingTrackVM);
                }
             })
+            .DisposeWith(Disposables);
+         this.WhenAnyValue(x => x.IsShuffleMode)
+            .Subscribe(x => timingSwitchSampleProvider.IsShuffleMode = x)
             .DisposeWith(Disposables);
          this.WhenAnyValue(x => x.SelectedTrackVM)
             .Subscribe(_ =>

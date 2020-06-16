@@ -9,6 +9,7 @@
 * ZCP Modulation.
 * Include demo playlist.
 * Switch track in timing mode (hotkey, context menu)
+* Shuffle in timing mode
 ---
 #### v0.3.1.0
 ##### Changes

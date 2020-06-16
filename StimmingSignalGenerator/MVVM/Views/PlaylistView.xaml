@@ -47,6 +47,7 @@
       <StackPanel DockPanel.Dock="Top" Margin="0 0 0 3" Orientation="Horizontal" Spacing="5">
         <ToggleButton Content="Note" IsChecked="{Binding IsNoteMode}"/>
         <ToggleButton Content="Timing mode" IsChecked="{Binding IsTimingMode}" />
+        <ToggleButton Content="Shuffle" IsChecked="{Binding IsShuffleMode}" IsVisible="{Binding IsTimingMode}" />
       </StackPanel>
       <!-- HotKey for play track-->
       <Panel IsVisible="False">

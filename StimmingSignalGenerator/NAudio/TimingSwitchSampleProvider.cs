@@ -1,4 +1,5 @@
 ﻿using NAudio.Wave;
+using StimmingSignalGenerator.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,18 +25,21 @@ namespace StimmingSignalGenerator.NAudio
          => Observable.FromEventPattern<ProgressChangedEventArgs>(
                h => OnProgressChanged += h,
                h => OnProgressChanged -= h);
-
+      public bool IsShuffleMode { get; set; }
       public TimingSwitchSampleProvider()
       {
          WaveFormat = Constants.Wave.DefaultStereoWaveFormat;
          timeSpanSampleProviders = new List<TimeSpanSampleProvider>();
+         deck = new List<TimeSpanSampleProvider>();
       }
 
       public void AddSample(ISampleProvider sampleProvider, TimeSpan timeSpan)
       {
          lock (timeSpanSampleProviders)
          {
-            timeSpanSampleProviders.Add(new TimeSpanSampleProvider(sampleProvider, timeSpan));
+            var timeSpanSample = new TimeSpanSampleProvider(sampleProvider, timeSpan);
+            timeSpanSampleProviders.Add(timeSpanSample);
+            deck.Add(timeSpanSample);
          }
       }
 
@@ -84,6 +88,7 @@ namespace StimmingSignalGenerator.NAudio
             if (timeSpanSample == null) return;
             var removeIndex = GetTimeSpanSampleProviderIndex(sampleProvider);
             timeSpanSampleProviders.Remove(timeSpanSample);
+            deck.Remove(timeSpanSample);
             if (currentSampleIndex > removeIndex)
             {
                // shift current sample down if currently play above removed one
@@ -164,12 +169,26 @@ namespace StimmingSignalGenerator.NAudio
                }
                else // reach the end of sample. move to next sample.
                {
-                  currentSampleIndex++;
-                  if (currentSampleIndex >= timeSpanSampleProviders.Count)
+                  if (IsShuffleMode)
                   {
-                     // reach last sample go to first sample
-                     currentSampleIndex = 0;
+                     var randomTimeSpanSample = deck.GetRandom();
+                     deck.Remove(randomTimeSpanSample);
+                     currentSampleIndex = timeSpanSampleProviders.IndexOf(randomTimeSpanSample);
+                     if (deck.Count == 0)
+                     {
+                        deck.AddRange(timeSpanSampleProviders);
+                     }
                   }
+                  else
+                  {
+                     currentSampleIndex++;
+                     if (currentSampleIndex >= timeSpanSampleProviders.Count)
+                     {
+                        // reach last sample go to first sample
+                        currentSampleIndex = 0;
+                     }
+                  }
+
                   // Avoid invoke event in lock block to prevent dead lock
                   QueueInvokeSampleProviderChanged(
                      timeSpanSampleProviders[currentSampleIndex].SampleProvider);
@@ -241,6 +260,7 @@ namespace StimmingSignalGenerator.NAudio
          public int SampleSpan => WaveHelper.TimeSpanToSamples(TimeSpan, SampleProvider.WaveFormat);
       }
       private readonly List<TimeSpanSampleProvider> timeSpanSampleProviders;
+      private readonly List<TimeSpanSampleProvider> deck; //deck for shuffle
       private int currentSampleSpanPosition = 0;
       private int currentSampleSpanEndPosition = 0;
       private int currentSampleIndex = -1;

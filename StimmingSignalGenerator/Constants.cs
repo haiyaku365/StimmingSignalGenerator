@@ -39,6 +39,7 @@ namespace StimmingSignalGenerator
          internal const string WindowWidth = "WindowWidth";
          internal const string WindowHeight = "WindowHeight";
          internal const string IsTimingMode = "TimingMode";
+         internal const string IsShuffleMode = "ShuffleMode";
          internal const string IsPlotEnable = "PlotEnable";
          internal const string IsHighDefinition = "HighDefinition";
          internal const string CurrentAudioPlayerType = "AudioPlayerType";
