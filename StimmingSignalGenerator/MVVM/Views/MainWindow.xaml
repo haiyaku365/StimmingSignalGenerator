@@ -39,6 +39,8 @@
               <Image Source="/Assets/Icons/exclamation-circle.png" />
             </MenuItem.Icon>
           </MenuItem>
+          <MenuItem Header="Open Development chatroom" Command="{Binding OpenDevelopmentChatroom}" />
+          <MenuItem Header="Open Waveform chatroom" Command="{Binding OpenWaveformChatroom}" />
         </MenuItem>
       </Menu>
       <v:PlotSampleView DockPanel.Dock="Left"

@@ -78,6 +78,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public static void OpenGitHubPage() => OpenUrl("https://github.com/haiyaku365/StimmingSignalGenerator");
       public static void OpenGitHubReleasesPage() => OpenUrl("https://github.com/haiyaku365/StimmingSignalGenerator/releases");
       public static void OpenGitHubIssuesPage() => OpenUrl("https://github.com/haiyaku365/StimmingSignalGenerator/issues");
+      public static void OpenDevelopmentChatroom() => OpenUrl("https://gitter.im/StimmingSignalGenerator/Development");
+      public static void OpenWaveformChatroom() => OpenUrl("https://gitter.im/StimmingSignalGenerator/Waveform");
 
       private static void OpenUrl(string url)
       {
