@@ -5,6 +5,6 @@
 - [x] Demo playlist
 - [x] Shuffle mode in timming mode
 - [x] fade in/out when play/stop
-- [ ] fade in/out in timming mode
+- [x] crossfade in timming mode
 - [ ] dark theme
 ---

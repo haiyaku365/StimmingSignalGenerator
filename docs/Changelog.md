@@ -12,6 +12,7 @@
 * Shuffle in timing mode.
 * Copy, paste playlist on save, load button context menu.
 * Fade in/out when play/stop.
+* Crossfade in timing mode.
 ---
 #### v0.3.1.0
 ##### Changes

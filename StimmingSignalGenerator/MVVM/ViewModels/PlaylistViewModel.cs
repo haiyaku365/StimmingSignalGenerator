@@ -65,6 +65,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       /// </summary>
       public TrackViewModel PlayingTrackVM { get => playingTrackVM; set => this.RaiseAndSetIfChanged(ref playingTrackVM, value); }
       public bool IsTimingMode { get => isTimingMode; set => this.RaiseAndSetIfChanged(ref isTimingMode, value); }
+      public double CrossfadeDuration { get => crossfadeDuration; set => this.RaiseAndSetIfChanged(ref crossfadeDuration, value); }
       public bool IsShuffleMode { get => isShuffleMode; set => this.RaiseAndSetIfChanged(ref isShuffleMode, value); }
       public bool IsNoteMode { get => isNoteMode; set => this.RaiseAndSetIfChanged(ref isNoteMode, value); }
       public ISampleProvider FinalSample => volumeSampleProvider;
@@ -76,6 +77,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       private TrackViewModel playingTrackVM;
       private TrackViewModel autoplayingTrackVM;
       private bool isTimingMode;
+      private double crossfadeDuration;
       private bool isShuffleMode;
       private bool isNoteMode;
       private string name = string.Empty;
@@ -95,7 +97,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          ConfigurationHelper
             .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.IsShuffleMode, () => IsShuffleMode.ToString())
             .DisposeWith(Disposables);
-
+         CrossfadeDuration = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.CrossfadeDuration, 0d);
+         ConfigurationHelper
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.CrossfadeDuration, () => CrossfadeDuration.ToString())
+            .DisposeWith(Disposables);
          AppState = Locator.Current.GetService<AppState>();
 
          TrackVMsSourceList = new SourceList<TrackViewModel>().DisposeWith(Disposables);
@@ -162,6 +167,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                   UpdateIsPlaying(PlayingTrackVM);
                }
             })
+            .DisposeWith(Disposables);
+         this.WhenAnyValue(x => x.CrossfadeDuration)
+            .Subscribe(x=> timingSwitchSampleProvider.CrossfadeDuration = x)
             .DisposeWith(Disposables);
          this.WhenAnyValue(x => x.IsShuffleMode)
             .Subscribe(x => timingSwitchSampleProvider.IsShuffleMode = x)

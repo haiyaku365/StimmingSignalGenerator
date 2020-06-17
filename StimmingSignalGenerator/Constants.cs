@@ -47,6 +47,7 @@ namespace StimmingSignalGenerator
          internal const string Latency = "Latency";
          internal const string FadeInDuration = "FadeInDuration";
          internal const string FadeOutDuration = "FadeOutDuration";
+         internal const string CrossfadeDuration = "CrossfadeDuration";
       }
    }
 }

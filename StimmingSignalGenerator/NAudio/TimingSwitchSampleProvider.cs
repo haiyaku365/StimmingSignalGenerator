@@ -26,6 +26,7 @@ namespace StimmingSignalGenerator.NAudio
                h => OnProgressChanged += h,
                h => OnProgressChanged -= h);
       public bool IsShuffleMode { get; set; }
+      public double CrossfadeDuration { get; set; }
       public TimingSwitchSampleProvider()
       {
          WaveFormat = Constants.Wave.DefaultStereoWaveFormat;
@@ -84,6 +85,9 @@ namespace StimmingSignalGenerator.NAudio
       {
          lock (timeSpanSampleProviders)
          {
+            if (sampleProvider == crossfadeTo || sampleProvider == crossfadeFrom) 
+               crossfadeSampleProvider.ForceToEnd();
+
             var timeSpanSample = GetTimeSpanSampleProvider(sampleProvider);
             if (timeSpanSample == null) return;
             var removeIndex = GetTimeSpanSampleProviderIndex(sampleProvider);
@@ -126,6 +130,9 @@ namespace StimmingSignalGenerator.NAudio
          ProcessInvokeQueue();
       }
 
+      private CrossfadeSampleProvider crossfadeSampleProvider = new CrossfadeSampleProvider();
+      ISampleProvider crossfadeFrom;
+      ISampleProvider crossfadeTo;
       private TimeSpanSampleProvider GetTimeSpanSampleProvider(ISampleProvider sampleProvider)
          => timeSpanSampleProviders.SingleOrDefault(x => x.SampleProvider == sampleProvider);
       private int GetTimeSpanSampleProviderIndex(ISampleProvider sampleProvider)
@@ -145,8 +152,16 @@ namespace StimmingSignalGenerator.NAudio
 
             while (sampleToReadRemain > 0)
             {
+               var fadeSampleRemain = crossfadeSampleProvider.FadeSampleRemain;
+               if (fadeSampleRemain > 0)
+               {
+                  var sampleToRead = fadeSampleRemain;
+                  if (sampleToRead > sampleToReadRemain) sampleToRead = sampleToReadRemain;
+                  read += crossfadeSampleProvider.Read(buffer, count - sampleToReadRemain + offset, sampleToRead);
+                  sampleToReadRemain -= sampleToRead;
+               }
                // continue read if this sample still not reach the end
-               if (currentSampleSpanPosition < currentSampleSpanEndPosition)
+               else if (currentSampleSpanPosition < currentSampleSpanEndPosition)
                {
                   // calc read count
                   // read only until span end position
@@ -169,6 +184,7 @@ namespace StimmingSignalGenerator.NAudio
                }
                else // reach the end of sample. move to next sample.
                {
+                  var crossfadeFromIndex = currentSampleIndex < 0 ? 0 : currentSampleIndex;
                   if (IsShuffleMode)
                   {
                      var randomTimeSpanSample = deck.GetRandom();
@@ -188,6 +204,11 @@ namespace StimmingSignalGenerator.NAudio
                         currentSampleIndex = 0;
                      }
                   }
+
+                  var crossfadeToIndex = currentSampleIndex;
+                  crossfadeFrom = timeSpanSampleProviders[crossfadeFromIndex].SampleProvider;
+                  crossfadeTo = timeSpanSampleProviders[crossfadeToIndex].SampleProvider;
+                  crossfadeSampleProvider.BeginCrossfade(crossfadeFrom, crossfadeTo, CrossfadeDuration);
 
                   // Avoid invoke event in lock block to prevent dead lock
                   QueueInvokeSampleProviderChanged(
