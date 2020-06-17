@@ -4,7 +4,7 @@
 - [x] ZCP Mod
 - [x] Demo playlist
 - [x] Shuffle mode in timming mode
-- [ ] fade in/out when play/stop
+- [x] fade in/out when play/stop
 - [ ] fade in/out in timming mode
 - [ ] dark theme
 ---

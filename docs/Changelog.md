@@ -11,6 +11,7 @@
 * Switch track in timing mode (hotkey, context menu).
 * Shuffle in timing mode.
 * Copy, paste playlist on save, load button context menu.
+* Fade in/out when play/stop.
 ---
 #### v0.3.1.0
 ##### Changes

@@ -66,12 +66,12 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                .DisposeWith(Disposables);
          }
 
-         PlotSampleViewModel =
-            new PlotSampleViewModel(new PlotSampleProvider(PlaylistViewModel.FinalSample))
+         AudioPlayerViewModel =
+            new AudioPlayerViewModel(PlaylistViewModel.FinalSample)
             .DisposeWith(Disposables);
 
-         AudioPlayerViewModel =
-            new AudioPlayerViewModel(PlotSampleViewModel.SampleSignal)
+         PlotSampleViewModel =
+            new PlotSampleViewModel(AudioPlayerViewModel.PlotSampleProvider)
             .DisposeWith(Disposables);
       }
 

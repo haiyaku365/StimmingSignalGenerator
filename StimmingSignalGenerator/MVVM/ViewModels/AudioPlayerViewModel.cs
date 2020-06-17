@@ -3,6 +3,7 @@ using ReactiveUI;
 using Splat;
 using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.NAudio;
+using StimmingSignalGenerator.NAudio.OxyPlot;
 using System;
 using System.Linq;
 using System.Reactive;
@@ -25,6 +26,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    }
    public class AudioPlayerViewModel : ViewModelBase
    {
+      public double FadeInDuration { get => fadeInDuration; set => this.RaiseAndSetIfChanged(ref fadeInDuration, value); }
+      public double FadeOutDuration { get => fadeOutDuration; set => this.RaiseAndSetIfChanged(ref fadeOutDuration, value); }
 
       public ReactiveCommand<Unit, Unit> PlayCommand { get; }
       public ReactiveCommand<Unit, Unit> StopCommand { get; }
@@ -34,16 +37,38 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReactiveCommand<Unit, Unit> SwitchToWasapiAudioPlayerCommand { get; }
       public IAudioPlayer AudioPlayer { get => audioPlayer; private set => this.RaiseAndSetIfChanged(ref audioPlayer, value); }
       public AudioPlayerType CurrentAudioPlayerType => currentAudioPlayerType.Value;
-      public AppState AppState { get; }
+      public bool CanPlay { get => canPlay; set => this.RaiseAndSetIfChanged(ref canPlay, value); }
+      public bool IsPlaying => isPlaying.Value;
 
+      public AppState AppState { get; }
+      public PlotSampleProvider PlotSampleProvider { get; }
+
+      private double fadeInDuration;
+      private double fadeOutDuration;
+      private bool canPlay = true;
+      private ObservableAsPropertyHelper<bool> isPlaying;
       private readonly ISampleProvider sampleProvider;
+      private readonly FadeInOutSampleProviderEx fadeInOutSampleProviderEx;
       private IAudioPlayer audioPlayer;
       private ObservableAsPropertyHelper<AudioPlayerType> currentAudioPlayerType;
-      public AudioPlayerViewModel(ISampleProvider sampleProvider)
+
+      public AudioPlayerViewModel(ISampleProvider sourceProvider)
       {
-         this.sampleProvider = sampleProvider;
+         fadeInOutSampleProviderEx = new FadeInOutSampleProviderEx(sourceProvider, true);
+         PlotSampleProvider = new PlotSampleProvider(fadeInOutSampleProviderEx);
+
+         this.sampleProvider = PlotSampleProvider;
 
          AppState = Locator.Current.GetService<AppState>();
+
+         FadeInDuration = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.FadeInDuration, 0d);
+         ConfigurationHelper
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.FadeInDuration, () => FadeInDuration.ToString())
+            .DisposeWith(Disposables);
+         FadeOutDuration = ConfigurationHelper.GetConfigOrDefault(Constants.ConfigKey.FadeOutDuration, 0d);
+         ConfigurationHelper
+            .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.FadeOutDuration, () => FadeOutDuration.ToString())
+            .DisposeWith(Disposables);
 
          ConfigurationHelper
             .AddUpdateAppSettingsOnDispose(Constants.ConfigKey.CurrentAudioPlayerType, () => CurrentAudioPlayerType.ToString())
@@ -76,17 +101,26 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
          this.WhenAnyValue(x => x.AudioPlayer)
             .Select(x => GetAudioPlayerType(x))
-            .ToProperty(this, nameof(CurrentAudioPlayerType), out currentAudioPlayerType);
-
+            .ToProperty(this, nameof(CurrentAudioPlayerType), out currentAudioPlayerType)
+            .DisposeWith(Disposables);
          this.WhenAnyValue(x => x.AudioPlayer.PlayerStatus)
-            .Subscribe(x => AppState.IsPlaying = x == PlayerStatus.Play)
+            .Select(x => x == PlayerStatus.Play)
+            .ToProperty(this, nameof(IsPlaying), out isPlaying)
+            .DisposeWith(Disposables);
+         Observable.FromEventPattern(
+            h => fadeInOutSampleProviderEx.OnFadeOutCompleted += h,
+            h => fadeInOutSampleProviderEx.OnFadeOutCompleted -= h)
+            // Wait another buffer so last fadeout pass through to audio player
+            .Delay(TimeSpan.FromMilliseconds(AudioPlayer.Latency), RxApp.TaskpoolScheduler)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(_ => AudioPlayer.Stop())
             .DisposeWith(Disposables);
 
          PlayCommand = ReactiveCommand.Create(Play,
-            canExecute: AppState.WhenAnyValue(x => x.IsPlaying, selector: x => !x))
+            canExecute: this.WhenAnyValue(x => x.CanPlay))
             .DisposeWith(Disposables);
          StopCommand = ReactiveCommand.Create(Stop,
-            canExecute: AppState.WhenAnyValue(x => x.IsPlaying))
+            canExecute: this.WhenAnyValue(x => x.CanPlay, selector: x => !x))
             .DisposeWith(Disposables);
          TogglePlayCommand = ReactiveCommand.Create(TogglePlay,
             canExecute: this.WhenAnyValue(x => x.AudioPlayer.SelectedAudioDevice, selector: x => !string.IsNullOrEmpty(x)))
@@ -96,16 +130,16 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             () => SwitchAudioPlayer(AudioPlayerType.OpenAL),
             canExecute: this.WhenAnyValue(
                property1: x => x.CurrentAudioPlayerType,
-               property2: x => x.AppState.IsPlaying,
-               selector: (type, isPlaying) => type != AudioPlayerType.OpenAL && !isPlaying)
-            );
+               property2: x => x.IsPlaying,
+               selector: (type, _) => type != AudioPlayerType.OpenAL && !IsPlaying)
+            ).DisposeWith(Disposables);
          SwitchToWasapiAudioPlayerCommand = ReactiveCommand.Create(
             () => SwitchAudioPlayer(AudioPlayerType.Wasapi),
             canExecute: this.WhenAnyValue(
                property1: x => x.CurrentAudioPlayerType,
-               property2: x => x.AppState.IsPlaying,
-               selector: (type, isPlaying) => type != AudioPlayerType.Wasapi && !isPlaying && AppState.OSPlatform == OSPlatform.Windows)
-            );
+               property2: x => x.IsPlaying,
+               selector: (type, _) => type != AudioPlayerType.Wasapi && !IsPlaying && AppState.OSPlatform == OSPlatform.Windows)
+            ).DisposeWith(Disposables);
       }
 
       public void SwitchAudioPlayer(AudioPlayerType audioPlayerType)
@@ -161,19 +195,25 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public void TogglePlay()
       {
-         if (AppState.IsPlaying)
-            Stop();
-         else
+         if (CanPlay)
             Play();
+         else
+            Stop();
       }
 
       public void Play()
       {
-         AudioPlayer.Play();
+         CanPlay = false;
+         fadeInOutSampleProviderEx.BeginFadeIn(FadeInDuration);
+         if (!IsPlaying)
+         {
+            AudioPlayer.Play();
+         }
       }
       public void Stop()
       {
-         AudioPlayer.Stop();
+         CanPlay = true;
+         fadeInOutSampleProviderEx.BeginFadeOut(FadeOutDuration);
       }
    }
 

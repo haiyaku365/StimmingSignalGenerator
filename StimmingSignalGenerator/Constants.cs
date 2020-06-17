@@ -45,6 +45,8 @@ namespace StimmingSignalGenerator
          internal const string CurrentAudioPlayerType = "AudioPlayerType";
          internal const string MasterVolumeVM = "MasterVolume";
          internal const string Latency = "Latency";
+         internal const string FadeInDuration = "FadeInDuration";
+         internal const string FadeOutDuration = "FadeOutDuration";
       }
    }
 }
