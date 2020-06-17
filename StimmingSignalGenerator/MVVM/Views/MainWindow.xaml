@@ -16,14 +16,8 @@
     <!--<Binding Source="{x:Static vm:DesignMainWindowViewModel.StereoData}" />-->
   </Design.DataContext>
   <DockPanel Margin="10 0 10 10">
-    <Grid DockPanel.Dock="Top" Margin="0 0 0 5"
-          ColumnDefinitions="auto,*,auto,auto">
-      <v:PlotSampleView Grid.Column="0"
-                        Height="32"
-                        DataContext="{Binding PlotSampleViewModel}" />
-      <v:AudioPlayerView Grid.Column="2" DataContext="{Binding AudioPlayerViewModel}"
-                         VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
-      <Menu Grid.Column="3" Margin="10 0 0 0">
+    <DockPanel DockPanel.Dock="Top" Margin="0 0 0 5">
+      <Menu DockPanel.Dock="Right" Margin="10 0 0 0">
         <MenuItem Width="28" Height="28">
           <MenuItem.Header>
             <Viewbox Margin="-3">
@@ -47,7 +41,12 @@
           </MenuItem>
         </MenuItem>
       </Menu>
-    </Grid>
+      <v:PlotSampleView DockPanel.Dock="Left"
+                        Height="32"
+                        DataContext="{Binding PlotSampleViewModel}" />
+      <v:AudioPlayerView DockPanel.Dock="Right" DataContext="{Binding AudioPlayerViewModel}"
+                         VerticalContentAlignment="Top" HorizontalContentAlignment="Right"/>
+    </DockPanel>
 
     <v:PlaylistView DockPanel.Dock="Top" DataContext="{Binding PlaylistViewModel}" />
   </DockPanel>
