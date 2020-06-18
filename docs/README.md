@@ -3,9 +3,9 @@ This software basically generate real-time audio signal.
 [![Gitter](https://badges.gitter.im/StimmingSignalGenerator/Development.svg)](https://gitter.im/StimmingSignalGenerator/Development?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ### screenshot
-![Window1](v0.3.1.0_1.png)
+![Window1](v0.4.0.0_1.png)
 
-![Window2](v0.3.1.0_2.png)
+![Window2](v0.4.0.0_2.png)
 
 ## Running StimmingSignalGenerator
 #### To run on Windows
