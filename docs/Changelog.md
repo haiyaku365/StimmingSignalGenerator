@@ -12,8 +12,10 @@
 * Shuffle in timing mode.
 * Copy, paste playlist on save, load button context menu.
 * Fade in/out when play/stop.
+* Add development and waveform chatroom menu in information button.
 * Crossfade in timing mode.
 * Crossfade when switch track.
+* Add WaveOut Audio API.
 ---
 #### v0.3.1.0
 ##### Changes

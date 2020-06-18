@@ -14,6 +14,7 @@
     <DockPanel.ContextMenu>
       <ContextMenu>
         <MenuItem Header="Switch to Wasapi (Windows only)" Command="{Binding SwitchToWasapiAudioPlayerCommand}" />
+        <MenuItem Header="Switch to WaveOut (Windows only)" Command="{Binding SwitchToWaveOutAudioPlayerCommand}" />
         <MenuItem Header="Switch to OpenAL (Beta)" Command="{Binding SwitchToALAudioPlayerCommand}"/>
       </ContextMenu>
     </DockPanel.ContextMenu>

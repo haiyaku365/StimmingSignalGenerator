@@ -35,6 +35,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public ReactiveCommand<Unit, Unit> SwitchToALAudioPlayerCommand { get; }
       public ReactiveCommand<Unit, Unit> SwitchToWasapiAudioPlayerCommand { get; }
+      public ReactiveCommand<Unit, Unit> SwitchToWaveOutAudioPlayerCommand { get; }
       public IAudioPlayer AudioPlayer { get => audioPlayer; private set => this.RaiseAndSetIfChanged(ref audioPlayer, value); }
       public AudioPlayerType CurrentAudioPlayerType => currentAudioPlayerType.Value;
       public bool CanPlay { get => canPlay; set => this.RaiseAndSetIfChanged(ref canPlay, value); }
@@ -117,7 +118,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
 
          PlayCommand = ReactiveCommand.Create(Play,
-            canExecute: this.WhenAnyValue(x => x.CanPlay))
+            canExecute: this.WhenAnyValue(
+               property1: x => x.CanPlay,
+               property2: x => x.AudioPlayer.SelectedAudioDevice,
+               selector: (p1, p2) => p1 && !string.IsNullOrEmpty(p2)))
             .DisposeWith(Disposables);
          StopCommand = ReactiveCommand.Create(Stop,
             canExecute: this.WhenAnyValue(x => x.CanPlay, selector: x => !x))
@@ -140,6 +144,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                property2: x => x.IsPlaying,
                selector: (type, _) => type != AudioPlayerType.Wasapi && !IsPlaying && AppState.OSPlatform == OSPlatform.Windows)
             ).DisposeWith(Disposables);
+         SwitchToWaveOutAudioPlayerCommand = ReactiveCommand.Create(
+            () => SwitchAudioPlayer(AudioPlayerType.WaveOut),
+            canExecute: this.WhenAnyValue(
+               property1: x => x.CurrentAudioPlayerType,
+               property2: x => x.IsPlaying,
+               selector: (type, _) => type != AudioPlayerType.WaveOut && !IsPlaying && AppState.OSPlatform == OSPlatform.Windows)
+            ).DisposeWith(Disposables);
       }
 
       public void SwitchAudioPlayer(AudioPlayerType audioPlayerType)
@@ -152,6 +163,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                break;
             case AudioPlayerType.Wasapi:
                if (AudioPlayer != null && AudioPlayer is WasapiAudioPlayer) return;
+               break;
+            case AudioPlayerType.WaveOut:
+               if (AudioPlayer != null && AudioPlayer is WaveOutAudioPlayer) return;
                break;
             case AudioPlayerType.None:
             default:
@@ -179,6 +193,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          if (audioPlayer == null) return AudioPlayerType.None;
          if (audioPlayer is ALAudioPlayer) return AudioPlayerType.OpenAL;
          if (audioPlayer is WasapiAudioPlayer) return AudioPlayerType.Wasapi;
+         if (audioPlayer is WaveOutAudioPlayer) return AudioPlayerType.WaveOut;
          return AudioPlayerType.None;
       }
 
@@ -187,6 +202,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
          return audioPlayerType switch
          {
             AudioPlayerType.Wasapi => new WasapiAudioPlayer(sampleProvider.ToWaveProvider()).DisposeWith(Disposables),
+            AudioPlayerType.WaveOut => new WaveOutAudioPlayer(sampleProvider.ToWaveProvider()).DisposeWith(Disposables),
             AudioPlayerType.OpenAL => new ALAudioPlayer(sampleProvider.ToWaveProvider16()).DisposeWith(Disposables),
             AudioPlayerType.None => null,
             _ => throw new NotImplementedException()
@@ -221,7 +237,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
    {
       None,
       OpenAL,
-      Wasapi
+      Wasapi,
+      WaveOut
    }
 
 }
