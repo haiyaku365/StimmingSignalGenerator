@@ -6,5 +6,6 @@
 - [x] Shuffle mode in timming mode
 - [x] fade in/out when play/stop
 - [x] crossfade in timming mode
+- [x] crossfade when switch track
 - [ ] dark theme
 ---

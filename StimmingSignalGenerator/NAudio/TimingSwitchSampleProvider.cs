@@ -41,6 +41,11 @@ namespace StimmingSignalGenerator.NAudio
             var timeSpanSample = new TimeSpanSampleProvider(sampleProvider, timeSpan);
             timeSpanSampleProviders.Add(timeSpanSample);
             deck.Add(timeSpanSample);
+            if (timeSpanSampleProviders.Count == 1)
+            {
+               //first sample added update end position
+               currentSampleSpanEndPosition = timeSpanSampleProviders[0].SampleSpan;
+            }
          }
       }
 
@@ -85,7 +90,7 @@ namespace StimmingSignalGenerator.NAudio
       {
          lock (timeSpanSampleProviders)
          {
-            if (sampleProvider == crossfadeTo || sampleProvider == crossfadeFrom) 
+            if (sampleProvider == crossfadeTo || sampleProvider == crossfadeFrom)
                crossfadeSampleProvider.ForceToEnd();
 
             var timeSpanSample = GetTimeSpanSampleProvider(sampleProvider);
@@ -121,6 +126,7 @@ namespace StimmingSignalGenerator.NAudio
       {
          lock (timeSpanSampleProviders)
          {
+            if (0 > index || index >= timeSpanSampleProviders.Count) return;
             currentSampleIndex = index;
             currentSampleSpanEndPosition = timeSpanSampleProviders[index].SampleSpan;
             currentSampleSpanPosition = 0;
@@ -130,7 +136,7 @@ namespace StimmingSignalGenerator.NAudio
          ProcessInvokeQueue();
       }
 
-      private CrossfadeSampleProvider crossfadeSampleProvider = new CrossfadeSampleProvider();
+      private readonly CrossfadeSampleProvider crossfadeSampleProvider = new CrossfadeSampleProvider();
       ISampleProvider crossfadeFrom;
       ISampleProvider crossfadeTo;
       private TimeSpanSampleProvider GetTimeSpanSampleProvider(ISampleProvider sampleProvider)
@@ -143,15 +149,23 @@ namespace StimmingSignalGenerator.NAudio
          int read = 0;
          lock (timeSpanSampleProviders)
          {
-            if (timeSpanSampleProviders == null || timeSpanSampleProviders.Sum(x => x.SampleSpan) == 0)
-            {
-               Array.Fill(buffer, 0, offset, count);
-               return count;
-            }
             int sampleToReadRemain = count;
 
             while (sampleToReadRemain > 0)
             {
+               var sumSampleSpan = timeSpanSampleProviders.Sum(x => x.SampleSpan);
+               // fill 0 when cannot read from source
+               if (timeSpanSampleProviders == null ||
+                  sumSampleSpan + CrossfadeDuration < 0.1 ||
+                  0 > currentSampleIndex || currentSampleIndex >= timeSpanSampleProviders.Count)
+               {
+                  Array.Fill(buffer, 0, count - sampleToReadRemain + offset, sampleToReadRemain);
+                  read += sampleToReadRemain;
+                  sampleToReadRemain = 0;
+                  break;
+               }
+
+               // crossfade
                var fadeSampleRemain = crossfadeSampleProvider.FadeSampleRemain;
                if (fadeSampleRemain > 0)
                {
@@ -184,7 +198,7 @@ namespace StimmingSignalGenerator.NAudio
                }
                else // reach the end of sample. move to next sample.
                {
-                  var crossfadeFromIndex = currentSampleIndex < 0 ? 0 : currentSampleIndex;
+                  var crossfadeFromIndex = currentSampleIndex;
                   if (IsShuffleMode)
                   {
                      var randomTimeSpanSample = deck.GetRandom();
@@ -208,6 +222,11 @@ namespace StimmingSignalGenerator.NAudio
                   var crossfadeToIndex = currentSampleIndex;
                   crossfadeFrom = timeSpanSampleProviders[crossfadeFromIndex].SampleProvider;
                   crossfadeTo = timeSpanSampleProviders[crossfadeToIndex].SampleProvider;
+                  // incase init of 0 sum sample span
+                  if (sumSampleSpan == 0 && crossfadeFrom == crossfadeTo)
+                  {
+                     crossfadeFrom = null;
+                  }
                   crossfadeSampleProvider.BeginCrossfade(crossfadeFrom, crossfadeTo, CrossfadeDuration);
 
                   // Avoid invoke event in lock block to prevent dead lock
@@ -217,6 +236,7 @@ namespace StimmingSignalGenerator.NAudio
                   currentSampleSpanPosition = 0;
                   //set end position
                   currentSampleSpanEndPosition = timeSpanSampleProviders[currentSampleIndex].SampleSpan;
+
                }
             }
          }
@@ -284,7 +304,7 @@ namespace StimmingSignalGenerator.NAudio
       private readonly List<TimeSpanSampleProvider> deck; //deck for shuffle
       private int currentSampleSpanPosition = 0;
       private int currentSampleSpanEndPosition = 0;
-      private int currentSampleIndex = -1;
+      private int currentSampleIndex = 0;
    }
 
    public static class WaveHelper

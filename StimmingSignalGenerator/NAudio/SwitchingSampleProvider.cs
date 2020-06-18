@@ -5,14 +5,31 @@ namespace StimmingSignalGenerator.NAudio
 {
    public class SwitchingSampleProvider : ISampleProvider
    {
-      public WaveFormat WaveFormat { get; }
-      public ISampleProvider SampleProvider { get; set; }
 
+      public WaveFormat WaveFormat { get; }
+      public double CrossfadeDuration { get; set; }
+      public ISampleProvider SampleProvider
+      {
+         get => sampleProvider; set
+         {
+            crossfadeSampleProvider.ForceToEnd();
+            OldSampleProvider = sampleProvider;
+            sampleProvider = value;
+            crossfadeSampleProvider.BeginCrossfade(OldSampleProvider, SampleProvider, CrossfadeDuration);
+         }
+      }
+
+      private ISampleProvider sampleProvider;
+      public ISampleProvider OldSampleProvider { get; private set; }
+      private readonly CrossfadeSampleProvider crossfadeSampleProvider = new CrossfadeSampleProvider();
       public SwitchingSampleProvider()
       {
          WaveFormat = Constants.Wave.DefaultStereoWaveFormat;
       }
-
+      public void ForceEndCrossfade()
+      {
+         crossfadeSampleProvider.ForceToEnd();
+      }
       public int Read(float[] buffer, int offset, int count)
       {
          if (SampleProvider == null)
@@ -21,7 +38,15 @@ namespace StimmingSignalGenerator.NAudio
             return count;
          }
          int read;
-         read = SampleProvider.Read(buffer, offset, count);
+         if (crossfadeSampleProvider.FadeSampleRemain > 0)
+         {
+            read = crossfadeSampleProvider.Read(buffer, offset, count);
+         }
+         else
+         {
+            read = SampleProvider.Read(buffer, offset, count);
+         }
+
          return read;
       }
    }

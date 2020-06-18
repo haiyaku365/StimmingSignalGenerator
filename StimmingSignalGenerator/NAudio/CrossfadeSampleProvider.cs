@@ -26,6 +26,11 @@ namespace StimmingSignalGenerator.NAudio
       {
          lock (lockObject)
          {
+            if (sourceSampleFrom == sourceSampleTo) {
+               //not crossfade same samples
+               fadeSamplePosition = fadeSampleEndPosition = 0;
+               return; 
+            }
             SourceSampleFrom = sourceSampleFrom;
             SourceSampleTo = sourceSampleTo;
             CrossfadeDuration = crossfadeDuration;
@@ -33,6 +38,7 @@ namespace StimmingSignalGenerator.NAudio
             fadeSampleEndPosition = (int)(CrossfadeDuration * WaveFormat.SampleRate);
          }
       }
+
       public void ForceToEnd()
       {
          lock (lockObject)
@@ -49,8 +55,23 @@ namespace StimmingSignalGenerator.NAudio
             sourceSampleFromBuffer = BufferHelpers.Ensure(sourceSampleFromBuffer, count);
             sourceSampleToBuffer = BufferHelpers.Ensure(sourceSampleToBuffer, count);
 
-            sourceSamplesRead = SourceSampleFrom.Read(sourceSampleFromBuffer, 0, count);
-            SourceSampleTo.Read(sourceSampleToBuffer, 0, count);
+            if (SourceSampleFrom == null)
+            {
+               Array.Fill(sourceSampleFromBuffer, 0, 0, count);
+               sourceSamplesRead = count;
+            }
+            else
+            {
+               sourceSamplesRead = SourceSampleFrom.Read(sourceSampleFromBuffer, 0, count);
+            }
+            if (SourceSampleTo == null)
+            {
+               Array.Fill(sourceSampleToBuffer, 0, 0, count);
+            }
+            else
+            {
+               SourceSampleTo.Read(sourceSampleToBuffer, 0, count);
+            }
 
             while (sample < sourceSamplesRead)
             {

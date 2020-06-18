@@ -121,8 +121,18 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             })
             .OnItemRemoved(trackVM =>
             {
-               if (trackVM.IsPlaying && !IsTimingMode)
-                  SwitchPlayingTrack(null);
+               if (!IsTimingMode)
+               {
+                  if (trackVM.IsPlaying)
+                  {
+                     SwitchPlayingTrack(null);
+                  }
+                  if (trackVM.FinalSample == switchingSampleProvider.SampleProvider ||
+                     trackVM.FinalSample == switchingSampleProvider.OldSampleProvider)
+                  {
+                     switchingSampleProvider.ForceEndCrossfade();
+                  }
+               }
                timingSwitchSampleProvider.RemoveSample(trackVM.FinalSample);
                var innerDisposable = innerDisposables.First(x => x.vm == trackVM);
                innerDisposable.disposable.Dispose();
@@ -169,7 +179,11 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             })
             .DisposeWith(Disposables);
          this.WhenAnyValue(x => x.CrossfadeDuration)
-            .Subscribe(x=> timingSwitchSampleProvider.CrossfadeDuration = x)
+            .Subscribe(x =>
+            {
+               switchingSampleProvider.CrossfadeDuration = x;
+               timingSwitchSampleProvider.CrossfadeDuration = x;
+            })
             .DisposeWith(Disposables);
          this.WhenAnyValue(x => x.IsShuffleMode)
             .Subscribe(x => timingSwitchSampleProvider.IsShuffleMode = x)
@@ -214,10 +228,9 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       /// <param name="trackVM"></param>
       public void SwitchPlayingTrack(TrackViewModel trackVM)
       {
-         if (trackVM == null) return;
          if (IsTimingMode)
          {
-            timingSwitchSampleProvider.ForceSwitch(trackVM.FinalSample);
+            timingSwitchSampleProvider.ForceSwitch(trackVM?.FinalSample);
          }
          else
          {
