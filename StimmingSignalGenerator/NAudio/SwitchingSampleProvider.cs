@@ -12,7 +12,6 @@ namespace StimmingSignalGenerator.NAudio
       {
          get => sampleProvider; set
          {
-            crossfadeSampleProvider.ForceToEnd();
             OldSampleProvider = sampleProvider;
             sampleProvider = value;
             crossfadeSampleProvider.BeginCrossfade(OldSampleProvider, SampleProvider, CrossfadeDuration);

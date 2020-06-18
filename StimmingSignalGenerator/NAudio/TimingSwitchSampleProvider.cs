@@ -126,12 +126,21 @@ namespace StimmingSignalGenerator.NAudio
       {
          lock (timeSpanSampleProviders)
          {
-            if (0 > index || index >= timeSpanSampleProviders.Count) return;
+            if (0 > index || index >= timeSpanSampleProviders.Count ||
+               currentSampleIndex == index)
+               return;
+
+            var crossfadeFromIndex = currentSampleIndex;
+
             currentSampleIndex = index;
             currentSampleSpanEndPosition = timeSpanSampleProviders[index].SampleSpan;
             currentSampleSpanPosition = 0;
             QueueInvokeSampleProviderChanged(
                timeSpanSampleProviders[index].SampleProvider);
+
+            crossfadeFrom = timeSpanSampleProviders[crossfadeFromIndex].SampleProvider;
+            crossfadeTo = timeSpanSampleProviders[index].SampleProvider;
+            crossfadeSampleProvider.BeginCrossfade(crossfadeFrom, crossfadeTo, CrossfadeDuration);
          }
          ProcessInvokeQueue();
       }

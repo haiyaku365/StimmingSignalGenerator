@@ -19,6 +19,8 @@ namespace StimmingSignalGenerator.NAudio
       private int fadeSampleEndPosition;
       private float[] sourceSampleFromBuffer;
       private float[] sourceSampleToBuffer;
+      private float oldFadeInFactor;
+      private float fadeInFactor = 1;
       public void BeginCrossfade(
          ISampleProvider sourceSampleFrom,
          ISampleProvider sourceSampleTo,
@@ -26,14 +28,16 @@ namespace StimmingSignalGenerator.NAudio
       {
          lock (lockObject)
          {
-            if (sourceSampleFrom == sourceSampleTo) {
+            if (sourceSampleFrom == sourceSampleTo)
+            {
                //not crossfade same samples
                fadeSamplePosition = fadeSampleEndPosition = 0;
-               return; 
+               return;
             }
             SourceSampleFrom = sourceSampleFrom;
             SourceSampleTo = sourceSampleTo;
             CrossfadeDuration = crossfadeDuration;
+            oldFadeInFactor = fadeInFactor;
             fadeSamplePosition = 0;
             fadeSampleEndPosition = (int)(CrossfadeDuration * WaveFormat.SampleRate);
          }
@@ -77,8 +81,12 @@ namespace StimmingSignalGenerator.NAudio
             {
                for (int ch = 0; ch < WaveFormat.Channels; ch++)
                {
-                  var ratio = (float)fadeSamplePosition / fadeSampleEndPosition;
-                  buffer[offset + sample] = ((1 - ratio) * sourceSampleFromBuffer[sample]) + (ratio * sourceSampleToBuffer[sample]);
+                  fadeInFactor = (float)fadeSamplePosition / fadeSampleEndPosition;
+                  var fadeOutFactor = oldFadeInFactor - fadeInFactor;
+                  fadeOutFactor = fadeOutFactor < 0 ? 0 : fadeOutFactor;
+                  buffer[offset + sample] =
+                     (fadeOutFactor * sourceSampleFromBuffer[sample]) +
+                     (fadeInFactor * sourceSampleToBuffer[sample]);
                   sample++;
                }
                if (fadeSamplePosition <= fadeSampleEndPosition)
