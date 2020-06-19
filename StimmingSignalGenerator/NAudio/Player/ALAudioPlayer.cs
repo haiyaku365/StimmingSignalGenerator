@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 
-namespace StimmingSignalGenerator.NAudio
+namespace StimmingSignalGenerator.NAudio.Player
 {
    class ALAudioPlayer : AudioPlayerBase
    {

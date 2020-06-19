@@ -2,7 +2,7 @@
 using System;
 using System.Collections.ObjectModel;
 
-namespace StimmingSignalGenerator.NAudio
+namespace StimmingSignalGenerator.NAudio.Player
 {
    public interface IAudioPlayer : IReactiveObject, IDisposable
    {

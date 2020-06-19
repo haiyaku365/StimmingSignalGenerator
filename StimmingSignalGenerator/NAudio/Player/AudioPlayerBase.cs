@@ -6,7 +6,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
-namespace StimmingSignalGenerator.NAudio
+namespace StimmingSignalGenerator.NAudio.Player
 {
    public abstract class AudioPlayerBase : ReactiveObject, IAudioPlayer, IDisposable
    {

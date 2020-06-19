@@ -4,6 +4,7 @@ using Splat;
 using StimmingSignalGenerator.Helper;
 using StimmingSignalGenerator.NAudio;
 using StimmingSignalGenerator.NAudio.OxyPlot;
+using StimmingSignalGenerator.NAudio.Player;
 using System;
 using System.Linq;
 using System.Reactive;

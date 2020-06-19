@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
-namespace StimmingSignalGenerator.NAudio
+namespace StimmingSignalGenerator.NAudio.Player
 {
    public class WaveOutAudioPlayer : AudioPlayerBase
    {

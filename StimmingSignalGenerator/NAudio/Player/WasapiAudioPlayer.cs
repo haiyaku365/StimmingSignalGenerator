@@ -10,7 +10,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-namespace StimmingSignalGenerator.NAudio
+namespace StimmingSignalGenerator.NAudio.Player
 {
    public class WasapiAudioPlayer : AudioPlayerBase
    {
