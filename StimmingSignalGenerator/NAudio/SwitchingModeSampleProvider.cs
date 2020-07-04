@@ -1,10 +1,11 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using System;
 using System.Collections.Generic;
 
 namespace StimmingSignalGenerator.NAudio
 {
-   public class SwitchingModeSampleProvider : ISampleProvider
+   public class SwitchingModeSampleProvider : ISampleProvider, ISampleProviderReadEvent
    {
       public WaveFormat WaveFormat { get; }
       public GeneratorModeType GeneratorMode { get; set; }
@@ -39,11 +40,15 @@ namespace StimmingSignalGenerator.NAudio
          }
       }
 
+      public event EventHandler OnRead;
+      public event EventHandler OnReaded;
+
       private MultiplexingSampleProvider stereoSample;
       private MonoToStereoSampleProviderEx monoSample;
       private IEnumerable<ISampleProvider> stereoSampleProviders;
       private ISampleProvider monoSampleProvider;
       private readonly RampGain stereoRampGain;
+
       public SwitchingModeSampleProvider()
       {
          WaveFormat = Constants.Wave.DefaultStereoWaveFormat;
@@ -57,6 +62,8 @@ namespace StimmingSignalGenerator.NAudio
       }
       public int Read(float[] buffer, int offset, int count)
       {
+         OnRead?.Invoke(this, EventArgs.Empty);
+
          int read;
          switch (GeneratorMode)
          {
@@ -76,6 +83,8 @@ namespace StimmingSignalGenerator.NAudio
                read = 0;
                break;
          }
+
+         OnReaded?.Invoke(this, EventArgs.Empty);
          return read;
       }
    }

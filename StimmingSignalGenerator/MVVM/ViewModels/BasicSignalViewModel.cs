@@ -13,6 +13,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StimmingSignalGenerator.MVVM.ViewModels
@@ -350,11 +351,13 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .DisposeWith(Disposables);
 
          this.WhenAnyValue(
-               property1: x => x.SelectedLinkableBasicSignalVM,
-               property2: x => x.SelectedLinkableBasicSignalVM.Frequency)
+            property1: x => x.SelectedLinkableBasicSignalVM,
+            property2: x => x.SelectedLinkableBasicSignalVM.Frequency,
+            property3: x => x.SelectedLinkableBasicSignalVM.SignalType,
+            property4: x => x.SignalType)
             .Subscribe(x =>
             {
-               var (vm, f) = x;
+               var (vm, f, t1, t2) = x;
                if (vm == null)
                {
                   IsSyncFreq = false;
@@ -367,6 +370,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                else
                {
                   BasicSignal.SetFrequencyAndPhaseTo(SelectedLinkableBasicSignalVM.BasicSignal);
+                  if ((t1 == BasicSignalType.White || t1 == BasicSignalType.Pink) && t1 == t2)
+                  {
+                     SyncRandomTo(SelectedLinkableBasicSignalVM.BasicSignal);
+                  }
                }
             })
             .DisposeWith(Disposables);
@@ -375,6 +382,50 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Select(_ => $"{Parent.FullName}.{Name}")
             .ToProperty(this, nameof(FullName), out fullName)
             .DisposeWith(Disposables);
+      }
+
+      CancellationTokenSource SyncRandomCancellationTokenSource;
+      bool OnreadSubed = false;
+
+      ISampleProviderReadEvent RootSignalTreeFinalSampleReadEvent
+         => RootSignalTree.FinalSample as ISampleProviderReadEvent;
+      IObservable<EventPattern<object>> OnRootSignalTreeFinalSampleRead
+         => Observable.FromEventPattern(
+            h => RootSignalTreeFinalSampleReadEvent.OnRead += h,
+            h => RootSignalTreeFinalSampleReadEvent.OnRead -= h);
+      private void SyncRandomTo(BasicSignal basicSignal)
+      {
+         if (OnreadSubed) return;
+         SyncRandomCancellationTokenSource?.Cancel();
+         SyncRandomCancellationTokenSource = new CancellationTokenSource().DisposeWith(Disposables);
+         OnRootSignalTreeFinalSampleRead
+            .Take(1)
+            .Subscribe(
+            _ =>
+            {
+               OnreadSubed = false;
+               try
+               {
+                  Task.Run(() =>
+                  {
+                     BasicSignal.SyncRandomTo(basicSignal);
+                     if (Parent is BasicSignalViewModel parent && parent.SelectedLinkableBasicSignalVM != null)
+                     {
+                        parent.BasicSignal.SetFrequencyAndPhaseTo(parent.SelectedLinkableBasicSignalVM.BasicSignal);
+                     }
+                  }, SyncRandomCancellationTokenSource.Token).Wait();
+               }
+               catch (TaskCanceledException) { }
+               catch (AggregateException ae)
+               {
+                  foreach (var e in ae.Flatten().InnerExceptions)
+                  {
+                     if (!(e is TaskCanceledException)) throw;
+                  }
+               }
+               catch (Exception) { throw; }
+            });
+         OnreadSubed = true;
       }
 
       public async Task CopyToClipboard()
