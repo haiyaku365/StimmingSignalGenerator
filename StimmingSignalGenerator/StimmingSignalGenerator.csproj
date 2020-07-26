@@ -23,9 +23,9 @@
     </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.9.10" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.9.10" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.10" />
+    <PackageReference Include="Avalonia" Version="0.9.11" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.9.11" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.11" />
     <PackageReference Include="NAudio" Version="1.10.0" />
     <PackageReference Include="OpenToolkit.OpenAL" Version="4.0.0-pre9.1" />
     <PackageReference Include="OxyPlot.Avalonia-alpha-2020-04-15" Version="1.0.0" />
