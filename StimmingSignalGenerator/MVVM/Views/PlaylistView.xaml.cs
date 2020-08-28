@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using DynamicData;
@@ -73,8 +74,8 @@ namespace StimmingSignalGenerator.MVVM.Views
                   .DisposeWith(disposables);
 
             // Setup DragOver, Drop handler
-            this.AddHandler(DragDrop.DragOverEvent, DragOver).DisposeWith(disposables);
-            this.AddHandler(DragDrop.DropEvent, Drop).DisposeWith(disposables);
+            this.AddDisposableHandler(DragDrop.DragOverEvent, DragOver).DisposeWith(disposables);
+            this.AddDisposableHandler(DragDrop.DropEvent, Drop).DisposeWith(disposables);
          });
          InitializeComponent();
       }
