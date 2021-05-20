@@ -341,7 +341,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             .Filter(x => x.SelectedLinkableBasicSignalVM == this)
             .ToCollection()
             .Select(x => x.Count == 0)
-            .ToProperty(this, nameof(CanSyncFreq), out canSyncFreq, initialValue: true)
+            .ToProperty(this, x => x.CanSyncFreq, out canSyncFreq, initialValue: true)
             .DisposeWith(Disposables);
 
          RootSignalTreeAllSubBasicSignalVMs.Connect().DisposeWith(Disposables);
