@@ -39,7 +39,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       public ReactiveCommand<Unit, Unit> SwitchToWaveOutAudioPlayerCommand { get; }
       public IAudioPlayer AudioPlayer { get => audioPlayer; private set => this.RaiseAndSetIfChanged(ref audioPlayer, value); }
       public AudioPlayerType CurrentAudioPlayerType => currentAudioPlayerType.Value;
-      public bool CanPlay { get => canPlay; set => this.RaiseAndSetIfChanged(ref canPlay, value); }
       public bool IsPlaying => isPlaying.Value;
 
       public AppState AppState { get; }
@@ -47,7 +46,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       private double fadeInDuration;
       private double fadeOutDuration;
-      private bool canPlay = true;
       private ObservableAsPropertyHelper<bool> isPlaying;
       private readonly ISampleProvider sampleProvider;
       private readonly FadeInOutSampleProviderEx fadeInOutSampleProviderEx;
@@ -113,19 +111,19 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             h => fadeInOutSampleProviderEx.OnFadeOutCompleted += h,
             h => fadeInOutSampleProviderEx.OnFadeOutCompleted -= h)
             // Wait another buffer so last fadeout pass through to audio player
-            .Delay(TimeSpan.FromMilliseconds(AudioPlayer.Latency), RxApp.TaskpoolScheduler)
+            .Delay(TimeSpan.FromMilliseconds(AudioPlayer.Latency * 2), RxApp.TaskpoolScheduler)
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(_ => AudioPlayer.Stop())
             .DisposeWith(Disposables);
 
          PlayCommand = ReactiveCommand.Create(Play,
             canExecute: this.WhenAnyValue(
-               property1: x => x.CanPlay,
+               property1: x => x.IsPlaying,
                property2: x => x.AudioPlayer.SelectedAudioDevice,
-               selector: (p1, p2) => p1 && !string.IsNullOrEmpty(p2)))
+               selector: (p1, p2) => !p1 && !string.IsNullOrEmpty(p2)))
             .DisposeWith(Disposables);
          StopCommand = ReactiveCommand.Create(Stop,
-            canExecute: this.WhenAnyValue(x => x.CanPlay, selector: x => !x))
+            canExecute: this.WhenAnyValue(x => x.IsPlaying, selector: x => x))
             .DisposeWith(Disposables);
          TogglePlayCommand = ReactiveCommand.Create(TogglePlay,
             canExecute: this.WhenAnyValue(x => x.AudioPlayer.SelectedAudioDevice, selector: x => !string.IsNullOrEmpty(x)))
@@ -212,7 +210,7 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public void TogglePlay()
       {
-         if (CanPlay)
+         if (!IsPlaying)
             Play();
          else
             Stop();
@@ -220,7 +218,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
 
       public void Play()
       {
-         CanPlay = false;
          fadeInOutSampleProviderEx.BeginFadeIn(FadeInDuration);
          if (!IsPlaying)
          {
@@ -229,7 +226,6 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
       }
       public void Stop()
       {
-         CanPlay = true;
          fadeInOutSampleProviderEx.BeginFadeOut(FadeOutDuration);
       }
    }

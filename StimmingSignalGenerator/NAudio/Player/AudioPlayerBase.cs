@@ -58,6 +58,7 @@ namespace StimmingSignalGenerator.NAudio.Player
                {
                   playerStopDisposable.Dispose();
                   player = null;
+                  PlayerStatus = PlayerStatus.Stop;
                })
                .DisposeWith(playerStopDisposable);
          }
@@ -72,7 +73,6 @@ namespace StimmingSignalGenerator.NAudio.Player
 
       virtual public void Stop()
       {
-         PlayerStatus = PlayerStatus.Stop;
          player.Stop();
       }
 

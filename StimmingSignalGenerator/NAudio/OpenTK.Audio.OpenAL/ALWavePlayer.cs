@@ -191,6 +191,8 @@ namespace StimmingSignalGenerator.NAudio.OpenTK.Audio.OpenAL
             eventWaitHandle.WaitOne(1);
          }
 
+         Thread.Sleep(500);
+
          // Stop playing do clean up
          AL.SourceStop(alSource);
          CheckAndRaiseStopOnALError();
