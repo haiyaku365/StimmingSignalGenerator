@@ -1,9 +1,9 @@
 ﻿using NAudio.Wave;
-using OpenToolkit.Audio.OpenAL;
+using OpenTK.Audio.OpenAL;
 using System;
 using System.Threading;
 
-namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
+namespace StimmingSignalGenerator.NAudio.OpenTK.Audio.OpenAL
 {
    class ALWavePlayer : IWavePlayer
    {
@@ -98,7 +98,7 @@ namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
             CheckAndRaiseStopOnALError();
 
             //fill and queue buffer
-            AL.BufferData(_alBuffers[i], sourceALFormat, sourceBuffer, sourceBuffer.Length, sourceProvider.WaveFormat.SampleRate);
+            AL.BufferData(_alBuffers[i], sourceALFormat, sourceBuffer, sourceProvider.WaveFormat.SampleRate);
             CheckAndRaiseStopOnALError();
             AL.SourceQueueBuffer(alSource, _alBuffers[i]);
             CheckAndRaiseStopOnALError();

@@ -1,8 +1,8 @@
 ﻿using NAudio.Wave;
-using OpenToolkit.Audio.OpenAL;
+using OpenTK.Audio.OpenAL;
 using System;
 
-namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
+namespace StimmingSignalGenerator.NAudio.OpenTK.Audio.OpenAL
 {
    public static class WaveFormatExt
    {

@@ -1,5 +1,5 @@
 ﻿using NAudio.Wave;
-using StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL;
+using StimmingSignalGenerator.NAudio.OpenTK.Audio.OpenAL;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;

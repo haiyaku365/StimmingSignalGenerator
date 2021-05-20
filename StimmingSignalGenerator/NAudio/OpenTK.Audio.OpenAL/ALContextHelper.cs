@@ -1,9 +1,9 @@
-﻿using OpenToolkit.Audio.OpenAL.Extensions.Creative.EnumerateAll;
+﻿using OpenTK.Audio.OpenAL.Extensions.Creative.EnumerateAll;
 using System.Collections.Generic;
 using System.Linq;
 
 
-namespace StimmingSignalGenerator.NAudio.OpenToolkit.OpenAL
+namespace StimmingSignalGenerator.NAudio.OpenTK.Audio.OpenAL
 {
    public static class ALContextHelper
    {
