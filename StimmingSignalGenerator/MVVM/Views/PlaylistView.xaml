@@ -73,18 +73,16 @@
 
       <!-- HotKey for play track-->
       <Panel IsVisible="False">
-        <!-- Issue CommandParameter not passing when using Hotkey https://github.com/AvaloniaUI/Avalonia/issues/2446 -->
-        <!--<Button IsVisible="False" HotKey="Ctrl+D1" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="0" />-->
-        <Button HotKey="Ctrl+D1" Command="{Binding SwitchPlayingTrackByIndex0}" />
-        <Button HotKey="Ctrl+D2" Command="{Binding SwitchPlayingTrackByIndex1}" />
-        <Button HotKey="Ctrl+D3" Command="{Binding SwitchPlayingTrackByIndex2}" />
-        <Button HotKey="Ctrl+D4" Command="{Binding SwitchPlayingTrackByIndex3}" />
-        <Button HotKey="Ctrl+D5" Command="{Binding SwitchPlayingTrackByIndex4}" />
-        <Button HotKey="Ctrl+D6" Command="{Binding SwitchPlayingTrackByIndex5}" />
-        <Button HotKey="Ctrl+D7" Command="{Binding SwitchPlayingTrackByIndex6}" />
-        <Button HotKey="Ctrl+D8" Command="{Binding SwitchPlayingTrackByIndex7}" />
-        <Button HotKey="Ctrl+D9" Command="{Binding SwitchPlayingTrackByIndex8}" />
-        <Button HotKey="Ctrl+D0" Command="{Binding SwitchPlayingTrackByIndex9}" />
+        <Button HotKey="Ctrl+D1" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="0" />
+        <Button HotKey="Ctrl+D2" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="1" />
+        <Button HotKey="Ctrl+D3" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="2" />
+        <Button HotKey="Ctrl+D4" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="3" />
+        <Button HotKey="Ctrl+D5" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="4" />
+        <Button HotKey="Ctrl+D6" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="5" />
+        <Button HotKey="Ctrl+D7" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="6" />
+        <Button HotKey="Ctrl+D8" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="7" />
+        <Button HotKey="Ctrl+D9" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="8" />
+        <Button HotKey="Ctrl+D0" Command="{Binding SwitchPlayingTrackByIndex}" CommandParameter="9" />
       </Panel>
 
       <!-- Track List -->
