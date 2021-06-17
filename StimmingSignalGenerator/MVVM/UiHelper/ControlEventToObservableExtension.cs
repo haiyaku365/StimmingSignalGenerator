@@ -44,6 +44,11 @@ namespace StimmingSignalGenerator.MVVM.UiHelper
          => Observable.FromEventPattern<ItemContainerEventArgs>(
             h => itemContainerGenerator.Dematerialized += h,
             h => itemContainerGenerator.Dematerialized -= h);
+      public static IObservable<EventPattern<ItemContainerEventArgs>> ObservableRecycled
+         (this IItemContainerGenerator itemContainerGenerator)
+         => Observable.FromEventPattern<ItemContainerEventArgs>(
+               h => itemContainerGenerator.Recycled += h,
+               h => itemContainerGenerator.Recycled -= h);
 
 
       public static IObservable<EventPattern<SpinEventArgs>> ObservableSpinned
