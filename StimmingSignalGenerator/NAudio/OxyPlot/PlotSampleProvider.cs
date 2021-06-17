@@ -61,13 +61,13 @@ namespace StimmingSignalGenerator.NAudio.OxyPlot
          lineSeries = new AliasedLineSeries[lineCount];
          lineSeries[0] = new AliasedLineSeries()
          {
-            Color = OxyColor.FromArgb(180, 0, 0, 0)
+            Color = OxyColor.FromArgb(135, 0, 0, 0)
          };
          if (lineCount > 1)
          {
             lineSeries[1] = new AliasedLineSeries()
             {
-               Color = OxyColor.FromArgb(180, 255, 0, 0)
+               Color = OxyColor.FromArgb(135, 255, 0, 0)
             };
             for (int i = 2; i < lineCount; i++)
             {
