@@ -38,9 +38,10 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
                "67jDcN8fYD6zVsCRsAe33BSHfGdDUdQq6S8N3jvU \r\n" +
                "4yrkcYsjBy7bVDzAEw2DJm4vvAa8CUZskg9YbNcC \r\n" +
                "m9ryr5XRzuQtTVSAqXkwdUd4Cyn7R6aBs4Z5MNVX \r\n";
-            vm.AddNewTrack();
-            vm.AddNewTrack();
-            vm.AddNewTrack();
+            for (int i = 0; i < 15; i++)
+            {
+               vm.AddNewTrack();
+            }
 
             vm.TrackVMs[0].TimeSpanSecond = 1;
             vm.TrackVMs[1].TimeSpanSecond = 7200;
