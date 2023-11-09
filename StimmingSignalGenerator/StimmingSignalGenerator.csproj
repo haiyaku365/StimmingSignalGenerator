@@ -23,10 +23,10 @@
     </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.6" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.6" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.6" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.6" />
+    <PackageReference Include="Avalonia" Version="0.10.22" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.22" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.22" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.22" />
     <PackageReference Include="NAudio.Core" Version="2.0.0" />
     <PackageReference Include="NAudio.Wasapi" Version="2.0.0" />
     <PackageReference Include="NAudio.WinForms" Version="2.0.0" />
