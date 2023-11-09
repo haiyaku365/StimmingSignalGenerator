@@ -47,7 +47,7 @@ namespace StimmingSignalGenerator.FileService
          CreatePlaylistDir();
          openFileDialog.Directory = PlaylistPath;
          var loadPath = await openFileDialog.ShowAsync(Window);
-         if (loadPath.Length == 0) return null;
+         if (loadPath == null || loadPath.Length == 0) return null;
          return await LoadAsync(loadPath[0]);
       }
 
