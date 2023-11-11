@@ -10,38 +10,38 @@
              d:DataContext="{x:Static vm:DesignAudioPlayerViewModel.Data}"
              
              x:Class="StimmingSignalGenerator.MVVM.Views.AudioPlayerView">
-  <DockPanel HorizontalAlignment="Center" Background="Transparent">
-    <DockPanel.ContextMenu>
-      <ContextMenu>
-        <MenuItem Header="Switch to Wasapi (Windows only)" Command="{Binding SwitchToWasapiAudioPlayerCommand}" />
-        <MenuItem Header="Switch to WaveOut (Windows only)" Command="{Binding SwitchToWaveOutAudioPlayerCommand}" />
-        <MenuItem Header="Switch to OpenAL (Beta)" Command="{Binding SwitchToALAudioPlayerCommand}"/>
-      </ContextMenu>
-    </DockPanel.ContextMenu>
-    <DockPanel.Styles>
-      <Style Selector="Button,NumericUpDown,ComboBox">
-        <Setter Property="Margin" Value="5 0 0 0" />
-      </Style>
-    </DockPanel.Styles>
-    <!-- HotKey="Ctrl+Space" conflict with a lot of control it will trigger button if focus etc. -->
-    <Button Content="TogglePlay" Command="{Binding TogglePlayCommand}" HotKey="Ctrl+OemTilde" IsVisible="False" />
-    <Button DockPanel.Dock="Right"
-            Content="Stop" Command="{Binding StopCommand}"
-            ToolTip.Tip="Toggle Hotkey:Ctrl+Tilde" />
-    <Button DockPanel.Dock="Right"
-            Content="Play" Command="{Binding PlayCommand}"
-            ToolTip.Tip="Toggle Hotkey:Ctrl+Tilde" />
-    <NumericUpDown DockPanel.Dock="Right"
-                   ToolTip.Tip="Fade out durations(Second)"
-                   Value="{Binding FadeOutDuration}"
-                   Minimum="0" Maximum="30" Increment="0.1" FormatString="{}{0:N1}" />
-    <NumericUpDown DockPanel.Dock="Right"
-                   ToolTip.Tip="Fade in durations(Second)"
-                   Value="{Binding FadeInDuration}"
-                   Minimum="0" Maximum="30" Increment="0.1" FormatString="{}{0:N1}" />
-    <NumericUpDown DockPanel.Dock="Left" ToolTip.Tip="Latency (mSec)" IsEnabled="{Binding !IsPlaying}"
-                   Minimum="20" Maximum="500" ClipValueToMinMax="True" Value="{Binding AudioPlayer.Latency}" />
-    <ComboBox DockPanel.Dock="Left" Items="{Binding AudioPlayer.AudioDevices}" IsEnabled="{Binding !IsPlaying}"
-              SelectedItem="{Binding AudioPlayer.SelectedAudioDevice}" />
-  </DockPanel>
+	<DockPanel HorizontalAlignment="Center" Background="Transparent">
+		<DockPanel.ContextMenu>
+			<ContextMenu>
+				<MenuItem Header="Switch to PortAudio" Command="{Binding SwitchToPortAudioAudioPlayerCommand}"/>
+				<MenuItem Header="Switch to OpenAL" Command="{Binding SwitchToALAudioPlayerCommand}"/>
+				<MenuItem Header="Switch to Wasapi (Windows only)" Command="{Binding SwitchToWasapiAudioPlayerCommand}" />
+			</ContextMenu>
+		</DockPanel.ContextMenu>
+		<DockPanel.Styles>
+			<Style Selector="Button,NumericUpDown,ComboBox">
+				<Setter Property="Margin" Value="5 0 0 0" />
+			</Style>
+		</DockPanel.Styles>
+		<!-- HotKey="Ctrl+Space" conflict with a lot of control it will trigger button if focus etc. -->
+		<Button Content="TogglePlay" Command="{Binding TogglePlayCommand}" HotKey="Ctrl+OemTilde" IsVisible="False" />
+		<Button DockPanel.Dock="Right"
+				  Content="Stop" Command="{Binding StopCommand}"
+				  ToolTip.Tip="Toggle Hotkey:Ctrl+Tilde" />
+		<Button DockPanel.Dock="Right"
+				  Content="Play" Command="{Binding PlayCommand}"
+				  ToolTip.Tip="Toggle Hotkey:Ctrl+Tilde" />
+		<NumericUpDown DockPanel.Dock="Right"
+							ToolTip.Tip="Fade out durations(Second)"
+							Value="{Binding FadeOutDuration}"
+							Minimum="0" Maximum="30" Increment="0.1" FormatString="{}{0:N1}" />
+		<NumericUpDown DockPanel.Dock="Right"
+							ToolTip.Tip="Fade in durations(Second)"
+							Value="{Binding FadeInDuration}"
+							Minimum="0" Maximum="30" Increment="0.1" FormatString="{}{0:N1}" />
+		<NumericUpDown DockPanel.Dock="Left" ToolTip.Tip="Latency (mSec)" IsEnabled="{Binding !IsPlaying}"
+							Minimum="20" Maximum="500" ClipValueToMinMax="True" Value="{Binding AudioPlayer.Latency}" />
+		<ComboBox DockPanel.Dock="Left" Items="{Binding AudioPlayer.AudioDevices}" IsEnabled="{Binding !IsPlaying}"
+					 SelectedItem="{Binding AudioPlayer.SelectedAudioDevice}" />
+	</DockPanel>
 </UserControl>

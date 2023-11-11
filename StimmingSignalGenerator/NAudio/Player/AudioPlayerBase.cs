@@ -73,7 +73,7 @@ namespace StimmingSignalGenerator.NAudio.Player
 
       virtual public void Stop()
       {
-         player.Stop();
+         player?.Stop();
       }
 
       private CompositeDisposable playerStopDisposable;
