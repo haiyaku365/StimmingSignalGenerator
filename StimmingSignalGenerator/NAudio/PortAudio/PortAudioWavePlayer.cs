@@ -26,6 +26,7 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
 
         public int Latency { get; }
 
+        public WaveFormat OutputWaveFormat => sourceProvider.WaveFormat;
         private int _deviceIndex;
         private DeviceInfo _deviceInfo;
 
@@ -48,7 +49,7 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
         public void Init(IWaveProvider waveProvider)
         {
             sourceProvider = waveProvider;
-            bufferSizeByte = sourceProvider.WaveFormat.ConvertLatencyToByteSize(Latency);
+            bufferSizeByte = OutputWaveFormat.ConvertLatencyToByteSize(Latency);
             sourceBuffer = new CircularBuffer(bufferSizeByte);
             bufferWrite = new byte[bufferSizeByte];
             bufferRead = new byte[bufferSizeByte];
@@ -56,7 +57,7 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
             var param = new StreamParameters
             {
                 device = _deviceIndex,
-                channelCount = sourceProvider.WaveFormat.Channels,
+                channelCount = OutputWaveFormat.Channels,
                 sampleFormat = SampleFormat.Float32,
                 suggestedLatency = _deviceInfo.defaultLowInputLatency,
                 hostApiSpecificStreamInfo = IntPtr.Zero,
@@ -70,7 +71,7 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
                 IntPtr userData
                 )
             {
-                int cnt = (int)frameCount * sourceProvider.WaveFormat.BlockAlign;
+                int cnt = (int)frameCount * OutputWaveFormat.BlockAlign;
                 sourceBuffer.Read(bufferWrite, 0, cnt);
                 sourceBufferDequeuedEvent.Set();
                 Marshal.Copy(bufferWrite, 0, output, cnt);

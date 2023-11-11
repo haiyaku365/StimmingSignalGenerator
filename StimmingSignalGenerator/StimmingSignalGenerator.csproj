@@ -28,8 +28,8 @@
     <PackageReference Include="Avalonia.Diagnostics" Version="0.10.22" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.22" />
     <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.7.30" />
-    <PackageReference Include="NAudio.Core" Version="2.0.0" />
-    <PackageReference Include="NAudio.Wasapi" Version="2.0.0" />
+    <PackageReference Include="NAudio.Core" Version="2.2.1" />
+    <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
     <PackageReference Include="OpenAL.Soft" Version="1.19.1" />
     <PackageReference Include="OpenTK.OpenAL" Version="4.7.7" />
     <PackageReference Include="OxyPlot.Avalonia" Version="2.1.0-20201211.2" />
