@@ -35,6 +35,7 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
         private CircularBuffer sourceBuffer;
         private byte[] bufferWrite;
         private byte[] bufferRead;
+        private byte[] bufferWriteLastestBlock;
         private AsyncAutoResetEvent sourceBufferDequeuedEvent;
 
         private PortAudioSharp.Stream stream;
@@ -53,6 +54,7 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
             sourceBuffer = new CircularBuffer(bufferSizeByte);
             bufferWrite = new byte[bufferSizeByte];
             bufferRead = new byte[bufferSizeByte];
+            bufferWriteLastestBlock = new byte[OutputWaveFormat.BlockAlign];
 
             var param = new StreamParameters
             {
@@ -63,7 +65,7 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
                 hostApiSpecificStreamInfo = IntPtr.Zero,
             };
 
-            StreamCallbackResult callback (
+            StreamCallbackResult callback(
                 IntPtr input, IntPtr output,
                 UInt32 frameCount,
                 ref StreamCallbackTimeInfo timeInfo,
@@ -72,10 +74,28 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
                 )
             {
                 int cnt = (int)frameCount * OutputWaveFormat.BlockAlign;
-                sourceBuffer.Read(bufferWrite, 0, cnt);
+                var byteReadCnt = sourceBuffer.Read(bufferWrite, 0, cnt);
                 sourceBufferDequeuedEvent.Set();
-                Marshal.Copy(bufferWrite, 0, output, cnt);
 
+                #region prevent wave jump when not enough buffer
+                if (byteReadCnt >= OutputWaveFormat.BlockAlign)
+                {
+                    // Copy latest data to use when not enough buffer.
+                    Array.Copy(
+                        bufferWrite, byteReadCnt - OutputWaveFormat.BlockAlign,
+                        bufferWriteLastestBlock, 0, OutputWaveFormat.BlockAlign);
+                }
+                while (byteReadCnt < cnt)
+                {
+                    // When running out of buffer data (Latency too low).
+                    // Fill the rest of buffer with latest data
+                    // so wave does not jump.
+                    bufferWrite[byteReadCnt] = bufferWriteLastestBlock[byteReadCnt % OutputWaveFormat.BlockAlign];
+                    byteReadCnt++;
+                }
+                #endregion
+
+                Marshal.Copy(bufferWrite, 0, output, cnt);
                 return StreamCallbackResult.Continue;
             }
             stream = new PortAudioSharp.Stream(
@@ -123,7 +143,9 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
                 fillSourceBufferWorker = Task.Factory.StartNew(
                     function: FillSourceBufferTaskAsync,
                     cancellationToken: CancellationToken.None,
-                    creationOptions: TaskCreationOptions.LongRunning,
+                    creationOptions:
+                        TaskCreationOptions.RunContinuationsAsynchronously |
+                        TaskCreationOptions.LongRunning,
                     scheduler: TaskScheduler.Default);
                 stream.Start();
                 PlaybackState = PlaybackState.Playing;
