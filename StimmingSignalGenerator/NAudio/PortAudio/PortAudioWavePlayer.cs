@@ -125,7 +125,6 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
 
         private void FillSourceBuffer(int bufferSpace)
         {
-            bufferRead = new byte[bufferSpace];
             sourceProvider.Read(bufferRead, 0, bufferSpace);
             sourceBuffer.Write(bufferRead, 0, bufferSpace);
         }
