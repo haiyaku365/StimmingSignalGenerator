@@ -32,7 +32,7 @@
     <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
     <PackageReference Include="OpenAL.Soft" Version="1.19.1" />
     <PackageReference Include="OpenTK.OpenAL" Version="4.7.7" />
-    <PackageReference Include="OxyPlot.Avalonia" Version="2.1.0-20201211.2" />
+    <PackageReference Include="OxyPlot.Avalonia" Version="2.1.0" />
     <PackageReference Include="PortAudioSharp2" Version="0.4.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />

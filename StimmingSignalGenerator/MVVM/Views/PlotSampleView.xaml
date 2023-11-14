@@ -7,17 +7,17 @@
              xmlns:vm="clr-namespace:StimmingSignalGenerator.MVVM.ViewModels;assembly=StimmingSignalGenerator"
 
              mc:Ignorable="d"
-             d:DesignWidth="800" d:DesignHeight="150"
+             d:DesignWidth="800" d:DesignHeight="32"
              x:Class="StimmingSignalGenerator.MVVM.Views.PlotSampleView">
   <Design.DataContext>
     <Binding Source="{x:Static vm:DesignPlotSampleViewModel.MonoData}" />
     <!--<Binding Source="{x:Static vm:DesignPlotSampleViewModel.StereoData}" />-->
   </Design.DataContext>
   <Grid ColumnDefinitions="auto,auto,auto,auto">
-    <Border Grid.Column="2" Margin="0 -20"  Width="200" Height="70">
-      <oxy:PlotView Grid.Column="2" Margin="-20 0 0 -25"
-                    Width="{Binding $parent.Bounds.Width}"
-                    Height="{Binding $parent.Bounds.Height}"
+    <Border Grid.Column="2" Margin="0 -20" Width="200" Height="78">
+      <oxy:PlotView Grid.Column="2" Margin="-30 0 0 -18"
+                    Width="{Binding $parent.Width}"
+                    Height="{Binding $parent.Height}"
                     Model="{Binding PlotModel}">
         <!-- use empty template to diable tracker -->
         <oxy:PlotView.DefaultTrackerTemplate>
@@ -29,6 +29,6 @@
     </Border>
     <ToggleButton Grid.Column="0" Margin="0 0 0 0" Content="HD Plot" IsChecked="{Binding IsHighDefinition}" />
     <ToggleButton Grid.Column="1" Margin="5 0 0 0" Content="Plot enable" IsChecked="{Binding IsPlotEnable}" />
-    <TextBlock Grid.Column="3" Margin="-15 0 0 0" Foreground="Red" FontWeight="Bold" Name="FpsBlock" />
+    <TextBlock Grid.Column="3" Margin="-30 0 0 0" Foreground="Red" FontWeight="Bold" Name="FpsBlock" />
   </Grid>
 </UserControl>
