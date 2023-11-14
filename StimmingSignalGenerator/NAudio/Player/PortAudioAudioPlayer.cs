@@ -57,7 +57,7 @@ namespace StimmingSignalGenerator.NAudio.Player
     public static class DeviceInfoExt
     {
         public static string ToString(this DeviceInfo deviceInfo, int index)
-            => $"[{index}]{deviceInfo.name} SampleRate:{deviceInfo.defaultSampleRate} OutputLatency(L/H):{deviceInfo.defaultLowOutputLatency}/{deviceInfo.defaultHighOutputLatency}";
+            => $"[{index}]{deviceInfo.name} SampleRate:{deviceInfo.defaultSampleRate} MaxChannels:{deviceInfo.maxOutputChannels} OutputLatency(L/H):{deviceInfo.defaultLowOutputLatency}/{deviceInfo.defaultHighOutputLatency}";
         public static int GetDeviceInfoIndex(this string str)
         {
             var idxStr = Regex.Match(str, @"^\[(\d)\].*").Groups[1].Value;
