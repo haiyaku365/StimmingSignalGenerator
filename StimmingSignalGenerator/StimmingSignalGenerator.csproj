@@ -1,40 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <Authors>haiyaku@tuta.io</Authors>
-    <Version>0.4.0.0</Version>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Update="**\*.xaml.cs">
-      <DependentUpon>%(Filename)</DependentUpon>
-    </Compile>
-    <AvaloniaResource Include="**\*.xaml">
-      <SubType>Designer</SubType>
-    </AvaloniaResource>
-    <AvaloniaResource Include="Assets\**" />
-    <!-- This is for cleaning deleted file when compile error -->
-    <!--<AvaloniaResource Remove="**\<<RemovedFile.xaml>>" />-->
-  </ItemGroup>
-  <ItemGroup>
-    <ContentWithTargetPath Include="Assets\Playlists\**">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>Playlists\%(Filename)%(Extension)</TargetPath>
-    </ContentWithTargetPath>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.22" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.22" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.22" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.22" />
-    <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.7.30" />
-    <PackageReference Include="NAudio.Core" Version="2.2.1" />
-    <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
-    <PackageReference Include="OpenAL.Soft" Version="1.19.1" />
-    <PackageReference Include="OpenTK.OpenAL" Version="4.7.7" />
-    <PackageReference Include="OxyPlot.Avalonia" Version="2.1.0" />
-    <PackageReference Include="PortAudioSharp2" Version="0.4.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
-  </ItemGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<Authors>haiyaku@tuta.io</Authors>
+		<Version>0.4.0.0</Version>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Update="**\*.xaml.cs">
+			<DependentUpon>%(Filename)</DependentUpon>
+		</Compile>
+		<AvaloniaResource Include="**\*.xaml">
+			<SubType>Designer</SubType>
+		</AvaloniaResource>
+		<AvaloniaResource Include="Assets\**" />
+		<!-- This is for cleaning deleted file when compile error -->
+		<!--<AvaloniaResource Remove="**\<<RemovedFile.xaml>>" />-->
+	</ItemGroup>
+	<ItemGroup>
+		<ContentWithTargetPath Include="Assets\Playlists\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<TargetPath>Playlists\%(Filename)%(Extension)</TargetPath>
+		</ContentWithTargetPath>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Avalonia" Version="0.10.22" />
+		<PackageReference Include="Avalonia.Desktop" Version="0.10.22" />
+		<PackageReference Include="Avalonia.Diagnostics" Version="0.10.22" />
+		<PackageReference Include="Avalonia.ReactiveUI" Version="0.10.22" />
+		<PackageReference Include="OxyPlot.Avalonia" Version="2.1.0" />
+		<PackageReference Include="NAudio.Core" Version="2.2.1" />
+		<PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
+		<PackageReference Include="OpenAL.Soft" Version="1.19.1" />
+		<PackageReference Include="OpenTK.OpenAL" Version="4.7.7" />
+		<PackageReference Include="PortAudioSharp2" Version="0.4.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.8.14" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+		<!-- Avalonia 0.10.22 reference vulnerable packages. -->
+		<!-- By reference package new version directly, vulnerable can be avoided. -->
+		<!-- Might remove when upgrade to avalonia11 or Avalonia 0.10.x no longer reference vulnerable packages. -->
+		<PackageReference Include="SkiaSharp" Version="2.88.6" />
+		<PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+	</ItemGroup>
 </Project>

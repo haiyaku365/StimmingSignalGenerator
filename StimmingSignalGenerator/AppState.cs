@@ -11,7 +11,7 @@ namespace StimmingSignalGenerator
    {
       public bool IsHideZeroModulation { get => isHideZeroModulation; set => this.RaiseAndSetIfChanged(ref isHideZeroModulation, value); }
       public OSPlatform OSPlatform { get => _OSPlatform; private set => this.RaiseAndSetIfChanged(ref _OSPlatform, value); }
-      public string Version =>
+      public static string Version =>
          Assembly.GetEntryAssembly()
          .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
          .InformationalVersion;
