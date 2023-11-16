@@ -4,509 +4,522 @@ using System;
 
 namespace StimmingSignalGenerator.NAudio
 {
-   // https://raw.githubusercontent.com/naudio/NAudio/master/NAudio/Wave/SampleProviders/SignalGenerator.cs
-   /// <summary>
-   /// Basic Signal
-   /// Sin, SawTooth, Triangle, Square, White Noise, Pink Noise.
-   /// </summary>
-   /// <remarks>
-   /// Posibility to change ISampleProvider
-   /// Example :
-   /// ---------
-   /// WaveOut _waveOutGene = new WaveOut();
-   /// WaveGenerator wg = new BasicSignal();
-   /// wg.Type = ...
-   /// wg.Frequency = ...
-   /// wg ...
-   /// _waveOutGene.Init(wg);
-   /// _waveOutGene.Play();
-   /// </remarks>
-   public class BasicSignal : ISampleProvider
-   {
-      /// <summary>
-      /// Initializes a new instance for the Generator
-      /// </summary>
-      public BasicSignal(double initGain = 1, double initFrequency = 440.0)
-      {
-         WaveFormat = Constants.Wave.DefaultMonoWaveFormat;
+    // https://raw.githubusercontent.com/naudio/NAudio/master/NAudio/Wave/SampleProviders/SignalGenerator.cs
+    /// <summary>
+    /// Basic Signal
+    /// Sin, SawTooth, Triangle, Square, White Noise, Pink Noise.
+    /// </summary>
+    /// <remarks>
+    /// Posibility to change ISampleProvider
+    /// Example :
+    /// ---------
+    /// WaveOut _waveOutGene = new WaveOut();
+    /// WaveGenerator wg = new BasicSignal();
+    /// wg.Type = ...
+    /// wg.Frequency = ...
+    /// wg ...
+    /// _waveOutGene.Init(wg);
+    /// _waveOutGene.Play();
+    /// </remarks>
+    public class BasicSignal : ISampleProvider
+    {
+        /// <summary>
+        /// Initializes a new instance for the Generator
+        /// </summary>
+        public BasicSignal(double initGain = 1, double initFrequency = 440.0)
+        {
+            WaveFormat = Constants.Wave.DefaultMonoWaveFormat;
 
-         // Default
-         Type = BasicSignalType.Sin;
-         ZeroCrossingPosition = 0.5;
+            // Default
+            Type = BasicSignalType.Sin;
+            ZeroCrossingPosition = 0.5;
 
-         rampGain = new RampGain(initGain);
+            rampGain = new RampGain(initGain);
 
-         currentPhaseStep = initFrequency;
-         targetPhaseStep = initFrequency;
-         phaseStepDelta = 0;
-         seekFrequency = false;
+            currentPhaseStep = initFrequency;
+            targetPhaseStep = initFrequency;
+            phaseStepDelta = 0;
+            seekFrequency = false;
 
-         /*
-            AM Signal with gain bump
-            https://www.desmos.com/calculator/ya9ayr9ylc
-            f_{1}=1
-            g_{0}=0.25
-            y_{0}=g_{0}\sin\left(f_{1}\cdot2\pi x\right)
-            y_{1}=y_{0}+1-g_{0}
-            y_{2}=\frac{\left(y_{1}+1\right)}{2}
-            y=\sin\left(20\cdot2\pi x\right)\cdot y_{2}\left\{-1<y<1\right\}
-         */
-         AMSignals = new AggregableSignals(1, (current, next, signal) => current * (next + 2 - (float)signal.Gain) / 2);
-         FMSignals = new AggregableSignals(0, (current, next, _) => current + next);
-         PMSignals = new AggregableSignals(0, (current, next, _) => current + next);
-         ZMSignals = new AggregableSignals(0, (current, next, _) => current + next);
+            /*
+               AM Signal with gain bump
+               https://www.desmos.com/calculator/ya9ayr9ylc
+               f_{1}=1
+               g_{0}=0.25
+               y_{0}=g_{0}\sin\left(f_{1}\cdot2\pi x\right)
+               y_{1}=y_{0}+1-g_{0}
+               y_{2}=\frac{\left(y_{1}+1\right)}{2}
+               y=\sin\left(20\cdot2\pi x\right)\cdot y_{2}\left\{-1<y<1\right\}
+            */
+            AMSignals = new AggregableSignals(1, (current, next, signal) => current * (next + 2 - (float)signal.Gain) / 2);
+            FMSignals = new AggregableSignals(0, (current, next, _) => current + next);
+            PMSignals = new AggregableSignals(0, (current, next, _) => current + next);
+            ZMSignals = new AggregableSignals(0, (current, next, _) => current + next);
 
-         //init noise
-         randomSeed = seedRandom.Next();
-         random = new Random(randomSeed);
-         randomPhase = 0;
-         for (int i = 0; i < noiseValue.Length; i++)
-         {
-            noiseValue[i] = SampleWhite();
-         }
-      }
+            //init noise
+            randomSeed = seedRandom.Next();
+            random = new Random(randomSeed);
+            randomPhase = 0;
+            for (int i = 0; i < noiseValue.Length; i++)
+            {
+                noiseValue[i] = SampleWhite();
+            }
+        }
 
-      /// <summary>
-      /// The waveformat of this WaveProvider (same as the source)
-      /// </summary>
-      public WaveFormat WaveFormat { get; }
+        /// <summary>
+        /// The waveformat of this WaveProvider (same as the source)
+        /// </summary>
+        public WaveFormat WaveFormat { get; }
 
-      /// <summary>
-      /// Type of Generator.
-      /// </summary>
-      public BasicSignalType Type { get; set; }
+        /// <summary>
+        /// Type of Generator.
+        /// </summary>
+        public BasicSignalType Type { get; set; }
 
-      #region Frequency and Phase field, prop
-      /// <summary>
-      /// Frequency for the Generator. (Hz)
-      /// </summary>
-      public double Frequency
-      {
-         get => targetPhaseStep;
-         set
-         {
-            targetPhaseStep = value;
-            seekFrequency = true;
-         }
-      }
-      /// <summary>
-      /// Phase shift (0.0 to 1.0)
-      /// </summary>
-      public double PhaseShift { get; set; }
-      public void SetFrequencyAndPhaseTo(BasicSignal basicSignal)
-      {
-         seekFrequency = basicSignal.seekFrequency;
-         targetPhaseStep = basicSignal.targetPhaseStep;
-         currentPhaseStep = basicSignal.currentPhaseStep;
-         phaseStepDelta = basicSignal.phaseStepDelta;
-         phase = basicSignal.phase;
-      }
+        #region Frequency and Phase field, prop
+        /// <summary>
+        /// Frequency for the Generator. (Hz)
+        /// </summary>
+        public double Frequency
+        {
+            get => targetPhaseStep;
+            set
+            {
+                targetPhaseStep = value;
+                seekFrequency = true;
+            }
+        }
+        /// <summary>
+        /// Phase shift (0.0 to 1.0)
+        /// </summary>
+        public double PhaseShift { get; set; }
+        public void SetFrequencyAndPhaseTo(BasicSignal basicSignal)
+        {
+            lock (basicSignal.readLockObj)
+            {
+                lock (readLockObj)
+                {
+                    seekFrequency = basicSignal.seekFrequency;
+                    targetPhaseStep = basicSignal.targetPhaseStep;
+                    currentPhaseStep = basicSignal.currentPhaseStep;
+                    phaseStepDelta = basicSignal.phaseStepDelta;
+                    phase = basicSignal.phase;
+                }
+            }
+        }
 
-      private bool seekFrequency;
-      private double targetPhaseStep;
-      private double currentPhaseStep;
-      private double phaseStepDelta;
-      private double phase;
-      private double Period => WaveFormat.SampleRate;
-      private bool isPeriodCycle;
-      /// <summary>
-      /// Position when signal cross zero default 0.5 (0.0 to 1.0)
-      /// Noise ignore this
-      /// </summary>
-      public double ZeroCrossingPosition { get; set; }
-      #endregion
+        private bool seekFrequency;
+        private double targetPhaseStep;
+        private double currentPhaseStep;
+        private double phaseStepDelta;
+        private double phase;
+        private double Period => WaveFormat.SampleRate;
+        private bool isPeriodCycle;
+        /// <summary>
+        /// Position when signal cross zero default 0.5 (0.0 to 1.0)
+        /// Noise ignore this
+        /// </summary>
+        public double ZeroCrossingPosition { get; set; }
+        #endregion
 
-      #region Amplitude field, Prop, Method
-      private readonly RampGain rampGain;
-      /// <summary>
-      /// Gain for the Generator. (0.0 to 1.0)
-      /// </summary>
-      public double Gain { get => rampGain.Gain; set => rampGain.Gain = value; }
-      /// <summary>
-      /// Gain before seek to target gain.
-      /// </summary>
-      public double CurrentGain => rampGain.CurrentGain;
-      /// <summary>
-      /// Gain step delta of latest read.
-      /// </summary>
-      public double GainStepDelta => rampGain.GainStepDelta;
-      #endregion
+        #region Amplitude field, Prop, Method
+        private readonly RampGain rampGain;
+        /// <summary>
+        /// Gain for the Generator. (0.0 to 1.0)
+        /// </summary>
+        public double Gain { get => rampGain.Gain; set => rampGain.Gain = value; }
+        /// <summary>
+        /// Gain before seek to target gain.
+        /// </summary>
+        public double CurrentGain => rampGain.CurrentGain;
+        /// <summary>
+        /// Gain step delta of latest read.
+        /// </summary>
+        public double GainStepDelta => rampGain.GainStepDelta;
+        #endregion
 
-      #region Modulation field, Prop, Add, Remove method
-      readonly AggregableSignals AMSignals;
-      readonly AggregableSignals FMSignals;
-      readonly AggregableSignals PMSignals;
-      readonly AggregableSignals ZMSignals;
+        #region Modulation field, Prop, Add, Remove method
+        readonly AggregableSignals AMSignals;
+        readonly AggregableSignals FMSignals;
+        readonly AggregableSignals PMSignals;
+        readonly AggregableSignals ZMSignals;
 
-      float[] aggregateAMBuffer;
-      float[] aggregateFMBuffer;
-      float[] aggregatePMBuffer;
-      float[] aggregateZMBuffer;
-      /// <summary>
-      /// 1 Channel Signal for amplitude modulation.
-      /// </summary>
-      /// <param name="signal">1 Channel Signal</param>
-      public void AddAMSignal(BasicSignal signal) => AMSignals.Add(signal);
-      public void RemoveAMSignal(BasicSignal signal) => AMSignals.Remove(signal);
-      /// <summary>
-      /// Add 1 Channel Signal for frequency modulation. Gain of signal indicate how much frequency change.
-      /// </summary>
-      /// <param name="signal">1 Channel Signal</param>
-      public void AddFMSignal(BasicSignal signal) => FMSignals.Add(signal);
-      public void RemoveFMSignal(BasicSignal signal) => FMSignals.Remove(signal);
-      /// <summary>
-      /// Add 1 Channel Signal for phase modulation.
-      /// </summary>
-      /// <param name="signal">1 Channel Signal</param>
-      public void AddPMSignal(BasicSignal signal) => PMSignals.Add(signal);
-      public void RemovePMSignal(BasicSignal signal) => PMSignals.Remove(signal);
+        float[] aggregateAMBuffer;
+        float[] aggregateFMBuffer;
+        float[] aggregatePMBuffer;
+        float[] aggregateZMBuffer;
+        /// <summary>
+        /// 1 Channel Signal for amplitude modulation.
+        /// </summary>
+        /// <param name="signal">1 Channel Signal</param>
+        public void AddAMSignal(BasicSignal signal) => AMSignals.Add(signal);
+        public void RemoveAMSignal(BasicSignal signal) => AMSignals.Remove(signal);
+        /// <summary>
+        /// Add 1 Channel Signal for frequency modulation. Gain of signal indicate how much frequency change.
+        /// </summary>
+        /// <param name="signal">1 Channel Signal</param>
+        public void AddFMSignal(BasicSignal signal) => FMSignals.Add(signal);
+        public void RemoveFMSignal(BasicSignal signal) => FMSignals.Remove(signal);
+        /// <summary>
+        /// Add 1 Channel Signal for phase modulation.
+        /// </summary>
+        /// <param name="signal">1 Channel Signal</param>
+        public void AddPMSignal(BasicSignal signal) => PMSignals.Add(signal);
+        public void RemovePMSignal(BasicSignal signal) => PMSignals.Remove(signal);
 
-      /// <summary>
-      /// Add 1 Channel Signal for ZCP modulation.
-      /// </summary>
-      /// <param name="signal">1 Channel Signal</param>
-      public void AddZMSignal(BasicSignal signal) => ZMSignals.Add(signal);
-      public void RemoveZMSignal(BasicSignal signal) => ZMSignals.Remove(signal);
-      #endregion
+        /// <summary>
+        /// Add 1 Channel Signal for ZCP modulation.
+        /// </summary>
+        /// <param name="signal">1 Channel Signal</param>
+        public void AddZMSignal(BasicSignal signal) => ZMSignals.Add(signal);
+        public void RemoveZMSignal(BasicSignal signal) => ZMSignals.Remove(signal);
+        #endregion
 
-      #region Noise generator field, prop, method
-      public void SyncRandomTo(BasicSignal basicSignal)
-      {
-         lock (basicSignal.readLockObj)
-         {
+        #region Noise generator field, prop, method
+        public void SyncRandomTo(BasicSignal basicSignal)
+        {
+            lock (basicSignal.readLockObj)
+            {
+                lock (readLockObj)
+                {
+                    //sync random seed
+                    randomSeed = basicSignal.randomSeed;
+                    random = new Random(randomSeed);
+
+                    //sync phase
+                    randomPhase = 0;
+                    for (ushort i = 0; i < basicSignal.randomPhase; i++)
+                    {
+                        SampleWhite();
+                    }
+
+                    //sync noiseValue
+                    for (int i = 0; i < noiseValue.Length; i++)
+                    {
+                        noiseValue[i] = basicSignal.noiseValue[i];
+                    }
+                    //sync pinkNoiseBuffer
+                    for (int i = 0; i < pinkNoiseBuffer.Length; i++)
+                    {
+                        pinkNoiseBuffer[i] = basicSignal.pinkNoiseBuffer[i];
+                    }
+                }
+            }
+        }
+        // Random Number for the White Noise & Pink Noise Generator
+        private ushort randomPhase;
+        private int randomSeed;
+        private Random random;
+        private static readonly Random seedRandom = new();
+        private readonly double[] pinkNoiseBuffer = new double[7];
+        private readonly double[] noiseValue = new double[4];
+        #endregion
+
+        private readonly object readLockObj = new();
+        /// <summary>
+        /// Reads from this provider.
+        /// </summary>
+        public int Read(float[] buffer, int offset, int count)
+        {
             lock (readLockObj)
             {
-               //sync random seed
-               randomSeed = basicSignal.randomSeed;
-               random = new Random(randomSeed);
-               //sync phase
-               randomPhase = 0;
-               for (int i = 0; i < basicSignal.randomPhase; i++)
-               {
-                  SampleWhite();
-               }
-               //sync noiseValue
-               for (int i = 0; i < noiseValue.Length; i++)
-               {
-                  noiseValue[i] = basicSignal.noiseValue[i];
-               }
-               //sync pinkNoiseBuffer
-               for (int i = 0; i < pinkNoiseBuffer.Length; i++)
-               {
-                  pinkNoiseBuffer[i] = basicSignal.pinkNoiseBuffer[i];
-               }
-            }
-         }
-      }
-      // Random Number for the White Noise & Pink Noise Generator
-      private long randomPhase;
-      private int randomSeed;
-      private Random random;
-      private static Random seedRandom = new Random();
-      private readonly double[] pinkNoiseBuffer = new double[7];
-      private readonly double[] noiseValue = new double[4];
-      #endregion
+                // Generator current value
+                double sampleValue;
 
-      private readonly object readLockObj = new object();
-      /// <summary>
-      /// Reads from this provider.
-      /// </summary>
-      public int Read(float[] buffer, int offset, int count)
-      {
-         lock (readLockObj)
-         {
-            // Generator current value
-            double sampleValue;
+                // Once per Read variable
+                double beforeZCShift = 0;
+                double afterZCShift = -Period;
 
-            // Once per Read variable
-            double beforeZCShift = 0;
-            double afterZCShift = -Period;
+                double zeroCrossingPoint;
+                double moddedZeroCrossingPosition;
+                double x = 0, frequencyFactor = 0, shift = 0;
+                bool isBeforeCrossingZero = true;
+                double noisePre, noisePost;
 
-            double zeroCrossingPoint;
-            double moddedZeroCrossingPosition;
-            double x = 0, frequencyFactor = 0, shift = 0;
-            bool isBeforeCrossingZero = true;
-            double noisePre, noisePost;
+                // Calc gainStepDelta
+                rampGain.CalculateGainStepDelta(count);
 
-            // Calc gainStepDelta
-            rampGain.CalculateGainStepDelta(count);
+                // Calc frequencyStepDelta
+                if (seekFrequency) // process frequency change only once per call to Read
+                {
+                    phaseStepDelta = (targetPhaseStep - currentPhaseStep) / count;
+                    seekFrequency = false;
+                }
 
-            // Calc frequencyStepDelta
-            if (seekFrequency) // process frequency change only once per call to Read
-            {
-               phaseStepDelta = (targetPhaseStep - currentPhaseStep) / count;
-               seekFrequency = false;
-            }
+                // read modulation signal
+                aggregateAMBuffer = BufferHelpers.Ensure(aggregateAMBuffer, count);
+                AMSignals.Read(aggregateAMBuffer, offset, count);
 
-            // read modulation signal
-            aggregateAMBuffer = BufferHelpers.Ensure(aggregateAMBuffer, count);
-            AMSignals.Read(aggregateAMBuffer, offset, count);
+                aggregateFMBuffer = BufferHelpers.Ensure(aggregateFMBuffer, count);
+                FMSignals.Read(aggregateFMBuffer, offset, count);
 
-            aggregateFMBuffer = BufferHelpers.Ensure(aggregateFMBuffer, count);
-            FMSignals.Read(aggregateFMBuffer, offset, count);
+                aggregatePMBuffer = BufferHelpers.Ensure(aggregatePMBuffer, count);
+                PMSignals.Read(aggregatePMBuffer, offset, count);
 
-            aggregatePMBuffer = BufferHelpers.Ensure(aggregatePMBuffer, count);
-            PMSignals.Read(aggregatePMBuffer, offset, count);
+                aggregateZMBuffer = BufferHelpers.Ensure(aggregateZMBuffer, count);
+                ZMSignals.Read(aggregateZMBuffer, offset, count);
 
-            aggregateZMBuffer = BufferHelpers.Ensure(aggregateZMBuffer, count);
-            ZMSignals.Read(aggregateZMBuffer, offset, count);
+                //skip calc if gain is 0
+                if (CurrentGain == 0)
+                {
+                    Array.Fill(buffer, 0, offset, count);
 
-            //skip calc if gain is 0
-            if (CurrentGain == 0)
-            {
-               Array.Fill(buffer, 0, offset, count);
+                    //prevent out of phase when mixing multi signal
+                    for (int i = offset; i < count; i++)
+                    {
+                        CalculateNextPhase(aggregateFMBuffer[i]);
+                        rampGain.CalculateNextGain();
+                    }
+                    return count;
+                }
 
-               //prevent out of phase when mixing multi signal
-               for (int i = offset; i < count; i++)
-               {
-                  CalculateNextPhase(aggregateFMBuffer[i]);
-                  rampGain.CalculateNextGain();
-               }
-               return count;
-            }
+                // Complete Buffer
+                for (int sampleCount = offset; sampleCount < count; sampleCount++)
+                {
+                    moddedZeroCrossingPosition = ZeroCrossingPosition + aggregateZMBuffer[sampleCount];
+                    zeroCrossingPoint = moddedZeroCrossingPosition * Period;
 
-            // Complete Buffer
-            for (int sampleCount = offset; sampleCount < count; sampleCount++)
-            {
-               moddedZeroCrossingPosition = ZeroCrossingPosition + aggregateZMBuffer[sampleCount];
-               zeroCrossingPoint = moddedZeroCrossingPosition * Period;
+                    //calculate common variable
+                    x = phase + ((PhaseShift + aggregatePMBuffer[sampleCount]) * Period);
+                    switch (Type)
+                    {
+                        case BasicSignalType.Sin:
+                        case BasicSignalType.SawTooth:
+                        case BasicSignalType.Triangle:
+                        case BasicSignalType.Square:
+                            //Canot use % here x < 0 will cause SampleSaw calc error
+                            if (x < 0) x += Period; //phase shift to the past
+                            else if (x > Period) x -= Period; // phase shift to the future
 
-               //calculate common variable
-               x = phase + ((PhaseShift + aggregatePMBuffer[sampleCount]) * Period);
-               switch (Type)
-               {
-                  case BasicSignalType.Sin:
-                  case BasicSignalType.SawTooth:
-                  case BasicSignalType.Triangle:
-                  case BasicSignalType.Square:
-                     //Canot use % here x < 0 will cause SampleSaw calc error
-                     if (x < 0) x += Period; //phase shift to the past
-                     else if (x > Period) x -= Period; // phase shift to the future
+                            isBeforeCrossingZero = 0 <= x && x < zeroCrossingPoint;
+                            //bool isAfterCrossingZero = zeroCrossingPoint <= x && x < period;
+                            if (isBeforeCrossingZero)
+                            {
+                                frequencyFactor = 1 / moddedZeroCrossingPosition;
+                                shift = beforeZCShift;
+                            }
+                            else //if (isAfterCrossingZero)
+                            {
+                                frequencyFactor = 1 / (1 - moddedZeroCrossingPosition);
+                                shift = afterZCShift;
+                            }
+                            break;
+                        case BasicSignalType.Pink:
+                        case BasicSignalType.White:
+                        default:
+                            break;
+                    }
 
-                     isBeforeCrossingZero = 0 <= x && x < zeroCrossingPoint;
-                     //bool isAfterCrossingZero = zeroCrossingPoint <= x && x < period;
-                     if (isBeforeCrossingZero)
-                     {
-                        frequencyFactor = 1 / moddedZeroCrossingPosition;
-                        shift = beforeZCShift;
-                     }
-                     else //if (isAfterCrossingZero)
-                     {
-                        frequencyFactor = 1 / (1 - moddedZeroCrossingPosition);
-                        shift = afterZCShift;
-                     }
-                     break;
-                  case BasicSignalType.Pink:
-                  case BasicSignalType.White:
-                  default:
-                     break;
-               }
+                    switch (Type)
+                    {
+                        case BasicSignalType.Sin:
+                            // Sinus Generator
+                            sampleValue = CurrentGain * SampleSin(x, frequencyFactor, shift);
+                            break;
 
-               switch (Type)
-               {
-                  case BasicSignalType.Sin:
-                     // Sinus Generator
-                     sampleValue = CurrentGain * SampleSin(x, frequencyFactor, shift);
-                     break;
+                        case BasicSignalType.SawTooth:
+                            // SawTooth Generator
+                            sampleValue = CurrentGain * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
+                            break;
 
-                  case BasicSignalType.SawTooth:
-                     // SawTooth Generator
-                     sampleValue = CurrentGain * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
-                     break;
+                        case BasicSignalType.Triangle:
+                            // Triangle Generator
+                            sampleValue = -2 * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
+                            if (sampleValue > 1)
+                                sampleValue = 2 - sampleValue;
+                            if (sampleValue < -1)
+                                sampleValue = -2 - sampleValue;
 
-                  case BasicSignalType.Triangle:
-                     // Triangle Generator
-                     sampleValue = -2 * SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero);
-                     if (sampleValue > 1)
-                        sampleValue = 2 - sampleValue;
-                     if (sampleValue < -1)
-                        sampleValue = -2 - sampleValue;
+                            sampleValue *= CurrentGain;
+                            break;
 
-                     sampleValue *= CurrentGain;
-                     break;
+                        case BasicSignalType.Square:
+                            // Square Generator
+                            sampleValue =
+                               SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero) < 0 ?
+                                  CurrentGain : -CurrentGain;
 
-                  case BasicSignalType.Square:
-                     // Square Generator
-                     sampleValue =
-                        SampleSaw(x, frequencyFactor, shift, isBeforeCrossingZero) < 0 ?
-                           CurrentGain : -CurrentGain;
+                            break;
 
-                     break;
-
-                  case BasicSignalType.Pink:
-                  case BasicSignalType.White:
-                     // Pink Noise Generator
-                     // White Noise Generator
+                        case BasicSignalType.Pink:
+                        case BasicSignalType.White:
+                            // Pink Noise Generator
+                            // White Noise Generator
 #pragma warning disable CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
-                     // only get new random point when reach new period
-                     if (isPeriodCycle)
-                     {
-                        //keep history for phase shift beyond period
-                        noiseValue[0] = noiseValue[1];
-                        noiseValue[1] = noiseValue[2];
-                        noiseValue[2] = noiseValue[3];
-                        noiseValue[3] = Type switch
-                        {
-                           BasicSignalType.White => SampleWhite(),
-                           BasicSignalType.Pink => SamplePink()
-                        };
-                     }
+                            // only get new random point when reach new period
+                            if (isPeriodCycle)
+                            {
+                                //keep history for phase shift beyond period
+                                noiseValue[0] = noiseValue[1];
+                                noiseValue[1] = noiseValue[2];
+                                noiseValue[2] = noiseValue[3];
+                                noiseValue[3] = Type switch
+                                {
+                                    BasicSignalType.White => SampleWhite(),
+                                    BasicSignalType.Pink => SamplePink()
+                                };
+                            }
 
 #pragma warning restore CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
 
-                     if (x < 0) //phase shift to the past
-                     {
-                        x += Period;
-                        noisePre = noiseValue[0];
-                        noisePost = noiseValue[1];
-                     }
-                     else if (x > Period) // phase shift to the future
-                     {
-                        x -= Period;
-                        noisePre = noiseValue[2];
-                        noisePost = noiseValue[3];
-                     }
-                     else
-                     {
-                        noisePre = noiseValue[1];
-                        noisePost = noiseValue[2];
-                     }
-                     // Interpolate between random point
-                     sampleValue = CurrentGain * ((noisePost - noisePre) / Period * x + noisePre);
-                     break;
+                            if (x < 0) //phase shift to the past
+                            {
+                                x += Period;
+                                noisePre = noiseValue[0];
+                                noisePost = noiseValue[1];
+                            }
+                            else if (x > Period) // phase shift to the future
+                            {
+                                x -= Period;
+                                noisePre = noiseValue[2];
+                                noisePost = noiseValue[3];
+                            }
+                            else
+                            {
+                                noisePre = noiseValue[1];
+                                noisePost = noiseValue[2];
+                            }
+                            // Interpolate between random point
+                            sampleValue = CurrentGain * ((noisePost - noisePre) / Period * x + noisePre);
+                            break;
 
-                  default:
-                     sampleValue = 0.0;
-                     break;
-               }
-               // also CalculateNextPhase when do noise to avoid out of phase when sync with another signal
-               CalculateNextPhase(aggregateFMBuffer[sampleCount]);
-               rampGain.CalculateNextGain();
-               // apply AM signal
-               buffer[sampleCount] = (float)sampleValue * aggregateAMBuffer[sampleCount];
+                        default:
+                            sampleValue = 0.0;
+                            break;
+                    }
+                    // also CalculateNextPhase when do noise to avoid out of phase when sync with another signal
+                    CalculateNextPhase(aggregateFMBuffer[sampleCount]);
+                    rampGain.CalculateNextGain();
+                    // apply AM signal
+                    buffer[sampleCount] = (float)sampleValue * aggregateAMBuffer[sampleCount];
+                }
+                return count;
             }
-            return count;
-         }
-      }
+        }
 
-      private void CalculateNextPhase(float fmValue)
-      {
-         // move to next phase and apply FM
-         var nextPhaseStep = currentPhaseStep + fmValue;
-         switch (Type)
-         {
-            case BasicSignalType.Sin:
-            case BasicSignalType.SawTooth:
-            case BasicSignalType.Triangle:
-            case BasicSignalType.Square:
-               phase += nextPhaseStep;
-               break;
-            case BasicSignalType.Pink:
-            case BasicSignalType.White:
-               // Noise Phase only go forward if it go backward then freeze
-               phase += nextPhaseStep > 0 ? nextPhaseStep : 0;
-               break;
-            default:
-               break;
-         }
-         isPeriodCycle = phase >= Period;
-         if (isPeriodCycle) phase -= Period;
-         if (currentPhaseStep != targetPhaseStep)
-         {
-            //calculate currentPhaseStep
-            currentPhaseStep += phaseStepDelta;
-            //correct if value exceed target
-            if (phaseStepDelta > 0 && currentPhaseStep > targetPhaseStep ||
-                phaseStepDelta < 0 && currentPhaseStep < targetPhaseStep)
-               currentPhaseStep = targetPhaseStep;
-         }
-      }
+        private void CalculateNextPhase(float fmValue)
+        {
+            // move to next phase and apply FM
+            var nextPhaseStep = currentPhaseStep + fmValue;
+            switch (Type)
+            {
+                case BasicSignalType.Sin:
+                case BasicSignalType.SawTooth:
+                case BasicSignalType.Triangle:
+                case BasicSignalType.Square:
+                    phase += nextPhaseStep;
+                    break;
+                case BasicSignalType.Pink:
+                case BasicSignalType.White:
+                    // Noise Phase only go forward if it go backward then freeze
+                    phase += nextPhaseStep > 0 ? nextPhaseStep : 0;
+                    break;
+                default:
+                    break;
+            }
+            isPeriodCycle = phase >= Period;
+            if (isPeriodCycle) phase -= Period;
+            if (currentPhaseStep != targetPhaseStep)
+            {
+                //calculate currentPhaseStep
+                currentPhaseStep += phaseStepDelta;
+                //correct if value exceed target
+                if (phaseStepDelta > 0 && currentPhaseStep > targetPhaseStep ||
+                    phaseStepDelta < 0 && currentPhaseStep < targetPhaseStep)
+                    currentPhaseStep = targetPhaseStep;
+            }
+        }
 
-      private double SampleSin(double x, double frequencyFactor, double shift)
-      {
-         /*
-         https://www.desmos.com/calculator/0de76phnur
-         f_{1}=1
-         f_{2}=0.3
-         p=\frac{1}{f_{1}}
-         z=\frac{f_{2}}{f_{1}}
-         y=\sin\left(f_{1}\cdot2\pi x\right)\left\{0\le x<p\right\}
-         y_{1}=\sin\left(\frac{f_{1}}{f_{2}}\cdot\pi x\right)\left\{0\le x<z\right\}
-         y_{2}=\sin\left(\frac{f_{1}}{\left(1-f_{2}\right)}\cdot\pi\left(x-p\right)\right)\left\{z\le x<p\right\}
-         \left(0,0\right),\left(z,0\right),\left(p,0\right)
-         */
-         return Math.Sin(frequencyFactor * Math.PI / WaveFormat.SampleRate * (x + shift));
-      }
+        private double SampleSin(double x, double frequencyFactor, double shift)
+        {
+            /*
+            https://www.desmos.com/calculator/0de76phnur
+            f_{1}=1
+            f_{2}=0.3
+            p=\frac{1}{f_{1}}
+            z=\frac{f_{2}}{f_{1}}
+            y=\sin\left(f_{1}\cdot2\pi x\right)\left\{0\le x<p\right\}
+            y_{1}=\sin\left(\frac{f_{1}}{f_{2}}\cdot\pi x\right)\left\{0\le x<z\right\}
+            y_{2}=\sin\left(\frac{f_{1}}{\left(1-f_{2}\right)}\cdot\pi\left(x-p\right)\right)\left\{z\le x<p\right\}
+            \left(0,0\right),\left(z,0\right),\left(p,0\right)
+            */
+            return Math.Sin(frequencyFactor * Math.PI / WaveFormat.SampleRate * (x + shift));
+        }
 
-      private double SampleSaw(double x, double frequencyFactor, double shift, bool isBeforeCrossingZero)
-      {
-         /*
-         https://www.desmos.com/calculator/kb4nj3hurl
-         f_{1}=1
-         f_{2}=0.7
-         p=\frac{1}{f_{1}}
-         z=\frac{f_{2}}{f_{1}}
-         y=\left(\operatorname{mod}\left(2f_{1}x,2\right)\right)-1\left\{0\le x<p\right\}
-         y_{1}=\left(\frac{f_{1}}{f_{2}}\operatorname{mod}\left(x,p\right)\right)-1\left\{0\le x<z\right\}
-         y_{2}=\left(\frac{f_{1}}{1-f_{2}}\left(\operatorname{mod}\left(x,p\right)-p\right)\right)+1\left\{z\le x<p\right\}
-         \left(0,0\right),\left(z,0\right),\left(p,0\right)
-         */
-         double lift = isBeforeCrossingZero ? -1 : 1;
-         return (frequencyFactor / WaveFormat.SampleRate * (x + shift)) + lift;
-      }
+        private double SampleSaw(double x, double frequencyFactor, double shift, bool isBeforeCrossingZero)
+        {
+            /*
+            https://www.desmos.com/calculator/kb4nj3hurl
+            f_{1}=1
+            f_{2}=0.7
+            p=\frac{1}{f_{1}}
+            z=\frac{f_{2}}{f_{1}}
+            y=\left(\operatorname{mod}\left(2f_{1}x,2\right)\right)-1\left\{0\le x<p\right\}
+            y_{1}=\left(\frac{f_{1}}{f_{2}}\operatorname{mod}\left(x,p\right)\right)-1\left\{0\le x<z\right\}
+            y_{2}=\left(\frac{f_{1}}{1-f_{2}}\left(\operatorname{mod}\left(x,p\right)-p\right)\right)+1\left\{z\le x<p\right\}
+            \left(0,0\right),\left(z,0\right),\left(p,0\right)
+            */
+            double lift = isBeforeCrossingZero ? -1 : 1;
+            return (frequencyFactor / WaveFormat.SampleRate * (x + shift)) + lift;
+        }
 
-      /// <summary>
-      /// White noise (Value form -1 to 1)
-      /// </summary>
-      /// <returns>Random value from -1 to +1</returns>
-      private double SampleWhite()
-      {
-         randomPhase++;
-         return 2 * random.NextDouble() - 1;
-      }
-      private double SamplePink()
-      {
-         double white = SampleWhite();
-         pinkNoiseBuffer[0] = 0.99886 * pinkNoiseBuffer[0] + white * 0.0555179;
-         pinkNoiseBuffer[1] = 0.99332 * pinkNoiseBuffer[1] + white * 0.0750759;
-         pinkNoiseBuffer[2] = 0.96900 * pinkNoiseBuffer[2] + white * 0.1538520;
-         pinkNoiseBuffer[3] = 0.86650 * pinkNoiseBuffer[3] + white * 0.3104856;
-         pinkNoiseBuffer[4] = 0.55000 * pinkNoiseBuffer[4] + white * 0.5329522;
-         pinkNoiseBuffer[5] = -0.7616 * pinkNoiseBuffer[5] - white * 0.0168980;
-         double pink = pinkNoiseBuffer[0] + pinkNoiseBuffer[1] + pinkNoiseBuffer[2] + pinkNoiseBuffer[3] + pinkNoiseBuffer[4] + pinkNoiseBuffer[5] + pinkNoiseBuffer[6] + white * 0.5362;
-         pinkNoiseBuffer[6] = white * 0.115926;
-         return pink / 5;
-      }
-   }
+        /// <summary>
+        /// White noise (Value form -1 to 1)
+        /// </summary>
+        /// <returns>Random value from -1 to +1</returns>
+        private double SampleWhite()
+        {
+            if (++randomPhase == ushort.MaxValue >> 3)
+            {
+                randomPhase = 0;
+                random = new Random(randomSeed);
+            }
+            return 2 * random.NextDouble() - 1;
+        }
 
-   /// <summary>
-   /// Basic Signal type
-   /// </summary>
-   public enum BasicSignalType
-   {
-      /// <summary>
-      /// Sine wave
-      /// </summary>
-      Sin,
-      /// <summary>
-      /// Sawtooth wave
-      /// </summary>
-      SawTooth,
-      /// <summary>
-      /// Triangle Wave
-      /// </summary>
-      Triangle,
-      /// <summary>
-      /// Square wave
-      /// </summary>
-      Square,
-      /// <summary>
-      /// Pink noise
-      /// </summary>
-      Pink,
-      /// <summary>
-      /// White noise
-      /// </summary>
-      White
-   }
+        private double SamplePink()
+        {
+            double white = SampleWhite();
+            pinkNoiseBuffer[0] = 0.99886 * pinkNoiseBuffer[0] + white * 0.0555179;
+            pinkNoiseBuffer[1] = 0.99332 * pinkNoiseBuffer[1] + white * 0.0750759;
+            pinkNoiseBuffer[2] = 0.96900 * pinkNoiseBuffer[2] + white * 0.1538520;
+            pinkNoiseBuffer[3] = 0.86650 * pinkNoiseBuffer[3] + white * 0.3104856;
+            pinkNoiseBuffer[4] = 0.55000 * pinkNoiseBuffer[4] + white * 0.5329522;
+            pinkNoiseBuffer[5] = -0.7616 * pinkNoiseBuffer[5] - white * 0.0168980;
+            double pink = pinkNoiseBuffer[0] + pinkNoiseBuffer[1] + pinkNoiseBuffer[2] + pinkNoiseBuffer[3] + pinkNoiseBuffer[4] + pinkNoiseBuffer[5] + pinkNoiseBuffer[6] + white * 0.5362;
+            pinkNoiseBuffer[6] = white * 0.115926;
+            return pink / 5;
+        }
+    }
+
+    /// <summary>
+    /// Basic Signal type
+    /// </summary>
+    public enum BasicSignalType
+    {
+        /// <summary>
+        /// Sine wave
+        /// </summary>
+        Sin,
+        /// <summary>
+        /// Sawtooth wave
+        /// </summary>
+        SawTooth,
+        /// <summary>
+        /// Triangle Wave
+        /// </summary>
+        Triangle,
+        /// <summary>
+        /// Square wave
+        /// </summary>
+        Square,
+        /// <summary>
+        /// Pink noise
+        /// </summary>
+        Pink,
+        /// <summary>
+        /// White noise
+        /// </summary>
+        White
+    }
 }
