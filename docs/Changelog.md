@@ -1,5 +1,13 @@
 # StimmingSignalGenerator
 ### Changelog:
+#### v0.5.0.0
+##### Changes
+* Remove WaveOut audio API.
+* Upgrade to .Net 8
+* Various bug fix.
+##### New
+* Add PortAudio audio API.
+---
 #### v0.4.0.0
 ##### Changes
 * On startup load last playlist instead of first playlist sort by file name.

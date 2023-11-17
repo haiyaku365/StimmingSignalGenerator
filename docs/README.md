@@ -9,13 +9,13 @@ This software basically generate real-time audio signal.
 
 ## Running StimmingSignalGenerator
 #### To run on Windows
-1. Install [.NET Core 3.1 Desktop Runtime](https://dot.net).
+1. Install [.NET Desktop Runtime 8.0](https://dot.net).
 2. Download binary in [releases page](https://github.com/haiyaku365/StimmingSignalGenerator/releases)
 3. run exe
 
 #### To run on Linux
-1. Install [.NET Core 3.1 runtime](https://dot.net)
-2. Install OpenAL lib
+1. Install [.NET runtime 8.0](https://dot.net)
+2. (optional)Install OpenAL lib
 ```
 sudo apt install libopenal1
 ```
@@ -25,7 +25,7 @@ sudo apt install libopenal1
 dotnet PathToApp/StimmingSignalGenerator.dll
 ```
 #### To run from source
-1. Install [.NET Core 3.1 SDK](https://dot.net)
+1. Install [.NET SDK  8.0](https://dot.net)
 2. clone
 ```
 git clone https://github.com/haiyaku365/StimmingSignalGenerator.git
@@ -83,8 +83,5 @@ Use mouse scroll to zoom in, out.
 #### Note
 Note that save along with playlist.
 
-#### ~~Default playlist~~
-~~When startup it will load first playlist file sort by file name.~~  
-No default playlist anymore.  
-When startup it will load playlist you open before exit.
-
+#### Audio API selection
+Right click on play, stop button to select audio API.
