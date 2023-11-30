@@ -31,7 +31,7 @@
 		<PackageReference Include="NAudio.Core" Version="2.2.1" />
 		<PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
 		<PackageReference Include="OpenAL.Soft" Version="1.19.1" />
-		<PackageReference Include="OpenTK.OpenAL" Version="4.7.7" />
+		<PackageReference Include="OpenTK.Audio.OpenAL" Version="4.8.1" />
 		<PackageReference Include="PortAudioSharp2" Version="0.4.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.8.14" />
 		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
