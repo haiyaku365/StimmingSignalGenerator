@@ -52,8 +52,6 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
             sourceProvider = waveProvider;
             bufferSizeByte = OutputWaveFormat.ConvertLatencyToByteSize(Latency);
             sourceBuffer = new CircularBuffer(bufferSizeByte);
-            bufferWrite = new byte[bufferSizeByte];
-            bufferRead = new byte[bufferSizeByte];
             bufferWriteLastestBlock = new byte[OutputWaveFormat.BlockAlign];
 
             var param = new StreamParameters
@@ -74,6 +72,7 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
                 )
             {
                 int cnt = (int)frameCount * OutputWaveFormat.BlockAlign;
+                bufferWrite = BufferHelpers.Ensure(bufferWrite, cnt);
                 var byteReadCnt = sourceBuffer.Read(bufferWrite, 0, cnt);
                 sourceBufferDequeuedEvent.Set();
 
@@ -99,7 +98,7 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
                 return StreamCallbackResult.Continue;
             }
             stream = new PortAudioSharp.Stream(
-                        inParams: null, outParams: param, sampleRate: _deviceInfo.defaultSampleRate,
+                        inParams: null, outParams: param, sampleRate: waveProvider.WaveFormat.SampleRate,
                         framesPerBuffer: 0,
                         streamFlags: StreamFlags.NoFlag,
                         callback: callback,
@@ -125,6 +124,7 @@ namespace StimmingSignalGenerator.NAudio.PortAudio
 
         private void FillSourceBuffer(int bufferSpace)
         {
+            bufferRead = BufferHelpers.Ensure(bufferRead, bufferSpace);
             sourceProvider.Read(bufferRead, 0, bufferSpace);
             sourceBuffer.Write(bufferRead, 0, bufferSpace);
         }

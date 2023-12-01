@@ -181,6 +181,8 @@ namespace StimmingSignalGenerator.MVVM.ViewModels
             {
                 // Load from previous AudioPlayer
                 latency = AudioPlayer.Latency;
+                // dispose old player
+                AudioPlayer.Dispose();
             }
 
             AudioPlayer = CreateAudioPlayer(audioPlayerType);
